@@ -12,7 +12,7 @@ PROJECT_ROOT = "/home/yihao19/"
 class Kinematic_model(nn.Module):
     def __init__(self, 
                  bone_skining_matrix_name:str, 
-                 template_obj_path = os.path.join(PROJECT_ROOT,"PhD_research/3D_bat_reconstruction/SoftRas/models/membrane_kinematic_optimization_model/dummy.obj"),
+                 template_obj_path = os.path.join(PROJECT_ROOT,"3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/dummy.obj"),
                  train_skining_matrix = False,
                  use_previous = True, 
                  opposite_direction=False, 
@@ -28,7 +28,7 @@ class Kinematic_model(nn.Module):
         self.use_previous = use_previous
         self.template_flip = template_flip
         self.template_mesh = sr.Mesh.from_obj(template_obj_path, load_texture=False, texture_res = 5, texture_type='surface')
-        with open(os.path.join(PROJECT_ROOT,"PhD_research/3D_bat_reconstruction/SoftRas/models/membrane_kinematic_optimization_model/model_template", bone_skining_matrix_name), 'rb') as f:
+        with open(os.path.join(PROJECT_ROOT,"3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/model_template", bone_skining_matrix_name), 'rb') as f:
             data = pickle.load(f)
         # generate the .obj file from params.pkl
         self.template_mesh.vertices = torch.tensor(data['v_template']).float().unsqueeze(0).cuda()
@@ -211,13 +211,23 @@ class Kinematic_model(nn.Module):
             #self.pose_tensor[17][1] =  torch.max(torch.min( prev_pose[17][1] - math.pi / 3 * torch.tanh(self.joint_4[0][1]), upper_bound_2), lower_bound_2)
             self.pose_tensor[17][2] = ( prev_pose[17][2] - math.pi / 9 * torch.tanh(self.joint_4[0][2]))
             
-            self.pose_tensor[6][0] =    prev_pose[6][0]  + math.pi / 9 * torch.tanh(self.joint_6[0][0])
-            self.pose_tensor[6][1]  =   prev_pose[6][1]  + math.pi / 6 * torch.tanh(self.joint_6[0][1])
-            self.pose_tensor[6][2]  =   prev_pose[6][2]  + math.pi / 6 * torch.tanh(self.joint_6[0][2])
+            low_bound_x = -math.pi/9
+            high_bound_x = math.pi/9
+
+            low_bound_y = -math.pi/6
+            high_bound_y = math.pi/6
+
+            low_bound_z = -math.pi/6
+            high_bound_z = math.pi/6
             
-            self.pose_tensor[19][0] =   prev_pose[19][0] + math.pi / 9 * torch.tanh(self.joint_19[0][0])
-            self.pose_tensor[19][1] =   prev_pose[19][1] + math.pi / 6 * torch.tanh(self.joint_19[0][1])
-            self.pose_tensor[19][2] =   prev_pose[19][2] + math.pi / 6 * torch.tanh(self.joint_19[0][2])
+
+            self.pose_tensor[6][0] =    max(low_bound_x,min(high_bound_x,prev_pose[6][0]  + math.pi / 9 * torch.tanh(self.joint_6[0][0])))
+            self.pose_tensor[6][1]  =   max(low_bound_y,min(high_bound_y,prev_pose[6][1]  + math.pi / 6 * torch.tanh(self.joint_6[0][1])))
+            self.pose_tensor[6][2]  =   max(low_bound_z, min(high_bound_z,prev_pose[6][2]  + math.pi / 6 * torch.tanh(self.joint_6[0][2])))
+            
+            self.pose_tensor[19][0] =   max(low_bound_x, min(high_bound_x,prev_pose[19][0] + math.pi / 9 * torch.tanh(self.joint_19[0][0])))
+            self.pose_tensor[19][1] =   max(low_bound_y, min(high_bound_y,prev_pose[19][1] + math.pi / 6 * torch.tanh(self.joint_19[0][1])))
+            self.pose_tensor[19][2] =   max(low_bound_z,min(high_bound_z,prev_pose[19][2] + math.pi / 6 * torch.tanh(self.joint_19[0][2])))
            
             
             #self.pose_tensor[7][0] = ( prev_pose[7][0]   + math.pi / 3 * torch.tanh(self.joint_7[0][0]))
@@ -332,9 +342,9 @@ class Kinematic_model(nn.Module):
             #self.pose_tensor[17][1] =  torch.max(torch.min( prev_pose[17][1] - math.pi / 3 * torch.tanh(self.joint_4[0][1]), upper_bound_2), lower_bound_2)
             self.pose_tensor[17][2] = ( -math.pi / 9 * torch.tanh(self.joint_4[0][2]))
             
-            self.pose_tensor[6][0] =    math.pi / 9 * torch.tanh(self.joint_6[0][0])
+            #self.pose_tensor[6][0] =    math.pi / 9 * torch.tanh(self.joint_6[0][0])
             self.pose_tensor[6][1]  =   math.pi / 6 * torch.tanh(self.joint_6[0][1])
-            self.pose_tensor[6][2]  =   math.pi / 6 * torch.tanh(self.joint_6[0][2])
+            #self.pose_tensor[6][2]  =   math.pi / 6 * torch.tanh(self.joint_6[0][2])
             
             self.pose_tensor[19][0] =   math.pi / 9 * torch.tanh(self.joint_19[0][0])
             self.pose_tensor[19][1] =   math.pi / 6 * torch.tanh(self.joint_19[0][1])

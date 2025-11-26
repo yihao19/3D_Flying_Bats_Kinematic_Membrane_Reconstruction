@@ -1119,12 +1119,12 @@ class Optimize_Driver():
             pose_json = json.load(file)
             rotation_euler = pose_json['pose'][0]
             displacement = pose_json['template_displacement']
-            #rotation_matrix = quat_to_rotmat(rodrigues(rotation_euler))
-            #rect_rotation_matrix =  root_inv_rotation_matrix @ rotation_matrix
-            #rect_rotation_euler = rotmat_to_euler(rect_rotation_matrix)
-            #rect_displacement = (np.array(displacement) - np.array(root_displacement)).tolist()
+            rotation_matrix = quat_to_rotmat(rodrigues(rotation_euler))
+            rect_rotation_matrix =  root_inv_rotation_matrix @ rotation_matrix
+            rect_rotation_euler = rotmat_to_euler(rect_rotation_matrix)
+            rect_displacement = (np.array(displacement) - np.array(root_displacement)).tolist()
             pose_json['template_displacement'] = [0,0,0]
-            pose_json['pose'][0] = rotation_euler
+            pose_json['pose'][0] = rect_rotation_euler
 
             kinematic_model = Kinematic_model(bone_skining_matrix_name=self.model_template,
                                           opposite_direction=self.opposite_direction).cuda()
