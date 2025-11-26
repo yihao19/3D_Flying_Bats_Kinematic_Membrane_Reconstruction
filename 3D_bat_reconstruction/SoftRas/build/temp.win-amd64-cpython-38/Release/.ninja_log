@@ -1,0 +1,11 @@
+# ninja log v5
+2	6766	7389117441025271	C:/Users/yihao/SoftRas/build/temp.win-amd64-cpython-38/Release/soft_renderer/cuda/load_textures_cuda.obj	93f54d08714ce836
+14	6658	7389123361276159	C:/Users/yihao/SoftRas/build/temp.win-amd64-cpython-38/Release/soft_renderer/cuda/load_textures_cuda.obj	501120de1d0692f5
+8	7876	7389128752133878	C:/Users/yihao/SoftRas/build/temp.win-amd64-cpython-38/Release/soft_renderer/cuda/load_textures_cuda_kernel.obj	9adcccd7752ae31b
+0	6294	7389128853227604	C:/Users/yihao/SoftRas/build/temp.win-amd64-cpython-38/Release/soft_renderer/cuda/create_texture_image_cuda.obj	5fd8a06ad7201528
+3	7195	7389128862133898	C:/Users/yihao/SoftRas/build/temp.win-amd64-cpython-38/Release/soft_renderer/cuda/create_texture_image_cuda_kernel.obj	ec4a3c3b73f11943
+0	6426	7389128958878456	C:/Users/yihao/SoftRas/build/temp.win-amd64-cpython-38/Release/soft_renderer/cuda/soft_rasterize_cuda.obj	5567b8fe0367aa1d
+3	7914	7389128973565953	C:/Users/yihao/SoftRas/build/temp.win-amd64-cpython-38/Release/soft_renderer/cuda/soft_rasterize_cuda_kernel.obj	68265c416154b9e2
+0	6300	7389129068589671	C:/Users/yihao/SoftRas/build/temp.win-amd64-cpython-38/Release/soft_renderer/cuda/voxelization_cuda.obj	7df6b1bd08a460f9
+2	7364	7389129078912015	C:/Users/yihao/SoftRas/build/temp.win-amd64-cpython-38/Release/soft_renderer/cuda/voxelization_cuda_kernel.obj	c28eda04a066b8aa
+27	29479	7584153358655892	C:/Users/yihao/SoftRas/build/temp.win-amd64-cpython-38/Release/soft_renderer/cuda/load_textures_cuda.obj	d1b12d36e44c3810

@@ -1,0 +1,13 @@
+Metadata-Version: 2.1
+Name: soft_renderer
+Version: 1.0.0
+Summary: PyTorch implementation of "Soft Rasterizer"
+Author: Shichen Liu
+Author-email: liushichen95@gmail.com
+License: MIT License
+Requires-Dist: numpy
+Requires-Dist: torch
+Requires-Dist: torchvision
+Requires-Dist: scikit-image
+Requires-Dist: tqdm
+Requires-Dist: imageio

@@ -1,0 +1,1 @@
+docker build -t 3d_bat_reconstruction .
