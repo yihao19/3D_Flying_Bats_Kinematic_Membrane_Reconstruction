@@ -4,7 +4,7 @@ Short one-line project description.
 
 ---
 
-## Gallery (5 images per row)
+## Kinematic reconstruction
 
 <!-- Container: flex layout, wraps to next line if viewport shrinks -->
 <div style="display: flex; flex-wrap: wrap; gap: 10px; max-width: 550px;">
@@ -13,14 +13,18 @@ Short one-line project description.
        aspect-ratio:1/1 keeps it square, object-fit:cover crops to fill.
        Replace src="..." with your image URL (e.g., images/pic1.png or raw githubusercontent link).
        Wrap with <a> to make the image clickable (optional). -->
-  <img src="drivers/2023/result_plot/Brunei_2023_bat_14_1/Brunei_2023_bat_14_1_trajectory.gif"  width="300" height="300"  alt="Brunei_2023_bat_14_1" />
-  <img src="drivers/2023/result_plot/Brunei_2023_bat_15_1/Brunei_2023_bat_15_1_trajectory.gif"  width="300" height="300" alt="Brunei_2023_bat_15_1" />
-  <img src="drivers/2023/result_plot/Brunei_2023_bat_15_2/Brunei_2023_bat_15_2_trajectory.gif"  width="300" height="300" alt="Brunei_2023_bat_15_2" />
-  <img src="drivers/2023/result_plot/Brunei_2023_bat_16/Brunei_2023_bat_16_trajectory.gif"      width="300" height="300" alt="Brunei_2023_bat_16" />
-  <img src="drivers/2023/result_plot/Brunei_2023_bat_test_13_1/Brunei_2023_bat_test_13_1_trajectory.gif" width="300" height="300" alt="Brunei_2023_bat_test_13_1"/>
-  <img src="drivers/2023/result_plot/Brunei_2023_bat_test_13_2/Brunei_2023_bat_test_13_2_trajectory.gif" width="300" height="300" alt="Brunei_2023_bat_test_13_2"/>
-  <img src="drivers/2023/result_plot/Brunei_2023_bat_test_15_1/Brunei_2023_bat_test_15_1_trajectory.gif" width="300" height="300" alt="Brunei_2023_bat_test_15_1"/>
-  <img src="drivers/2023/result_plot/Brunei_2023_bat_test_16_1/Brunei_2023_bat_test_16_1_trajectory.gif" width="300" height="300" alt="Brunei_2023_bat_test_16_1"/>
-  <img src="drivers/2023/result_plot/Brunei_2023_bat_test_17_1/Brunei_2023_bat_test_17_1_trajectory.gif" width="300" height="300" alt="Brunei_2023_bat_test_17_1"/>
+  <img src="drivers/2023/result_plot/Brunei_2023_bat_14_1/Brunei_2023_bat_14_1_trajectory.gif"  width="250" height="250"  
+  alt="Brunei_2023_bat_14_1" />
+  <img src="drivers/2023/result_plot/Brunei_2023_bat_15_1/Brunei_2023_bat_15_1_trajectory.gif"  width="250" height="250" 
+  alt="Brunei_2023_bat_15_1" />
+  <img src="drivers/2023/result_plot/Brunei_2023_bat_15_2/Brunei_2023_bat_15_2_trajectory.gif"  width="250" height="250" 
+  alt="Brunei_2023_bat_15_2" />
+  <img src="drivers/2023/result_plot/Brunei_2023_bat_16/Brunei_2023_bat_16_trajectory.gif"      width="250" height="250" 
+  alt="Brunei_2023_bat_16" />
+  <img src="drivers/2023/result_plot/Brunei_2023_bat_test_13_1/Brunei_2023_bat_test_13_1_trajectory.gif" width="250" height="250" alt="Brunei_2023_bat_test_13_1"/>
+  <img src="drivers/2023/result_plot/Brunei_2023_bat_test_13_2/Brunei_2023_bat_test_13_2_trajectory.gif" width="250" height="250" alt="Brunei_2023_bat_test_13_2"/>
+  <img src="drivers/2023/result_plot/Brunei_2023_bat_test_15_1/Brunei_2023_bat_test_15_1_trajectory.gif" width="250" height="250" alt="Brunei_2023_bat_test_15_1"/>
+  <img src="drivers/2023/result_plot/Brunei_2023_bat_test_16_1/Brunei_2023_bat_test_16_1_trajectory.gif" width="250" height="250" alt="Brunei_2023_bat_test_16_1"/>
+  <img src="drivers/2023/result_plot/Brunei_2023_bat_test_17_1/Brunei_2023_bat_test_17_1_trajectory.gif" width="250" height="250" alt="Brunei_2023_bat_test_17_1"/>
 </div>
 
