@@ -1122,7 +1122,7 @@ class Optimize_Driver():
             rotation_matrix = quat_to_rotmat(rodrigues(rotation_euler))
             rect_rotation_matrix =  root_inv_rotation_matrix @ rotation_matrix
             rect_rotation_euler = rotmat_to_euler(rect_rotation_matrix)
-            #rect_displacement = (np.array(displacement) - np.array(root_displacement)).tolist()
+            rect_displacement = (np.array(displacement) - np.array(root_displacement)).tolist()
             pose_json['template_displacement'] = [0,0,0]
             pose_json['pose'][0] = rect_rotation_euler
 
