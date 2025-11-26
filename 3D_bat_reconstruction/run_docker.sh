@@ -1,0 +1,1 @@
+docker run  -it  --gpus all -v .:/bat_reconstruction 3d_bat_reconstruction
