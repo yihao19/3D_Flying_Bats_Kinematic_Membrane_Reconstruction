@@ -1,0 +1,63 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Nov  3 21:59:25 2025
+
+@author: yihao
+"""
+import sys
+import os
+sys.path.append("/home/yihao19/PhD_research/3D_bat_reconstruction/SoftRas/models/membrane_kinematic_optimization_model")
+from driver import Optimize_Driver
+
+
+
+
+
+if __name__ == "__main__":
+    project_root_path = "/home/yihao19/"
+    project_name = "PhDProject_real_data"
+    test_name = "Brunei_2023_bat_test_17_1"
+    membrane_simulation_mode = "ANGULAR"
+    start_pose = 400
+    end_pose =960
+    current_pose_index = start_pose
+    half_window_size = 8  # animation rendering window size
+    membrane_optimized_frame = 1# frame number that will be optimized
+    kinematic_opt_epoch =100
+    membrane_opt_epoch =100
+    membrane_kinematic_opt_epoch = 20
+    whole_opt_epoch =1
+    if_use_previous_attr = True
+    if_use_previous_kinematics =True
+    opposite_direction = True # bat flying direction
+    model_template_name = "new_bat_params_version2_backward_membrane_24.pkl"
+    driver = Optimize_Driver(project_root_path, 
+                             project_name, 
+                             test_name, 
+                             start_pose, 
+                             end_pose, 
+                             current_pose_index, 
+                             half_window_size,
+                             membrane_optimized_frame,
+                             kinematic_opt_epoch, 
+                             membrane_opt_epoch, 
+                             membrane_kinematic_opt_epoch,
+                             whole_opt_epoch, 
+                             model_template_name,
+                             if_use_previous_attr,
+                             if_use_previous_kinematics,
+                             opposite_direction)
+    
+    #driver.run_raw_kinematic_optimize_pipeline()
+    #driver.run_kinematic_smoothing()
+    #driver.run_membrane_optimize_pipeline(epoch_index = 0)
+    #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
+    driver.run_original_reconstruction()
+    #driver.stiffness_visualization()
+    driver.plot_initial_kinematic()
+    #driver.iou_loss_compare()
+    driver.iou_loss_original()
+    #driver.run_original_kinematic_smooth_rendering()
+    #driver.iou_loss_membrane_compare()
+    driver.scale_parameter_plot()
+    driver.generate_flying_trajectory_gif()
