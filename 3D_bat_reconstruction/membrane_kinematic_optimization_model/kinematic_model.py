@@ -220,7 +220,6 @@ class Kinematic_model(nn.Module):
             low_bound_z = -math.pi/6
             high_bound_z = math.pi/6
             
-
             self.pose_tensor[6][0] =    max(low_bound_x,min(high_bound_x,prev_pose[6][0]  + math.pi / 9 * torch.tanh(self.joint_6[0][0])))
             self.pose_tensor[6][1]  =   max(low_bound_y,min(high_bound_y,prev_pose[6][1]  + math.pi / 6 * torch.tanh(self.joint_6[0][1])))
             self.pose_tensor[6][2]  =   max(low_bound_z, min(high_bound_z,prev_pose[6][2]  + math.pi / 6 * torch.tanh(self.joint_6[0][2])))
