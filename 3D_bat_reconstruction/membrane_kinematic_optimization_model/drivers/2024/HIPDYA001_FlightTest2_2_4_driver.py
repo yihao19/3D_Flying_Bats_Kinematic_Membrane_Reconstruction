@@ -18,8 +18,8 @@ if __name__ == "__main__":
     test_name = "Brunei_2024_HIPDYA001_FlightTest2_2_4"
     membrane_simulation_mode = "ANGULAR"
     #[6521, 6620, 6900]
-    start_pose = 6621
-    end_pose = 6900
+    start_pose = 6619
+    end_pose = 6520
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
