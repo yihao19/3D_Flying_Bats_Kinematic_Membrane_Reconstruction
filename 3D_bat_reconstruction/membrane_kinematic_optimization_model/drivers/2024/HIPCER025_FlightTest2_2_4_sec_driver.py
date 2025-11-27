@@ -19,17 +19,17 @@ if __name__ == "__main__":
     membrane_simulation_mode = "ANGULAR"
     #[start, seed, end]
     #[1499, 1730, 2540]
-    start_pose = 1730  # 1730
-    end_pose = 1731
+    start_pose = 1731  # 1730
+    end_pose = 2540
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
-    kinematic_opt_epoch = 300
+    kinematic_opt_epoch = 50
     membrane_opt_epoch =100
     membrane_kinematic_opt_epoch = 10
     whole_opt_epoch =1
     if_use_previous_attr = False
-    if_use_previous_kinematics =False
+    if_use_previous_kinematics =True
     opposite_direction = False # bat flying direction
     template_flip = True
     model_template_name = "new_bat_params_version2_backward_membrane_24.pkl"
@@ -52,8 +52,8 @@ if __name__ == "__main__":
                              template_flip=template_flip
                              )
     
-    #driver.run_raw_kinematic_optimize_pipeline()
-    #exit(0)
+    driver.run_raw_kinematic_optimize_pipeline()
+    exit(0)
     driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
