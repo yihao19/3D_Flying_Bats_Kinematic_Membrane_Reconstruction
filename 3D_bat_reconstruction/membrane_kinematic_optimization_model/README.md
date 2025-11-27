@@ -127,9 +127,6 @@
         <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_RHISED002_FlightTest3_2_4/Brunei_2024_RHISED002_FlightTest3_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_RHISED002_FlightTest3_2_4"/>
     </figure>
-        <figure  style="text-align: center;">
-        <img src="drivers/2024/result_plot/Brunei_2024_RHISED001_FlightTest3_2_4/Brunei_2024_RHISED001_FlightTest3_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_RHISED001_FlightTest3_2_4"/>
-    </figure>
     <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_RHISED003_FlightTest1_2_4/Brunei_2024_RHISED003_FlightTest1_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_RHISED003_FlightTest1_2_4"/>
     </figure>
@@ -139,8 +136,4 @@
     <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_RHITRI002_FlightTest1_2_4/Brunei_2024_RHITRI002_FlightTest1_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_RHITRI002_FlightTest1_2_4"/>
     </figure>
-
-    
-    
-    
 </div>
