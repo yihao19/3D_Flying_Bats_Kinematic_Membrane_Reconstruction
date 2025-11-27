@@ -888,7 +888,7 @@ class Optimize_Driver():
         plt.close()
         return
     
-    def iou_loss_original(self):
+    def iou_loss_original(self, suffix:str=""):
         original_iou_loss_list = []
         original_raw_iou_loss_list = []
         for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc="iou_loss cal..."):
@@ -903,11 +903,11 @@ class Optimize_Driver():
         plt.plot(original_raw_iou_loss_list, color='grey', linestyle=':')
         plt.xlabel("Frame index")
         plt.ylabel("IOU loss")
-        plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_original_wo_legend.svg",format="svg")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_IOU_original_wo_legend.svg",format="svg")
         plt.legend(["fixed template","size&shape varying template",])
-        if not os.path.exists(f"./result_plot/{self.test_name}/"):
-            os.makedirs(f"./result_plot/{self.test_name}/")
-        plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_original_w_legend.svg",format="svg")
+        if not os.path.exists(f"./result_plot/{self.test_name}{suffix}/"):
+            os.makedirs(f"./result_plot/{self.test_name}{suffix}/")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_IOU_original_w_legend.svg",format="svg")
         plt.close()
         return None
     
@@ -995,10 +995,10 @@ class Optimize_Driver():
         plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_loss_membrane_opt_w_prev.svg",format="svg")
         plt.close()
 
-    def plot_initial_kinematic(self, bone_index = [0,6,19], kinematic_smoothed:bool=False):
+    def plot_initial_kinematic(self, bone_index = [0,6,19], kinematic_smoothed:bool=False, suffix:str=""):
         output_path = os.path.join(self.camera_list_path_root)
-        if not os.path.exists(f"./result_plot/{self.test_name}/"):
-            os.makedirs(f"./result_plot/{self.test_name}/")
+        if not os.path.exists(f"./result_plot/{self.test_name}{suffix}/"):
+            os.makedirs(f"./result_plot/{self.test_name}{suffix}/")
         output_jsons_x = []
         output_jsons_y = []
         output_jsons_z = []
@@ -1034,7 +1034,7 @@ class Optimize_Driver():
         plt.axhline(y = 0, color = 'black', linestyle = '--') 
         plt.ylim(-1, 1)
 
-        plt.savefig(f"./result_plot/{self.test_name}/{prefix}_Kinematic_X.svg")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{prefix}_Kinematic_X.svg")
         plt.close()
         fig = plt.figure()
         plt.title("Y axis")
@@ -1048,7 +1048,7 @@ class Optimize_Driver():
         plt.axhline(y = 0, color = 'black', linestyle = '--') 
         plt.ylim(-1, 1)
 
-        plt.savefig(f"./result_plot/{self.test_name}/{prefix}_Kinematic_Y.svg")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{prefix}_Kinematic_Y.svg")
         plt.close()
 
         fig = plt.figure()
@@ -1062,25 +1062,25 @@ class Optimize_Driver():
         plt.legend(["Bone: {}".format(bone_index[1]), "Bone: {}".format(bone_index[2])])
         plt.axhline(y = 0, color = 'black', linestyle = '--')
         plt.ylim(-1, 1)
-        plt.savefig(f"./result_plot/{self.test_name}/{prefix}_Kinematic_Z.svg")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{prefix}_Kinematic_Z.svg")
         plt.close()
 
         fig = plt.figure()
         plt.title("Displacement X axis")
         plt.plot(displacement_array[:, 0], color = "black")
-        plt.savefig(f"./result_plot/{self.test_name}/{prefix}_displacement_X.svg")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{prefix}_displacement_X.svg")
         plt.close()
 
         fig = plt.figure()
         plt.title("Displacement Y axis")
         plt.plot(displacement_array[:, 1], color = "black")
-        plt.savefig(f"./result_plot/{self.test_name}/{prefix}_displacement_Y.svg")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{prefix}_displacement_Y.svg")
         plt.close()
 
         fig = plt.figure()
         plt.title("Displacement Z axis")
         plt.plot(displacement_array[:, 2], color = "black")
-        plt.savefig(f"./result_plot/{self.test_name}/{prefix}_displacement_Z.svg")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{prefix}_displacement_Z.svg")
         plt.close()
         return
     
@@ -1090,17 +1090,19 @@ class Optimize_Driver():
             self.original_reconstruction(self.current_pose_index)
         return None
     
-    def generate_flying_trajectory_gif(self, if_smoothed:bool=False):
+    def generate_flying_trajectory_gif(self, if_smoothed:bool=False, suffix:str=""):
         """
         generate the gif that contains the flying trajectory of the point cloud in bev view
         """
+        if not os.path.exists(f"./result_plot/{self.test_name}{suffix}/"):
+            os.makedirs(f"./result_plot/{self.test_name}{suffix}/")
         if(if_smoothed == True):
             prefix = "smoothed"
             kinematic_file_name = "output_smoothed.json"
         else: 
             prefix = "initial"
             kinematic_file_name = "output.json"
-        gif_output_path = os.path.join(f"./result_plot/{self.test_name}/{self.test_name}_{prefix}_trajectory.gif")
+        gif_output_path = os.path.join(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_{prefix}_trajectory.gif")
         gif_writter = imageio.get_writer(gif_output_path, loop=0, fps=40)
         # get the first reconstruction pose and function as reference
         first_pose_json_path =  os.path.join(self.kinematic_save_path_root, str(self.start_pose), kinematic_file_name)

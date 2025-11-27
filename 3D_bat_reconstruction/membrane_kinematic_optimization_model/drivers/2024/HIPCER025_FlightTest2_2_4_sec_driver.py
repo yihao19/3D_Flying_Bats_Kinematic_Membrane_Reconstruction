@@ -19,7 +19,7 @@ if __name__ == "__main__":
     membrane_simulation_mode = "ANGULAR"
     #[start, seed, end]
     #[1499, 1730, 2540]
-    start_pose = 1731  # 1730
+    start_pose = 1730  # 1730
     end_pose = 2540
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
@@ -52,18 +52,18 @@ if __name__ == "__main__":
                              template_flip=template_flip
                              )
     
-    driver.run_raw_kinematic_optimize_pipeline()
-    exit(0)
+    #driver.run_raw_kinematic_optimize_pipeline()
+    #exit(0)
     driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     driver.run_original_reconstruction()
     #driver.stiffness_visualization()
-    driver.plot_initial_kinematic(kinematic_smoothed=False)
-    driver.plot_initial_kinematic(kinematic_smoothed=True)
+    driver.plot_initial_kinematic(kinematic_smoothed=False, suffix="_sec")
+    driver.plot_initial_kinematic(kinematic_smoothed=True, suffix="_sec")
     #driver.iou_loss_compare()
-    driver.iou_loss_original()
+    driver.iou_loss_original(suffix="_sec")
     #driver.run_original_kinematic_smooth_rendering()
     #driver.iou_loss_membrane_compare()
     #driver.scale_parameter_plot()
-    driver.generate_flying_trajectory_gif(if_smoothed=True)
+    driver.generate_flying_trajectory_gif(if_smoothed=True, suffix="_sec")

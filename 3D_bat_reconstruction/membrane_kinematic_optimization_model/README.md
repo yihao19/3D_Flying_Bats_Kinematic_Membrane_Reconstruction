@@ -110,4 +110,5 @@
         <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_HIPCER025_FlightTest2_2_4_sec/Brunei_2024_HIPCER025_FlightTest2_2_4_sec_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER025_FlightTest2_2_4_sec"/>
     </figure>
+    
 </div>
