@@ -103,12 +103,15 @@
         <img src="drivers/2024/result_plot/Brunei_2024_HIPCER025_FlightTest1_2_4/Brunei_2024_HIPCER025_FlightTest1_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER025_FlightTest1_2_4"/>
     </figure>
     </figure>
-        <figure  style="text-align: center;">
+    <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_HIPCER025_FlightTest2_2_4/Brunei_2024_HIPCER025_FlightTest2_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER025_FlightTest2_2_4"/>
     </figure>
-    </figure>
-        <figure  style="text-align: center;">
+    <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_HIPCER025_FlightTest2_2_4_sec/Brunei_2024_HIPCER025_FlightTest2_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER025_FlightTest2_2_4_sec"/>
     </figure>
+     <figure  style="text-align: center;">
+        <img src="drivers/2024/result_plot/Brunei_2024_HIPDYA001_FlightTest2_2_4/Brunei_2024_HIPDYA001_FlightTest2_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPDYA001_FlightTest2_2_4"/>
+    </figure>
+    
     
 </div>
