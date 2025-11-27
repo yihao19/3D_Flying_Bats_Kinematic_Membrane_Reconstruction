@@ -7,7 +7,7 @@ Kinematic and membrane reconstruction.
 ## Kinematic Reconstruction (2023)
 
 <!-- Container: flex layout, wraps to next line if viewport shrinks -->
-<div style="flex-wrap: wrap; gap: 10px; max-width: 550px;">
+<div >
 
   <!-- Each image: width ~19% so 5 fit across with small gaps.
        aspect-ratio:1/1 keeps it square, object-fit:cover crops to fill.
