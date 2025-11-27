@@ -7,7 +7,7 @@ Created on Mon Nov  3 21:59:25 2025
 import sys
 import os
 project_root_path = "/home/yihao19/"
-sys.path.append(os.path.join(project_root_path,"PhD_research/3D_bat_reconstruction/SoftRas/models/membrane_kinematic_optimization_model"))
+sys.path.append(os.path.join(project_root_path,"3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model"))
 from driver import Optimize_Driver
 
 
@@ -17,12 +17,13 @@ if __name__ == "__main__":
     project_name = "PhDProject_real_data"
     test_name = "Brunei_2024_RHIBOR001_FlightTest3_2_4"
     membrane_simulation_mode = "ANGULAR"
-    start_pose = 2
+    #[0, 160, 352]
+    start_pose = 161
     end_pose = 353
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
-    kinematic_opt_epoch = 150
+    kinematic_opt_epoch = 50
     membrane_opt_epoch =100
     membrane_kinematic_opt_epoch = 10
     whole_opt_epoch =1
@@ -51,10 +52,17 @@ if __name__ == "__main__":
                              )
     
     driver.run_raw_kinematic_optimize_pipeline()
+    exit(0)
+    driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
+    driver.run_original_reconstruction()
     #driver.stiffness_visualization()
-    #driver.iou_loss_stage()
-    #driver.run_original_reconstruction()
+    driver.plot_initial_kinematic(kinematic_smoothed=False)
+    driver.plot_initial_kinematic(kinematic_smoothed=True)
     #driver.iou_loss_compare()
-    #driver.run_kinematic_smooth_only(epoch_index=0)
+    driver.iou_loss_original()
+    #driver.run_original_kinematic_smooth_rendering()
+    #driver.iou_loss_membrane_compare()
+    #driver.scale_parameter_plot()
+    driver.generate_flying_trajectory_gif(if_smoothed=True)

@@ -6,6 +6,27 @@
   </figure>
 </div>
 
+## Kinematic optimization pipeline
+<div>
+  <figure  style="text-align: center;">
+    <img src="images/kinematic optimization network.jpg" alt="kinematic optimization" />
+  </figure>
+</div>
+
+## Membrane optimization pipeline
+<div>
+  <figure  style="text-align: center;">
+    <img src="images/membrane optimization network.jpg" alt="membrane optimization" />
+  </figure>
+</div>
+
+## Kinematic update pipeline
+<div>
+  <figure  style="text-align: center;">
+    <img src="images/kinematic update network.jpg" alt="kinematic update" />
+  </figure>
+</div>
+
 
 
 ---
