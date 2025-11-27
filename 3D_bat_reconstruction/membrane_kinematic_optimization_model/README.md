@@ -18,38 +18,46 @@ Kinematic and membrane reconstruction.
     alt="Brunei_2023_bat_14_1" />
     <figcaption style="text-align: center;"> Glide</figcaption>
   </figure>
+
   <figure>
     <img src="drivers/2023/result_plot/Brunei_2023_bat_15_1/Brunei_2023_bat_15_1_trajectory.gif"  width="250" height="250" 
     alt="Brunei_2023_bat_15_1" />
     <figcaption style="text-align: center;"> Straight fly + glide</figcaption>
   </figure>
+
   <figure>
     <img src="drivers/2023/result_plot/Brunei_2023_bat_15_2/Brunei_2023_bat_15_2_trajectory.gif"  width="250" height="250" 
     alt="Brunei_2023_bat_15_2" />
     <figcaption style="text-align: center;"> Straight fly</figcaption>
-    </figure>
+  </figure>
+
   <figure>
     <img src="drivers/2023/result_plot/Brunei_2023_bat_16/Brunei_2023_bat_16_trajectory.gif"      width="250" height="250" 
     alt="Brunei_2023_bat_16" />
     <figcaption style="text-align: center;"> U turn</figcaption>
   </figure>
+
   <figure>
     <img src="drivers/2023/result_plot/Brunei_2023_bat_test_13_1/Brunei_2023_bat_test_13_1_trajectory.gif" width="250" height="250" alt="Brunei_2023_bat_test_13_1"/>
     <figcaption style="text-align: center;"> Straight fly</figcaption>
   </figure>
+
   <figure>
     <img src="drivers/2023/result_plot/Brunei_2023_bat_test_13_2/Brunei_2023_bat_test_13_2_trajectory.gif" width="250" height="250" alt="Brunei_2023_bat_test_13_2"/>
     <figcaption style="text-align: center;"> Straight fly</figcaption>
   </figure>
+
   <figure>
     <img src="drivers/2023/result_plot/Brunei_2023_bat_test_15_1/Brunei_2023_bat_test_15_1_trajectory.gif" width="250" height="250" alt="Brunei_2023_bat_test_15_1"/>
     <figcaption style="text-align: center;"> Straight fly</figcaption>
   </figure>
-    <figure>
+
+  <figure>
     <img src="drivers/2023/result_plot/Brunei_2023_bat_test_16_1/Brunei_2023_bat_test_16_1_trajectory.gif" width="250" height="250" alt="Brunei_2023_bat_test_16_1"/>
     <figcaption style="text-align: center;"> Straight fly</figcaption>
   </figure>
-    <figure>
+  
+  <figure>
     <img src="drivers/2023/result_plot/Brunei_2023_bat_test_17_1/Brunei_2023_bat_test_17_1_trajectory.gif" width="250" height="250" alt="Brunei_2023_bat_test_17_1"/>
     <figcaption style="text-align: center;"> Straight fly</figcaption>
   </figure>
