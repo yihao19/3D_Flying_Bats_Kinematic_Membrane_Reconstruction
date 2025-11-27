@@ -73,6 +73,10 @@ Kinematic and membrane reconstruction.
     </figure>
     </figure>
         <figure  style="text-align: center;">
+        <img src="drivers/2024/result_plot/Brunei_2024_HIPCER025_FlightTest1_2_4/Brunei_2024_HIPCER025_FlightTest1_2_4_smoothed_trajectory.gif" width="250" height="250" alt="Brunei_2024_HIPCER025_FlightTest1_2_4"/>
+    </figure>
+    </figure>
+        <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_HIPCER025_FlightTest2_2_4/Brunei_2024_HIPCER025_FlightTest2_2_4_smoothed_trajectory.gif" width="250" height="250" alt="Brunei_2024_HIPCER025_FlightTest2_2_4"/>
     </figure>
 </div>

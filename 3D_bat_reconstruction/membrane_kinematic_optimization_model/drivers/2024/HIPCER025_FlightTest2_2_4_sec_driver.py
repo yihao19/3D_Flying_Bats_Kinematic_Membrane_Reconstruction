@@ -15,22 +15,22 @@ from driver import Optimize_Driver
 
 if __name__ == "__main__":
     project_name = "PhDProject_real_data"
-    test_name = "Brunei_2024_HIPCER025_FlightTest1_2_4"
+    test_name = "Brunei_2024_HIPCER025_FlightTest2_2_4"
     membrane_simulation_mode = "ANGULAR"
-    #[10, 600, 760]
-    #
-    start_pose = 10
-    end_pose = 601
+    #[start, seed, end]
+    #[1499, 1730, 2540]
+    start_pose = 1730  # 1730
+    end_pose = 1731
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
-    kinematic_opt_epoch = 50
+    kinematic_opt_epoch = 300
     membrane_opt_epoch =100
     membrane_kinematic_opt_epoch = 10
     whole_opt_epoch =1
     if_use_previous_attr = False
-    if_use_previous_kinematics =True
-    opposite_direction = True # bat flying direction
+    if_use_previous_kinematics =False
+    opposite_direction = False # bat flying direction
     template_flip = True
     model_template_name = "new_bat_params_version2_backward_membrane_24.pkl"
     driver = Optimize_Driver(project_root_path, 

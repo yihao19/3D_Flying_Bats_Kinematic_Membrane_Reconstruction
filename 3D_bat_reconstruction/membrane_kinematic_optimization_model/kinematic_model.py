@@ -196,11 +196,13 @@ class Kinematic_model(nn.Module):
             #self.pose_tensor[2][:] = prev_pose[2][:] + math.pi / 9 * torch.tanh(self.joint_2)  # make the neck bone trainable(slightly)
             # for the shoulder using the symmetric deformation
             #self.pose_tensor[5][0] = (prev_pose[5][0] + math.pi / 9 * torch.tanh(self.joint_5[0][0]))
-            self.pose_tensor[5][1] = (prev_pose[5][1] + math.pi / 3 * torch.tanh(self.joint_5[0][1]))
+            low_bound_y = -math.pi/9
+            high_bound_y = math.pi/9
+            self.pose_tensor[5][1] = max(low_bound_y, min(high_bound_y,(prev_pose[5][1] + math.pi / 3 * torch.tanh(self.joint_5[0][1]))))
             self.pose_tensor[5][2] =  (prev_pose[5][2] + math.pi / 3 * torch.tanh(self.joint_5[0][2]))
             
             #self.pose_tensor[18][0] = (prev_pose[18][0] + math.pi / 9 * torch.tanh(self.joint_5[0][0]))
-            self.pose_tensor[18][1] =  (prev_pose[18][1] + math.pi / 3 * torch.tanh(self.joint_18[0][1]))
+            self.pose_tensor[18][1] = max(low_bound_y, min(high_bound_y,(prev_pose[18][1] + math.pi / 3 * torch.tanh(self.joint_18[0][1]))))
             self.pose_tensor[18][2] =  (prev_pose[18][2] + math.pi / 3 * torch.tanh(self.joint_18[0][2]))
             
             #self.pose_tensor[4][0] =  torch.max(torch.min( prev_pose[4][0] + math.pi / 3 * torch.tanh(self.joint_4[0][0]), upper_bound_2),  lower_bound_2)
@@ -230,11 +232,14 @@ class Kinematic_model(nn.Module):
            
             
             #self.pose_tensor[7][0] = ( prev_pose[7][0]   + math.pi / 3 * torch.tanh(self.joint_7[0][0]))
-            self.pose_tensor[7][1] = ( prev_pose[7][1]   + math.pi / 6 * torch.tanh(self.joint_7[0][1]))
+            low_bound_y = -math.pi/18
+            high_bound_y = math.pi/18
+
+            self.pose_tensor[7][1] = max(low_bound_y, min(high_bound_y, ( prev_pose[7][1]   + math.pi / 6 * torch.tanh(self.joint_7[0][1]))))
             self.pose_tensor[7][2] = max(( prev_pose[7][2]   + math.pi / 6 * torch.tanh(self.joint_7[0][2])),0)
             
             #self.pose_tensor[20][0] = ( prev_pose[20][0] + math.pi / 3 * torch.tanh(self.joint_20[0][0]))
-            self.pose_tensor[20][1] = ( prev_pose[20][1] + math.pi / 6 * torch.tanh(self.joint_20[0][1]))
+            self.pose_tensor[20][1] = max(low_bound_y, min(high_bound_y, ( prev_pose[20][1] + math.pi / 6 * torch.tanh(self.joint_20[0][1]))))
             self.pose_tensor[20][2] = min((prev_pose[20][2] + math.pi / 6 * torch.tanh(self.joint_20[0][2])),0)
             
             #self.pose_tensor[15][:] = ( prev_pose[15][:] +math.pi / 18 * torch.tanh(self.joint_15))
