@@ -20,8 +20,8 @@ if __name__ == "__main__":
     #[start, seed, end]
     #[4385, 4640, 5100]
     #[1499, 1730, 1530]
-    start_pose = 4641  # 1730
-    end_pose = 5100
+    start_pose = 4549  # 1730
+    end_pose = 4384
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
