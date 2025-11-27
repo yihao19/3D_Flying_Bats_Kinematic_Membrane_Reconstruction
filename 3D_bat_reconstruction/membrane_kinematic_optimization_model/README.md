@@ -79,6 +79,7 @@
 </div>
 
 ## Kinematic reconstruction (2024)
+### HIPCER
 <div style="display: flex; flex-wrap: wrap; gap: 10px; max-width: 900px;">
     <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_HIPCER019_FlightTest1_2_4/Brunei_2024_HIPCER019_FlightTest1_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER019_FlightTest1_2_4"/>
@@ -112,15 +113,34 @@
     <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_HIPCER025_FlightTest3_2_4/Brunei_2024_HIPCER025_FlightTest3_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER025_FlightTest3_2_4"/>
     </figure>
+</div>
+
+### HIPDYA
+<div>
     <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_HIPDYA001_FlightTest2_2_4/Brunei_2024_HIPDYA001_FlightTest2_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPDYA001_FlightTest2_2_4"/>
     </figure>
+</div>
+
+### RHIBOR
+<div>
     <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_RHIBOR001_FlightTest3_2_4/Brunei_2024_RHIBOR001_FlightTest3_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_RHIBOR001_FlightTest3_2_4"/>
     </figure>
     <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_RHIBOR002_FlightTest2_2_4/Brunei_2024_RHIBOR002_FlightTest2_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_RHIBOR002_FlightTest2_2_4"/>
     </figure>
+</div>
+
+### RHITRT
+<div>
+    <figure  style="text-align: center;">
+        <img src="drivers/2024/result_plot/Brunei_2024_RHITRI002_FlightTest1_2_4/Brunei_2024_RHITRI002_FlightTest1_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_RHITRI002_FlightTest1_2_4"/>
+    </figure>
+</div>
+
+### RHISED
+<div>
     <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_RHISED001_FlightTest3_2_4/Brunei_2024_RHISED001_FlightTest3_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_RHISED001_FlightTest3_2_4"/>
     </figure>
@@ -132,8 +152,5 @@
     </figure>
      <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_RHISED003_FlightTest3_2_4/Brunei_2024_RHISED003_FlightTest3_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_RHISED003_FlightTest3_2_4"/>
-    </figure>
-    <figure  style="text-align: center;">
-        <img src="drivers/2024/result_plot/Brunei_2024_RHITRI002_FlightTest1_2_4/Brunei_2024_RHITRI002_FlightTest1_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_RHITRI002_FlightTest1_2_4"/>
     </figure>
 </div>

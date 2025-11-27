@@ -18,17 +18,17 @@ if __name__ == "__main__":
     test_name = "Brunei_2024_RHISED001_FlightTest3_2_4"
     membrane_simulation_mode = "ANGULAR"
     #[786, 1000, 1316]
-    start_pose = 1000
-    end_pose = 1001
+    start_pose = 1001
+    end_pose = 1316
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
-    kinematic_opt_epoch = 300
+    kinematic_opt_epoch = 50
     membrane_opt_epoch =100
     membrane_kinematic_opt_epoch = 10
     whole_opt_epoch =1
     if_use_previous_attr = False
-    if_use_previous_kinematics =False
+    if_use_previous_kinematics =True
     opposite_direction = True # bat flying direction
     template_flip = True
     model_template_name = "new_bat_params_version2_backward_membrane_24.pkl"
