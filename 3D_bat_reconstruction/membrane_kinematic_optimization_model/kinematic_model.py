@@ -244,9 +244,10 @@ class Kinematic_model(nn.Module):
             
             #self.pose_tensor[15][:] = ( prev_pose[15][:] +math.pi / 18 * torch.tanh(self.joint_15))
             #self.pose_tensor[16][:] = ( prev_pose[16][:] +math.pi / 18 * torch.tanh(self.joint_16))
-            
+
             self.pose_tensor[8][0] = ( prev_pose[8][0]   + math.pi / 18 * torch.tanh(self.joint_8[0][0]))
-            self.pose_tensor[8][1] = ( prev_pose[8][1]   + math.pi / 18 * torch.tanh(self.joint_8[0][1]))
+            high_bound_y = math.pi/18
+            self.pose_tensor[8][1] = max(high_bound_y,( prev_pose[8][1]   + math.pi / 18 * torch.tanh(self.joint_8[0][1])))
             #self.pose_tensor[8][2] = ( prev_pose[8][2]   + math.pi / 18 * torch.tanh(self.joint_8[0][2]))
             self.pose_tensor[9][0] =  ( prev_pose[9][0]   - 0.8 * math.pi / 18 * torch.tanh(self.joint_8[0][0]))
             self.pose_tensor[10][0] = ( prev_pose[10][0] - 0.5 * math.pi / 18 * torch.tanh(self.joint_8[0][0]))
@@ -267,7 +268,8 @@ class Kinematic_model(nn.Module):
             self.pose_tensor[36][0] = ( prev_pose[36][0] - 0.3 * math.pi / 18 * torch.tanh(self.joint_14[0][0]))
             
             self.pose_tensor[21][0] = ( prev_pose[21][0] + math.pi / 18 * torch.tanh(self.joint_21[0][0]))
-            self.pose_tensor[21][1] = ( prev_pose[21][1] + math.pi / 18 * torch.tanh(self.joint_21[0][1]))
+            high_bound_y = -math.pi/18
+            self.pose_tensor[21][1] = max(high_bound_y,( prev_pose[21][1] + math.pi / 18 * torch.tanh(self.joint_21[0][1])))
             #self.pose_tensor[21][2] = ( prev_pose[21][2] + math.pi / 18 * torch.tanh(self.joint_21[0][2]))
             
             self.pose_tensor[22][0] = ( prev_pose[22][0] - 0.8 * math.pi / 18 * torch.tanh(self.joint_21[0][0]))
