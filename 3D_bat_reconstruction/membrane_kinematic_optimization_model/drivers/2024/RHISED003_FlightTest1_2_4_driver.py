@@ -18,7 +18,7 @@ if __name__ == "__main__":
     test_name = "Brunei_2024_RHISED003_FlightTest1_2_4"
     membrane_simulation_mode = "ANGULAR"
     #[4058, 4360, 4712]
-    start_pose = 4361#4359
+    start_pose = 4200#4359
     end_pose = 4700#4057
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
@@ -51,8 +51,8 @@ if __name__ == "__main__":
                              template_flip=template_flip
                              )
     
-    driver.run_raw_kinematic_optimize_pipeline()
-    exit(0)
+    #driver.run_raw_kinematic_optimize_pipeline()
+    #exit(0)
     driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)

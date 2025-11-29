@@ -6,7 +6,8 @@ Created on Mon Nov  3 21:59:25 2025
 """
 import sys
 import os
-sys.path.append("/home/yihao19/PhD_research/3D_bat_reconstruction/SoftRas/models/membrane_kinematic_optimization_model")
+project_root_path = "/home/yihao19/"
+sys.path.append(os.path.join(project_root_path,"3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model"))
 from driver import Optimize_Driver
 
 
@@ -49,15 +50,17 @@ if __name__ == "__main__":
                              opposite_direction)
     
     #driver.run_raw_kinematic_optimize_pipeline()
-    #driver.run_kinematic_smoothing()
+    #exit(0)
+    driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     driver.run_original_reconstruction()
     #driver.stiffness_visualization()
-    driver.plot_initial_kinematic()
+    driver.plot_initial_kinematic(kinematic_smoothed=False)
+    driver.plot_initial_kinematic(kinematic_smoothed=True)
     #driver.iou_loss_compare()
     driver.iou_loss_original()
     #driver.run_original_kinematic_smooth_rendering()
     #driver.iou_loss_membrane_compare()
-    driver.scale_parameter_plot()
-    driver.generate_flying_trajectory_gif()
+    #driver.scale_parameter_plot()
+    driver.generate_flying_trajectory_gif(if_smoothed=True)
