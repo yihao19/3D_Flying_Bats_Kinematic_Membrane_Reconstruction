@@ -18,7 +18,9 @@ from utils.general_utils import (neg_iou_loss,
                                 rodrigues, 
                                 kinematic_smoothing, 
                                 displacement_smoothing,
-                                sample_sphere_volume)
+                                sample_sphere_volume,
+                                if_keep_via_projection,
+                                point_to_image)
 from utils.blender_utils import update_simulations, get_target_objs, y_forward_z_up
 import torch
 from skopt import gp_minimize
@@ -172,6 +174,12 @@ class Optimize_Driver():
         if not os.path.exists(self.original_reconstruction_smooth_kinematic_path):
              os.makedirs(self.original_reconstruction_smooth_kinematic_path)
 
+        self.calibration_check_path = os.path.join(self.project_root_path, 
+                                                   self.project_name, 
+                                                   self.test_name, 
+                                                   "calibration_check")
+        if not os.path.exists(self.calibration_check_path):
+            os.makedirs(self.calibration_check_path)
         self.result_path_root = './result'
         self.use_previous_attr = if_use_previous_attr
         self.use_previous = if_use_previous_kinamatics
@@ -1094,9 +1102,10 @@ class Optimize_Driver():
         plt.close()
         return
     
-    def calibration_validation(self, pose_index:int) -> None: 
+    def calibration_validation(self, pose_index:int, threshold:int = 5) -> None: 
         """
-        function to generate a small cube around the pose to validate the projection and select the "most" calibrated camera list
+        function to generate a small cube around the pose to validate the projection and select the "most" calibrated camera list. 
+        Function will return the projection of all the calibration
         :param self: Description
         :param pose_index: Description
         :type pose_index: int
@@ -1106,8 +1115,39 @@ class Optimize_Driver():
         pose_json = json.load(file)
         center = pose_json['template_displacement']
         sample_point = sample_sphere_volume(center=center)
-        
-
+        # turn it into homogeneous
+        camera_matrix = np.loadtxt(os.path.join(self.camera_meta_path_root, "camera_meta.txt"))
+        camera_list_txt_path = os.path.join(self.camera_list_path_root, str(pose_index), "camera.txt")
+        with open(camera_list_txt_path) as f:
+            text = f.read()
+            data = json.loads(text)
+        camera_list = str(data)[1:-1].split(", ")
+        camera_number = camera_matrix.shape[0]
+        camera_matrix = np.reshape(camera_matrix, (camera_number, 3, 4))
+        candidate = []
+        for point in tqdm(sample_point, desc="projecting points to images..."): 
+            keeps = 0
+            for _index, camera_index in enumerate(camera_list):
+                image_path = os.path.join(self.camera_list_path_root, str(pose_index),f"camera{camera_index}.png")
+                image =cv2.imread(image_path, cv2.COLOR_RGB2GRAY)
+                matrix = camera_matrix[int(camera_index) - 1]
+                keep = if_keep_via_projection(point, image, matrix)
+                if(keep == 1): 
+                    keeps +=1
+            if(keeps >= threshold):
+                candidate.append(point)
+        # projects all the points onto all the images
+        for _index, camera_index in enumerate(camera_list):
+            image_path = os.path.join(self.camera_list_path_root, str(pose_index),f"camera{camera_index}.png")
+            image =cv2.imread(image_path, cv2.COLOR_RGB2GRAY)
+            matrix = camera_matrix[int(camera_index) - 1]
+            image = point_to_image(candidate, image, matrix)
+            # write it into calibration check folder
+            save_path_root = os.path.join(self.calibration_check_path, str(pose_index))
+            if not os.path.exists(save_path_root):
+                os.makedirs(save_path_root)
+            save_path = os.path.join(save_path_root, f"camera{camera_index}.png")
+            cv2.imwrite(save_path, image)
         return
     
     def run_original_reconstruction(self):

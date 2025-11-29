@@ -8,6 +8,7 @@ import json
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 from scipy.ndimage import gaussian_filter1d
+import cv2
 def read_pose_json(json_file, bone_index):
     output_json = 1
     f = open(json_file)
@@ -134,7 +135,7 @@ def sample_sphere_surface(center, radius, n):
     vec /= np.linalg.norm(vec, axis=1)[:, None]
     return np.array(center) + radius * vec
 
-def sample_sphere_volume(center, radius:float=0.02, n:int=1000):
+def sample_sphere_volume(center, radius:float=0.03, n:int=300):
     """Uniform points INSIDE sphere volume."""
     dirs = np.random.normal(size=(n, 3))
     dirs /= np.linalg.norm(dirs, axis=1)[:, None]
@@ -167,4 +168,37 @@ def projection_array(xyz, image, camera_matrix):
           y = proj[index][1]
           image[y][x] = 255
       return image  
-  
+
+def if_keep_via_projection(xyz, image, camera_matrix):
+    xyz = np.array([xyz[0],xyz[1],xyz[2],1])
+    proj = np.matmul(camera_matrix, xyz.transpose())
+    proj[0] = proj[0] / (proj[2] + 1e-10)
+    proj[1] = proj[1] / (proj[2] + 1e-10)
+    proj = proj.astype(int)
+    keep = 0 
+   
+    if(proj[0] <0 or proj[0] >= 1280 or proj[1] < 0 or proj[1] >= 1024):
+        return keep
+    x = proj[0]
+    y = proj[1]
+    if(image[y][x][0] > 0):
+        keep = 1
+    return keep
+
+def point_to_image(xyzs, image, camera_matrix):
+    xyzs = np.array(xyzs)
+    ones = np.ones(xyzs.shape[0])
+    xyzs = np.stack([xyzs[:, 0], xyzs[:, 1],xyzs[:, 2],ones], axis=1)
+    proj = np.matmul(camera_matrix, xyzs.transpose())
+    proj = proj.transpose()
+
+    proj[:, 0] = proj[:, 0] / (proj[:, 2] + 1e-5)
+    proj[:, 1] = proj[:, 1] / (proj[:, 2] + 1e-5)
+    proj = proj.astype(int)
+    for index in range(proj.shape[0]):
+        if(proj[index][0] < 0 or proj[index][0] >= 1280 or proj[index][1] < 0 or proj[index][1] >= 1024):
+            continue
+        x = proj[index][0]
+        y = proj[index][1]
+        cv2.circle(image, (x, y), 5, (255, 255, 0), -1)
+    return image  
