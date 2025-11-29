@@ -135,7 +135,7 @@ def sample_sphere_surface(center, radius, n):
     vec /= np.linalg.norm(vec, axis=1)[:, None]
     return np.array(center) + radius * vec
 
-def sample_sphere_volume(center, radius:float=0.03, n:int=300):
+def sample_sphere_volume(center, radius:float=0.04, n:int=300):
     """Uniform points INSIDE sphere volume."""
     dirs = np.random.normal(size=(n, 3))
     dirs /= np.linalg.norm(dirs, axis=1)[:, None]

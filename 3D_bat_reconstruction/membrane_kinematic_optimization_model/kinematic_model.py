@@ -245,7 +245,7 @@ class Kinematic_model(nn.Module):
             #self.pose_tensor[15][:] = ( prev_pose[15][:] +math.pi / 18 * torch.tanh(self.joint_15))
             #self.pose_tensor[16][:] = ( prev_pose[16][:] +math.pi / 18 * torch.tanh(self.joint_16))
 
-            self.pose_tensor[8][0] = min(0, ( prev_pose[8][0]   + math.pi / 18 * torch.tanh(self.joint_8[0][0])))
+            self.pose_tensor[8][0] = max(0, ( prev_pose[8][0]   + math.pi / 18 * torch.tanh(self.joint_8[0][0])))
             high_bound_y = math.pi/18
             self.pose_tensor[8][1] = min(high_bound_y,( prev_pose[8][1]   + math.pi / 18 * torch.tanh(self.joint_8[0][1])))
             #self.pose_tensor[8][2] = ( prev_pose[8][2]   + math.pi / 18 * torch.tanh(self.joint_8[0][2]))
@@ -267,7 +267,7 @@ class Kinematic_model(nn.Module):
             self.pose_tensor[16][0] = min(0, ( prev_pose[16][0] - 0.5 * math.pi / 18 * torch.tanh(self.joint_14[0][0])))
             self.pose_tensor[36][0] = min(0, ( prev_pose[36][0] - 0.3 * math.pi / 18 * torch.tanh(self.joint_14[0][0])))
             
-            self.pose_tensor[21][0] = ( prev_pose[21][0] + math.pi / 18 * torch.tanh(self.joint_21[0][0]))
+            self.pose_tensor[21][0] = max( 0, prev_pose[21][0] + math.pi / 18 * torch.tanh(self.joint_21[0][0]))
             high_bound_y = -math.pi/18
             self.pose_tensor[21][1] = max(high_bound_y,( prev_pose[21][1] + math.pi / 18 * torch.tanh(self.joint_21[0][1])))
             #self.pose_tensor[21][2] = ( prev_pose[21][2] + math.pi / 18 * torch.tanh(self.joint_21[0][2]))
@@ -500,7 +500,7 @@ class Kinematic_model(nn.Module):
         bone_prior_1 = 0.1 * (torch.norm(self.pose_tensor[4][2]) +torch.norm(self.pose_tensor[17][2]) + torch.norm(self.pose_tensor[5])+torch.norm(self.pose_tensor[18]))
         
                                                                                                            
-        bone_prior_2 = 0.2 * (torch.norm(self.pose_tensor[6]) + torch.norm(self.pose_tensor[19]) + 
+        bone_prior_2 = 0.1 * (torch.norm(self.pose_tensor[6]) + torch.norm(self.pose_tensor[19]) + 
                               torch.norm(self.pose_tensor[7])  + torch.norm(self.pose_tensor[20]))
                      
         bone_prior_3 = 0.3 * (

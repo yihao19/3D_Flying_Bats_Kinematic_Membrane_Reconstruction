@@ -246,13 +246,13 @@ class Optimize_Driver():
                     #l2_adjust = 0.02 * torch.norm(local_adjust - prev_local_adjust)
                 image_number = len(images_gt)
                 bone_symmetric_coeff = 0.005
-                bone_prior_coeff = 0.002
+                bone_prior_coeff =0.0
                 if(image_number >= 10):
                     bone_symmetric_coeff = 0.0
                 elif(image_number >= 5 and image_number < 10):
-                    bone_symmetric_coeff = 0.05
+                    bone_symmetric_coeff = 0.01
                 elif(image_number >= 3 and image_number < 5):
-                    bone_symmetric_coeff = 0.1
+                    bone_symmetric_coeff = 0.5
                 elif(image_number < 3):
                     bone_symmetric_coeff = 1
                 loss = IOU_loss + pose_loss  + bone_prior_coeff * bone_prior + bone_symmetric_coeff * bone_symmetric 
