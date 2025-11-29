@@ -127,3 +127,44 @@ def displacement_smoothing(displacement_list:list, sigma:float=1.0):
     smoothed_data = gaussian_filter1d(displacement_array, sigma=sigma, axis=0)
 
     return smoothed_data
+
+def sample_sphere_surface(center, radius, n):
+    """Uniform points ON sphere surface."""
+    vec = np.random.normal(size=(n, 3))
+    vec /= np.linalg.norm(vec, axis=1)[:, None]
+    return np.array(center) + radius * vec
+
+def sample_sphere_volume(center, radius:float=0.02, n:int=1000):
+    """Uniform points INSIDE sphere volume."""
+    dirs = np.random.normal(size=(n, 3))
+    dirs /= np.linalg.norm(dirs, axis=1)[:, None]
+    u = np.random.random(size=n)
+    rs = radius * (u ** (1/3.0))
+    return np.array(center) + dirs * rs[:, None]
+
+def sample_sphere_grid(center, radius, n_theta=30, n_phi=60):
+    """Grid (lat-long) points ON sphere surface."""
+    theta = np.linspace(0, np.pi, n_theta)
+    phi = np.linspace(0, 2*np.pi, n_phi)
+    th, ph = np.meshgrid(theta, phi, indexing='xy')
+    x = radius * np.sin(th) * np.cos(ph)
+    y = radius * np.sin(th) * np.sin(ph)
+    z = radius * np.cos(th)
+    pts = np.stack([x.ravel(), y.ravel(), z.ravel()], axis=1) + np.array(center)
+    return pts
+
+def projection_array(xyz, image, camera_matrix):
+      proj = np.matmul(camera_matrix, xyz.transpose())
+      proj = proj.transpose()
+
+      proj[:, 0] = proj[:, 0] / (proj[:, 2] + 1e-5)
+      proj[:, 1] = proj[:, 1] / (proj[:, 2] + 1e-5)
+      proj = proj.astype(int)
+      for index in range(proj.shape[0]):
+          if(proj[index][0] < 0 or proj[index][0] >= 1280 or proj[index][1] < 0 or proj[index][1] >= 1024):
+              continue
+          x = proj[index][0]
+          y = proj[index][1]
+          image[y][x] = 255
+      return image  
+  

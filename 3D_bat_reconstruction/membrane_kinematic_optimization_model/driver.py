@@ -8,7 +8,17 @@ import os
 from image_data_loader import image_dataloader
 from membrane_kinematic_model import Membrane_kinematic_model
 from kinematic_model import Kinematic_model
-from utils.general_utils import neg_iou_loss, item_transform, read_json_file,save_json_file,read_pose_json, quat_to_rotmat, rotmat_to_euler,rodrigues, kinematic_smoothing, displacement_smoothing
+from utils.general_utils import (neg_iou_loss, 
+                                item_transform, 
+                                read_json_file,
+                                save_json_file,
+                                read_pose_json, 
+                                quat_to_rotmat, 
+                                rotmat_to_euler,
+                                rodrigues, 
+                                kinematic_smoothing, 
+                                displacement_smoothing,
+                                sample_sphere_volume)
 from utils.blender_utils import update_simulations, get_target_objs, y_forward_z_up
 import torch
 from skopt import gp_minimize
@@ -232,11 +242,11 @@ class Optimize_Driver():
                 if(image_number >= 10):
                     bone_symmetric_coeff = 0.0
                 elif(image_number >= 5 and image_number < 10):
-                    bone_symmetric_coeff = 0.005
+                    bone_symmetric_coeff = 0.05
                 elif(image_number >= 3 and image_number < 5):
-                    bone_symmetric_coeff = 0.01
-                elif(image_number < 3):
                     bone_symmetric_coeff = 0.1
+                elif(image_number < 3):
+                    bone_symmetric_coeff = 1
                 loss = IOU_loss + pose_loss  + bone_prior_coeff * bone_prior + bone_symmetric_coeff * bone_symmetric 
                 epoch.set_description(f'Project name: {self.test_name} Image_num: {len(images_gt)} pose: {pose_index} IOU loss: {IOU_loss.item():.4f}')
                 #epoch.set_description('IOU Loss: %.4f   Pose Loss: %.4f  Wingtip_reg: %.4f  Bone prior: %.4f  Bone symmetry: %.4f  L2 adjust: %.4f' % (IOU_loss.item(),pose_loss.item(), wing_tip_reg.item(), 0.1 * bone_prior.item(), bone_symmetric.item(), l2_adjust.item()))
@@ -1082,6 +1092,22 @@ class Optimize_Driver():
         plt.plot(displacement_array[:, 2], color = "black")
         plt.savefig(f"./result_plot/{self.test_name}{suffix}/{prefix}_displacement_Z.svg")
         plt.close()
+        return
+    
+    def calibration_validation(self, pose_index:int) -> None: 
+        """
+        function to generate a small cube around the pose to validate the projection and select the "most" calibrated camera list
+        :param self: Description
+        :param pose_index: Description
+        :type pose_index: int
+        """
+        pose_json_path = os.path.join(self.kinematic_save_path_root, str(pose_index), "output.json")
+        file = open(pose_json_path)
+        pose_json = json.load(file)
+        center = pose_json['template_displacement']
+        sample_point = sample_sphere_volume(center=center)
+        
+
         return
     
     def run_original_reconstruction(self):

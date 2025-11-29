@@ -19,7 +19,7 @@ if __name__ == "__main__":
     membrane_simulation_mode = "ANGULAR"
     #[1190, 1190, 1842]
     start_pose = 1190
-    end_pose = 1400#1842
+    end_pose = 1600
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
@@ -50,7 +50,7 @@ if __name__ == "__main__":
                              opposite_direction,
                              template_flip=template_flip
                              )
-    
+    #driver.calibration_validation()
     #driver.run_raw_kinematic_optimize_pipeline()
     #exit(0)
     driver.run_kinematic_smoothing()

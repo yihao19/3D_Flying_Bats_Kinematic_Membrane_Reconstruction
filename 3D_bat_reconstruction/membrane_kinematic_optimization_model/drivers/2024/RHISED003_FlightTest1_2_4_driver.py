@@ -17,18 +17,19 @@ if __name__ == "__main__":
     project_name = "PhDProject_real_data"
     test_name = "Brunei_2024_RHISED003_FlightTest1_2_4"
     membrane_simulation_mode = "ANGULAR"
-    start_pose = 1140
-    end_pose = 1141
+    #[4058, 4360, 4712]
+    start_pose = 4361#4359
+    end_pose = 4700#4057
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
-    kinematic_opt_epoch = 300
+    kinematic_opt_epoch = 50
     membrane_opt_epoch =100
     membrane_kinematic_opt_epoch = 10
     whole_opt_epoch =1
     if_use_previous_attr = False
-    if_use_previous_kinematics =False
-    opposite_direction = True # bat flying direction
+    if_use_previous_kinematics =True
+    opposite_direction = False # bat flying direction
     template_flip = True
     model_template_name = "new_bat_params_version2_backward_membrane_24.pkl"
     driver = Optimize_Driver(project_root_path, 
@@ -51,10 +52,17 @@ if __name__ == "__main__":
                              )
     
     driver.run_raw_kinematic_optimize_pipeline()
+    exit(0)
+    driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
+    driver.run_original_reconstruction()
     #driver.stiffness_visualization()
-    #driver.iou_loss_stage()
-    #driver.run_original_reconstruction()
+    driver.plot_initial_kinematic(kinematic_smoothed=False)
+    driver.plot_initial_kinematic(kinematic_smoothed=True)
     #driver.iou_loss_compare()
-    #driver.run_kinematic_smooth_only(epoch_index=0)
+    driver.iou_loss_original()
+    #driver.run_original_kinematic_smooth_rendering()
+    #driver.iou_loss_membrane_compare()
+    #driver.scale_parameter_plot()
+    driver.generate_flying_trajectory_gif(if_smoothed=True)
