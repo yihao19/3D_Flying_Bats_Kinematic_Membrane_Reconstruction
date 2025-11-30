@@ -5,13 +5,11 @@ Flying tunntl consist about 50 camera and are divided into two sections (2-4) (5
  <figure  style="text-align: center;">
     <img src="images/tunnel_section_1.png" width="330" height="330",alt="tunnel section one" />
   </figure>
-</div>
-Camera group one (1): 21,22,23,24,25,31,32,35,41,42,43,44,45
-<div>
- <figure  style="text-align: center;">
+  <figure  style="text-align: center;">
     <img src="images/tunnel_section_2.png" width="330" height="330",alt="tunnel section two" />
   </figure>
 </div>
+Camera group one (1): 21,22,23,24,25,31,32,35,41,42,43,44,45
 Camera group two (2): 52,53,54,55,61,64,65,71,72,73,74,75
 
 ## Digital mesh and skeleton design
