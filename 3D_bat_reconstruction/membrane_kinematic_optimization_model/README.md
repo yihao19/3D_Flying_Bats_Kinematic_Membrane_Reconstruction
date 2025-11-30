@@ -141,6 +141,9 @@
     <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_RHIBOR002_FlightTest2_2_4/Brunei_2024_RHIBOR002_FlightTest2_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_RHIBOR002_FlightTest2_2_4"/>
     </figure>
+     <figure  style="text-align: center;">
+        <img src="drivers/2024/result_plot/Brunei_2024_RHIBOR002_FlightTest2_2_4_sec/Brunei_2024_RHIBOR002_FlightTest2_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_RHIBOR002_FlightTest2_2_4"/>
+    </figure>
 </div>
 
 #### 5-7 (second half of tunnel)
