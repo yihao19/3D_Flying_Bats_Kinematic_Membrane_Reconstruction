@@ -18,12 +18,12 @@ if __name__ == "__main__":
     test_name = "Brunei_2024_RHISED003_FlightTest3_2_4"
     membrane_simulation_mode = "ANGULAR"
     #[4803, 5170, 5555]
-    start_pose = 5220
-    end_pose = 5221
+    start_pose = 5171
+    end_pose = 5555
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
-    kinematic_opt_epoch = 1
+    kinematic_opt_epoch = 50
     membrane_opt_epoch =100
     membrane_kinematic_opt_epoch = 10
     whole_opt_epoch =1
