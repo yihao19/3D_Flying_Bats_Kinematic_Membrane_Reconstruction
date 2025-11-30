@@ -83,7 +83,8 @@ class Optimize_Driver():
                  if_use_previous_attr:bool,
                  if_use_previous_kinamatics:bool,
                  opposite_direction:bool,
-                 template_flip:bool=False):
+                 template_flip:bool=False, 
+                 glitched_camera_indexes:list = []):
         self.project_root_path = project_root_path
         self.project_name = project_name
         self.test_name = test_name
@@ -190,10 +191,7 @@ class Optimize_Driver():
         self.opposite_direction = opposite_direction  # back and force
         self.template_flip = template_flip   # to accomodate calibration difference between 2023 and 2024  2023:False, 2024:True
         self.image_size = (1024,1280)
-        self.SIM_INSTANCES = 1
-        self.membrane_parameter = {
-            
-            }
+        self.glitched_camera_indexes = glitched_camera_indexes
     def kinematic_optimize(self, pose_index, use_previous = False, reverse = False) -> None: 
         """
         Parameters
@@ -217,7 +215,8 @@ class Optimize_Driver():
             self.silhouette_image_path_root, 
             pose_index, 
             self.use_previous, 
-            self.reverse
+            self.reverse, 
+            self.glitched_camera_indexes
             )
         epoch = tqdm(list(range(0,self.kinematic_opt_epoch)))
         for i in epoch:

@@ -7,29 +7,28 @@ Created on Mon Nov  3 21:59:25 2025
 import sys
 import os
 project_root_path = "/home/yihao19/"
-sys.path.append(os.path.join(project_root_path,"PhD_research/3D_bat_reconstruction/SoftRas/models/membrane_kinematic_optimization_model"))
+sys.path.append(os.path.join(project_root_path,"3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model"))
 from driver import Optimize_Driver
-
-
-
 
 if __name__ == "__main__":
     project_name = "PhDProject_real_data"
     test_name = "Brunei_2024_RHIBOR001_FlightTest2_2_4"
     membrane_simulation_mode = "ANGULAR"
-    start_pose = 340
-    end_pose = 341
+    #[0, 0, 461]
+    start_pose = 1
+    end_pose = 461
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
-    kinematic_opt_epoch = 300
+    kinematic_opt_epoch = 50
     membrane_opt_epoch =100
     membrane_kinematic_opt_epoch = 10
     whole_opt_epoch =1
     if_use_previous_attr = False
-    if_use_previous_kinematics =False
+    if_use_previous_kinematics =True
     opposite_direction = True # bat flying direction
     template_flip = True
+    glitched_camera_indexes = ["3", "10"]
     model_template_name = "new_bat_params_version2_backward_membrane_24.pkl"
     driver = Optimize_Driver(project_root_path, 
                              project_name, 
@@ -47,14 +46,23 @@ if __name__ == "__main__":
                              if_use_previous_attr,
                              if_use_previous_kinematics,
                              opposite_direction,
-                             template_flip=template_flip
+                             template_flip=template_flip, 
+                             glitched_camera_indexes = glitched_camera_indexes
                              )
     
     driver.run_raw_kinematic_optimize_pipeline()
+    #driver.calibration_validation(pose_index = 0)
+    exit(0)
+    driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
+    driver.run_original_reconstruction()
     #driver.stiffness_visualization()
-    #driver.iou_loss_stage()
-    #driver.run_original_reconstruction()
+    driver.plot_initial_kinematic(kinematic_smoothed=False)
+    driver.plot_initial_kinematic(kinematic_smoothed=True)
     #driver.iou_loss_compare()
-    #driver.run_kinematic_smooth_only(epoch_index=0)
+    driver.iou_loss_original()
+    #driver.run_original_kinematic_smooth_rendering()
+    #driver.iou_loss_membrane_compare()
+    #driver.scale_parameter_plot()
+    driver.generate_flying_trajectory_gif(if_smoothed=True)

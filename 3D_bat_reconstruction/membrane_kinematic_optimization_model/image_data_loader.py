@@ -21,13 +21,15 @@ class Image_dataset(Dataset):
                  silouette_image_path:str, 
                  current_pose:int, 
                  use_previous:bool,
-                 reverse:bool):
+                 reverse:bool, 
+                 glitched_camera_indexes:list):
         self.camera_meta_path = camera_meta_path
         self.camera_list_path = camera_list_path
         self.silouette_image_path = silouette_image_path
         self.use_previous = use_previous
         self.current_pose = current_pose
         self.reverse = reverse
+        self.glitched_camera_indexes = glitched_camera_indexes
         # read the file
         
         camera_list_file = os.path.join(self.camera_list_path,str(self.current_pose), "camera.txt")
@@ -46,8 +48,7 @@ class Image_dataset(Dataset):
         self.image_list = []  # store the image path
         
         counter = 0
-        glitch_camera_index = []#['2', '6', '11', '12', '13']  # glithes camera index that need to get rid of
-        camera_list = set(camera_list).difference(set(glitch_camera_index))
+        camera_list = set(camera_list).difference(set(self.glitched_camera_indexes))
         self.camera_number = len(camera_list)
         camera_matrix = np.zeros((self.camera_number, 12))
         for index in camera_list:
@@ -145,8 +146,9 @@ def image_dataloader(camera_meta_path:str,
                      silhouette_image_path:str, 
                      current_pose:int, 
                      use_previous:bool,
-                     reverse:bool=False):
-    dataset =  Image_dataset(camera_meta_path, camera_list_path, silhouette_image_path, current_pose, use_previous, reverse)
+                     reverse:bool=False,
+                     glitched_camera_indexes:list = []):
+    dataset =  Image_dataset(camera_meta_path, camera_list_path, silhouette_image_path, current_pose, use_previous, reverse, glitched_camera_indexes)
     
     batch_size =dataset.camera_number 
     train_dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, drop_last=False)
