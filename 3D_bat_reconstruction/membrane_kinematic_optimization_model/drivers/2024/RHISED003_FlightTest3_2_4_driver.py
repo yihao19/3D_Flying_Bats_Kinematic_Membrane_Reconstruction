@@ -51,8 +51,8 @@ if __name__ == "__main__":
                              template_flip=template_flip
                              )
     
-    driver.run_raw_kinematic_optimize_pipeline()
-    #driver.calibration_validation(pose_index=5170)
+    #driver.run_raw_kinematic_optimize_pipeline()
+    driver.calibration_validation(pose_index=5280)
     exit(0)
     driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
