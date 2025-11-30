@@ -15,11 +15,11 @@ from driver import Optimize_Driver
 
 if __name__ == "__main__":
     project_name = "PhDProject_real_data"
-    test_name = "Brunei_2024_HIPCER025_FlightTest3_2_4"
+    test_name = "Brunei_2024_RHIBOR002_FlightTest3_2_4"
     membrane_simulation_mode = "ANGULAR"
-    #[0,50, 393]
-    start_pose = 1
-    end_pose =331
+    #[4421,4800,5131]
+    start_pose = 4801
+    end_pose = 5131
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     whole_opt_epoch =1
     if_use_previous_attr = False
     if_use_previous_kinematics =True
-    opposite_direction = False # bat flying direction
+    opposite_direction = True # bat flying direction
     template_flip = True
     model_template_name = "new_bat_params_version2_backward_membrane_24.pkl"
     driver = Optimize_Driver(project_root_path, 
@@ -51,19 +51,18 @@ if __name__ == "__main__":
                              template_flip=template_flip
                              )
     
-    
-    #driver.run_raw_kinematic_optimize_pipeline()
-    #exit(0)
+    driver.run_raw_kinematic_optimize_pipeline()
+    exit(0)
     driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     driver.run_original_reconstruction()
     #driver.stiffness_visualization()
-    driver.plot_initial_kinematic(kinematic_smoothed=False, suffix="_sec")
-    driver.plot_initial_kinematic(kinematic_smoothed=True,suffix="_sec")
+    driver.plot_initial_kinematic(kinematic_smoothed=False)
+    driver.plot_initial_kinematic(kinematic_smoothed=True)
     #driver.iou_loss_compare()
-    driver.iou_loss_original(suffix="_sec")
+    driver.iou_loss_original()
     #driver.run_original_kinematic_smooth_rendering()
     #driver.iou_loss_membrane_compare()
     #driver.scale_parameter_plot()
-    driver.generate_flying_trajectory_gif(if_smoothed=True,suffix="_sec")
+    driver.generate_flying_trajectory_gif(if_smoothed=True)

@@ -18,7 +18,7 @@ if __name__ == "__main__":
     test_name = "Brunei_2024_HIPCER022_FlightTest1_2_4"
     membrane_simulation_mode = "ANGULAR"
     #[4726, 4850,5147]
-    start_pose = 4801
+    start_pose = 4726
     end_pose = 5147
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
