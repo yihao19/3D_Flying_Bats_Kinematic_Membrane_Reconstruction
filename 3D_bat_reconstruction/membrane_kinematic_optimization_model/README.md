@@ -13,6 +13,7 @@ Camera group one (1): 21,22,23,24,25,31,32,35,41,42,43,44,45
   </figure>
 </div>
 Camera group two (2): 52,53,54,55,61,64,65,71,72,73,74,75
+
 ## Digital mesh and skeleton design
 <div>
   <figure  style="text-align: center;">
