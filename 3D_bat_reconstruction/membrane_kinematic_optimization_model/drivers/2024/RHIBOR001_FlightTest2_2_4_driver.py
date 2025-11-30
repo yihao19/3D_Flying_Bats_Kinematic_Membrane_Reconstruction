@@ -28,7 +28,7 @@ if __name__ == "__main__":
     if_use_previous_kinematics =True
     opposite_direction = True # bat flying direction
     template_flip = True
-    glitched_camera_indexes = ["3", "10"]
+    glitched_camera_indexes = ["3", "12"]
     model_template_name = "new_bat_params_version2_backward_membrane_24.pkl"
     driver = Optimize_Driver(project_root_path, 
                              project_name, 

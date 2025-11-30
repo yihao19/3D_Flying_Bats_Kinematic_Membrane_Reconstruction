@@ -1,4 +1,18 @@
 # Kinematic and membrane reconstruction.
+## Flying tunnel and camera matrix.
+Flying tunntl consist about 50 camera and are divided into two sections (2-4) (5-7). Svoboda method was ued to obtain the camera matrices for each section. 
+<div>
+ <figure  style="text-align: center;">
+    <img src="images/tunnel_section_1.png" alt="template design" />
+  </figure>
+</div>
+Camera group one (1): 21,22,23,24,25,31,32,35,41,42,43,44,45
+<div>
+ <figure  style="text-align: center;">
+    <img src="images/tunnel_section_2.png" alt="template design" />
+  </figure>
+</div>
+Camera group two (2): 52,53,54,55,61,64,65,71,72,73,74,75
 ## Digital mesh and skeleton design
 <div>
   <figure  style="text-align: center;">
@@ -120,6 +134,9 @@
     <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_HIPCER025_FlightTest3_2_4/Brunei_2024_HIPCER025_FlightTest3_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER025_FlightTest3_2_4"/>
     </figure>
+    <figure  style="text-align: center;">
+        <img src="drivers/2024/result_plot/Brunei_2024_HIPCER025_FlightTest3_2_4_sec/Brunei_2024_HIPCER025_FlightTest3_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER025_FlightTest3_2_4_sec"/>
+    </figure>
 </div>
 
 #### 5-7 (second half of tunnel)
@@ -135,6 +152,9 @@
 ### RHIBOR
 #### 2-4 (first half of tunnel)
 <div>
+    <figure  style="text-align: center;">
+        <img src="drivers/2024/result_plot/Brunei_2024_RHIBOR001_FlightTest2_2_4/Brunei_2024_RHIBOR001_FlightTest2_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_RHIBOR001_FlightTest2_2_4"/>
+    </figure>
     <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_RHIBOR001_FlightTest3_2_4/Brunei_2024_RHIBOR001_FlightTest3_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_RHIBOR001_FlightTest3_2_4"/>
     </figure>
