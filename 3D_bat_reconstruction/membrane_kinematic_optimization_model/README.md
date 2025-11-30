@@ -92,7 +92,7 @@
         <img src="drivers/2024/result_plot/Brunei_2024_HIPCER022_FlightTest1_2_4/Brunei_2024_HIPCER022_FlightTest1_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER022_FlightTest1_2_4"/>
     </figure>
         <figure  style="text-align: center;">
-        <img src="drivers/2024/result_plot/Brunei_2024_HIPCER022_FlightTest1_sec_2_4/Brunei_2024_HIPCER022_FlightTest1_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER022_FlightTest1_2_4_sec"/>
+        <img src="drivers/2024/result_plot/Brunei_2024_HIPCER022_FlightTest1_2_4_sec/Brunei_2024_HIPCER022_FlightTest1_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER022_FlightTest1_2_4_sec"/>
     </figure>
     <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_HIPCER023_FlightTest3_2_4/Brunei_2024_HIPCER023_FlightTest3_2_4_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER023_FlightTest3_2_4"/>
