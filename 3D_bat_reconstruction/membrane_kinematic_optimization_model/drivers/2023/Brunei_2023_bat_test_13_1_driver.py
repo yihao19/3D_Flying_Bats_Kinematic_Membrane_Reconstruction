@@ -17,8 +17,8 @@ if __name__ == "__main__":
     test_name = "Brunei_2023_bat_test_13_1"
     membrane_simulation_mode = "ANGULAR"
     #[510, 1200]
-    start_pose = 520
-    end_pose =521#1200
+    start_pose = 521
+    end_pose =1200
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     membrane_opt_epoch =100
     membrane_kinematic_opt_epoch = 20
     whole_opt_epoch =1
-    if_use_previous_attr = False
+    if_use_previous_attr = True
     if_use_previous_kinematics =True
     opposite_direction = True # bat flying direction
     template_flip = False
