@@ -17,9 +17,9 @@ if __name__ == "__main__":
     project_name = "PhDProject_real_data"
     test_name = "Brunei_2024_RHIBOR002_FlightTest3_2_4"
     membrane_simulation_mode = "ANGULAR"
-    #[4421,4800,5131]
-    start_pose = 4700#4801
-    end_pose = 4900#5131
+    #[4422,4800,5131]
+    start_pose = 4422#4801
+    end_pose = 5131#5131
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized

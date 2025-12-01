@@ -502,11 +502,11 @@ class Optimize_Driver():
         #1. render the mesh optimized mesh
         cmd = []
         cmd.append("./blender")
-        cmd.append(f"{PROJECT_ROOT}/PhD_research/3D_bat_reconstruction/SoftRas/models/membrane_kinematic_optimization_model/membrane_blender/{blender_test_name}/{blender_test_name}.blend")
+        cmd.append(f"{PROJECT_ROOT}/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/membrane_blender/{blender_test_name}/{blender_test_name}.blend")
         cmd.append("-b")  # run in backgroud
         cmd.append("--python-use-system-env")
         cmd.append("--python")
-        cmd.append(f"{PROJECT_ROOT}/PhD_research/3D_bat_reconstruction/SoftRas/models/membrane_kinematic_optimization_model/blender_script_template.blend.py")
+        cmd.append(f"{PROJECT_ROOT}/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/blender_script_template.blend.py")
         cmd.append("--")
 
         cmd.append(f"{self.project_root_path}{self.project_name}")
@@ -788,7 +788,7 @@ class Optimize_Driver():
         if(epoch_number == 0):
             
             for index in range(self.current_pose_index -self.half_window_size-1, self.current_pose_index+1): 
-                source_json_path = os.path.join(self.kinematic_save_path_root, str(index), "output.json")
+                source_json_path = os.path.join(self.kinematic_save_path_root, str(index), "output_smoothed.json")
                 target_json_path = os.path.join(self.kinematic_save_path_root, str(index), f"membrane_output_{epoch_number}.json")
                 source_json = read_json_file(source_json_path)
                 save_json_file(source_json, target_json_path)
