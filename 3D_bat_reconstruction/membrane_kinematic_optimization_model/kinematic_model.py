@@ -571,7 +571,7 @@ class Kinematic_model(nn.Module):
     def render_original(self,location,current_pose):
 
             
-        template_default_scale = 0.01#0.005/1.349  #blender precision difference
+        template_default_scale = 0.005/1.349  #blender precision difference
      
         vertices = self.vertices
 

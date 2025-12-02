@@ -881,7 +881,7 @@ class Optimize_Driver():
         for pose in range(self.start_pose, self.end_pose):
             temp_list = []
             baseline_temp_list=  []
-            for counter in range(95,100):
+            for counter in range(97,100):
                 try:
                     attrib = read_json_file(f"{PROJECT_ROOT}/PhDProject_real_data/{self.test_name}/membrane_optimization_physical_attributes/{self.membrane_optimized_frame_str}_average/bayesian_attrib_opt_linear_{pose}_{iteration}_{counter}.json")
                     temp_list.append(attrib['physical_attributes'][0])
@@ -932,12 +932,10 @@ class Optimize_Driver():
         original_iou_loss_list = []
         membrane_optimized_loss_list = []
         for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc="iou_loss cal..."):
-            iou_loss = self.iou_loss_cal(pose_index, original=True)
+            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="original")
             original_iou_loss_list.append(iou_loss)
-            json_file = os.path.join(self.kinematic_save_path_root, str(pose_index), "membrane_output_0.json")
-            file = open(json_file)
-            data = json.load(file)
-            membrane_optimized_loss_list.append(data['IOU'])
+            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="membrane_opt")
+            membrane_optimized_loss_list.append(iou_loss)
         plt.plot(original_iou_loss_list, color='black',linestyle = ':')
         plt.plot(membrane_optimized_loss_list,color = 'black')
         x = np.array([index for index in range(len(original_iou_loss_list))])
@@ -959,7 +957,7 @@ class Optimize_Driver():
         if not os.path.exists(f"./result_plot/{self.test_name}/"):
             os.makedirs(f"./result_plot/{self.test_name}/")
         plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_compare_wo_legend.svg",format="svg")
-        plt.legend(["initial kinematic + LBS","updated kinematic + cloth-based membrane"])
+        plt.legend(["initial kinematic + LBS","initial kinematic + cloth-based membrane"])
         plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_compare_w_legend.svg",format="svg")
         plt.close()
         '''

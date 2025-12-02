@@ -140,6 +140,14 @@ Camera group two (2): 52,53,54,55,61,64,65,71,72,73,74,75
 </div>
 
 #### 5-7 (second half of tunnel)
+<div>
+    <figure  style="text-align: center;">
+        <img src="drivers/2024/result_plot/Brunei_2024_HIPCER021_FlightTest1_5_7/Brunei_2024_HIPCER021_FlightTest1_5_7_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER021_FlightTest1_5_7_sec"/>
+    </figure>
+    <figure  style="text-align: center;">
+        <img src="drivers/2024/result_plot/Brunei_2024_HIPCER021_FlightTest2_5_7/Brunei_2024_HIPCER021_FlightTest2_5_7_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER021_FlightTest2_5_7_sec"/>
+    </figure>
+</div>
 
 ### HIPDYA
 #### 2-4 (first half of tunnel)
