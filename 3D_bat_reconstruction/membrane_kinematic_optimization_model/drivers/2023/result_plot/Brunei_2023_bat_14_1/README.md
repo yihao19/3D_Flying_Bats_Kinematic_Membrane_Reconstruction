@@ -24,4 +24,7 @@
     <figure  style="text-align: center;">
         <img src="Brunei_2023_bat_14_1_IOU_initial_vs_final_w_legend.svg"  height="350",alt="" />
     </figure>
+    <figure  style="text-align: center;">
+        <img src="Brunei_2023_bat_14_1_smoothed_trajectory.gif"  height="350",alt="" />
+    </figure>
 </div>
