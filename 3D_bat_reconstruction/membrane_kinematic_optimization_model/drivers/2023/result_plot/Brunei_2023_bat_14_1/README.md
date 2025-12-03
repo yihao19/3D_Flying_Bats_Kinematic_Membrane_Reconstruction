@@ -14,6 +14,9 @@
     <figure  style="text-align: center;">
         <img src="Brunei_2023_bat_14_1_IOU_compare_w_legend.svg"  height="350",alt="" />
     </figure>
+    <figure  style="text-align: center;">
+        <img src="Brunei_2023_bat_14_1_one_average_physical_attrib.svg"  height="350",alt="" />
+    </figure>
 </div>
 
 ## Kinematic update (initial kinematic + LBS VS update kinematic + cloth-based membrane)
