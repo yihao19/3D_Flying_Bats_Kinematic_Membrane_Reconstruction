@@ -11,8 +11,14 @@
 
 ## Membrane simulation (initial kinematic + LBS VS initial kinematic + cloth-based membrane)
 <div>
+    <figure  style="text-align: center;">
+        <img src="Brunei_2023_bat_14_1_IOU_compare_w_legend.svg"  height="350",alt="" />
+    </figure>
 </div>
 
 ## Kinematic update (initial kinematic + LBS VS update kinematic + cloth-based membrane)
 <div>
+    <figure  style="text-align: center;">
+        <img src="Brunei_2023_bat_14_1_IOU_initial_vs_final_w_legend.svg"  height="350",alt="" />
+    </figure>
 </div>
