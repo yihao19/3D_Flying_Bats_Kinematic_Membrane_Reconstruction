@@ -1,4 +1,4 @@
-# Kinematic and membrane simulation result for {{test_name}}
+# Kinematic and membrane simulation result for {{site.test_name}}
 ## Initial kinematic reconstruction (fixed VS size varying template)
 <div>
 </div>
