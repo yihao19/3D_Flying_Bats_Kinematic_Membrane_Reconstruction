@@ -73,7 +73,7 @@ class Membrane_kinematic_model(nn.Module):
         """
         
         self.membrane_optimized_mesh = sr.Mesh.from_obj(membrane_modified_obj_path, load_texture=False, texture_res = 5, texture_type='surface')
-        with open(os.path.join("/home/yihao19/PhD_research/3D_bat_reconstruction/SoftRas/models/membrane_kinematic_optimization_model/model_template", bone_skining_matrix_path), 'rb') as f:
+        with open(os.path.join("/home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/model_template", bone_skining_matrix_path), 'rb') as f:
             data = pickle.load(f)
         self.template_mesh =  sr.Mesh.from_obj(membrane_modified_obj_path, load_texture=False, texture_res = 5, texture_type='surface')
         self.template_mesh.vertices = torch.tensor(data['v_template']).float().unsqueeze(0).cuda()

@@ -714,7 +714,7 @@ class Optimize_Driver():
                      "vertices_mean": vertices_mean.tolist(),
                      "template_displacement":template_displacement}
         if(pose_index == self.current_pose_index):
-            output_mesh.save_obj(os.path.join(self.membrane_kinematic_optimized_mesh_save_root, '{}_bat_{}.obj'.format(self.test_name, pose_index)), save_texture=False)
+            output_mesh.save_obj(os.path.join(self.membrane_kinematic_optimized_mesh_save_root, f"{pose_index}.obj"), save_texture=False)
             save_file_path = os.path.join(self.kinematic_save_path_root,str(pose_index), f"membrane_output_{pipeline_epoch}.json")
             save_json_file(save_dict, save_file_path)
         return
@@ -927,7 +927,39 @@ class Optimize_Driver():
         plt.savefig(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_IOU_original_w_legend.svg",format="svg")
         plt.close()
         return None
-    
+    def iou_loss_initial_vs_final(self): 
+        original_iou_loss_list = []
+        final_optimized_loss_list = []
+        for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc="iou_loss cal..."):
+            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="original")
+            original_iou_loss_list.append(iou_loss)
+            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="kinematic_membrane_opt")
+            final_optimized_loss_list.append(iou_loss)
+        plt.plot(original_iou_loss_list, color='black',linestyle = ':')
+        plt.plot(final_optimized_loss_list,color = 'black')
+        x = np.array([index for index in range(len(original_iou_loss_list))])
+        original_iou_loss_list = np.array(original_iou_loss_list)
+        final_optimized_loss_list = np.array(final_optimized_loss_list)
+        plt.fill_between(x, original_iou_loss_list,final_optimized_loss_list, 
+                 where=(original_iou_loss_list >= final_optimized_loss_list),
+                 facecolor='green',
+                 alpha=0.2)
+
+        plt.fill_between(x, np.array(original_iou_loss_list), np.array(final_optimized_loss_list), 
+                         where=(original_iou_loss_list < final_optimized_loss_list),
+                         facecolor='red',
+                         alpha=0.2
+                         )
+        plt.xlabel("Frame index")
+        plt.ylabel("IOU loss")
+        #plt.legend(["original","membrane optimized",])
+        if not os.path.exists(f"./result_plot/{self.test_name}/"):
+            os.makedirs(f"./result_plot/{self.test_name}/")
+        plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_initial_vs_final_wo_legend.svg",format="svg")
+        plt.legend(["initial kinematic + LBS","updated kinematic + cloth-based membrane"])
+        plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_initial_vs_final_w_legend.svg",format="svg")
+        plt.close()
+
     def iou_loss_compare(self):
         original_iou_loss_list = []
         membrane_optimized_loss_list = []

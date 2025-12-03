@@ -142,25 +142,25 @@ Camera group two (2): 52,53,54,55,61,64,65,71,72,73,74,75
 #### 5-7 (second half of tunnel)
 <div>
     <figure  style="text-align: center;">
-        <img src="drivers/2024/result_plot/Brunei_2024_HIPCER021_FlightTest1_5_7/Brunei_2024_HIPCER021_FlightTest1_5_7_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER021_FlightTest1_5_7_sec"/>
+        <img src="drivers/2024/result_plot/Brunei_2024_HIPCER021_FlightTest1_5_7/Brunei_2024_HIPCER021_FlightTest1_5_7_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER021_FlightTest1_5_7"/>
     </figure>
     <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_HIPCER021_FlightTest2_5_7/Brunei_2024_HIPCER021_FlightTest2_5_7_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER021_FlightTest2_5_7_sec"/>
     </figure>
     <figure  style="text-align: center;">
-        <img src="drivers/2024/result_plot/Brunei_2024_HIPCER022_FlightTest1_5_7/Brunei_2024_HIPCER022_FlightTest1_5_7_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER022_FlightTest1_5_7_sec"/>
+        <img src="drivers/2024/result_plot/Brunei_2024_HIPCER022_FlightTest1_5_7/Brunei_2024_HIPCER022_FlightTest1_5_7_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER022_FlightTest1_5_7"/>
     </figure>
     <figure  style="text-align: center;">
-        <img src="drivers/2024/result_plot/Brunei_2024_HIPCER023_FlightTest3_5_7/Brunei_2024_HIPCER023_FlightTest3_5_7_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER023_FlightTest3_5_7_sec"/>
+        <img src="drivers/2024/result_plot/Brunei_2024_HIPCER023_FlightTest3_5_7/Brunei_2024_HIPCER023_FlightTest3_5_7_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER023_FlightTest3_5_7"/>
     </figure>
     <figure  style="text-align: center;">
-        <img src="drivers/2024/result_plot/Brunei_2024_HIPCER024_FlightTest1_5_7/Brunei_2024_HIPCER024_FlightTest1_5_7_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER024_FlightTest1_5_7_sec"/>
+        <img src="drivers/2024/result_plot/Brunei_2024_HIPCER024_FlightTest1_5_7/Brunei_2024_HIPCER024_FlightTest1_5_7_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER024_FlightTest1_5_7"/>
     </figure>
     <figure  style="text-align: center;">
-        <img src="drivers/2024/result_plot/Brunei_2024_HIPCER025_FlightTest1_5_7/Brunei_2024_HIPCER025_FlightTest1_5_7_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER025_FlightTest1_5_7_sec"/>
+        <img src="drivers/2024/result_plot/Brunei_2024_HIPCER025_FlightTest1_5_7/Brunei_2024_HIPCER025_FlightTest1_5_7_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER025_FlightTest1_5_7"/>
     </figure>
     <figure  style="text-align: center;">
-        <img src="drivers/2024/result_plot/Brunei_2024_HIPCER025_FlightTest2_5_7/Brunei_2024_HIPCER025_FlightTest2_5_7_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER025_FlightTest2_5_7_sec"/>
+        <img src="drivers/2024/result_plot/Brunei_2024_HIPCER025_FlightTest2_5_7/Brunei_2024_HIPCER025_FlightTest2_5_7_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_HIPCER025_FlightTest2_5_7/>
     </figure>
 </div>
 
