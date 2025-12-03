@@ -15,11 +15,11 @@ from driver import Optimize_Driver
 
 if __name__ == "__main__":
     project_name = "PhDProject_real_data"
-    test_name = "Brunei_2024_HIPCER023_FlightTest3_5_7"
+    test_name = "Brunei_2024_HIPCER025_FlightTest2_5_7"
     membrane_simulation_mode = "ANGULAR"
-    #[4448, 4500, 4841]
-    start_pose = 4450#4499
-    end_pose = 4667#4448
+    #[6310, 6580, 6891]
+    start_pose = 6579  # 1730
+    end_pose = 6309
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
@@ -29,9 +29,8 @@ if __name__ == "__main__":
     whole_opt_epoch =1
     if_use_previous_attr = False
     if_use_previous_kinematics =True
-    opposite_direction = True # bat flying direction
+    opposite_direction = False # bat flying direction
     template_flip = True
-    glitched_camera_indexes = []
     model_template_name = "new_bat_params_version2_backward_membrane_24.pkl"
     driver = Optimize_Driver(project_root_path, 
                              project_name, 
@@ -49,19 +48,18 @@ if __name__ == "__main__":
                              if_use_previous_attr,
                              if_use_previous_kinematics,
                              opposite_direction,
-                             template_flip=template_flip,
-                             glitched_camera_indexes=glitched_camera_indexes
+                             template_flip=template_flip
                              )
     
-    #driver.run_raw_kinematic_optimize_pipeline()
-    #exit(0)
-    driver.run_kinematic_smoothing()
+    driver.run_raw_kinematic_optimize_pipeline()
+    exit(0)
+    #driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     #driver.run_original_reconstruction()
     #driver.stiffness_visualization()
-    driver.plot_initial_kinematic(kinematic_smoothed=False)
-    driver.plot_initial_kinematic(kinematic_smoothed=True)
+    #driver.plot_initial_kinematic(kinematic_smoothed=False)
+    #driver.plot_initial_kinematic(kinematic_smoothed=True)
     #driver.iou_loss_compare()
     #driver.iou_loss_original()
     #driver.run_original_kinematic_smooth_rendering()
