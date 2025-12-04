@@ -19,8 +19,8 @@ if __name__ == "__main__":
     test_name = "Brunei_2024_HIPCER023_FlightTest1_5_7"
     membrane_simulation_mode = "ANGULAR"
     #[2778, 2900, 3155]
-    start_pose = 2892
-    end_pose = 2778#3155
+    start_pose = 2779
+    end_pose = 3155
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
@@ -54,8 +54,8 @@ if __name__ == "__main__":
                              glitched_camera_indexes = glitched_camera_indexes
                              )
     
-    driver.run_raw_kinematic_optimize_pipeline()
-    exit(0)
+    #driver.run_raw_kinematic_optimize_pipeline()
+    #exit(0)
     driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
