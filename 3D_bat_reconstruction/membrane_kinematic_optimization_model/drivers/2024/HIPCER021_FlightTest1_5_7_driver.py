@@ -12,14 +12,13 @@ from driver import Optimize_Driver
 
 
 
-
 if __name__ == "__main__":
     project_name = "PhDProject_real_data"
-    test_name = "Brunei_2024_HIPCER031_FlightTest3_5_7"
+    test_name = "Brunei_2024_HIPCER021_FlightTest1_5_7"
     membrane_simulation_mode = "ANGULAR"
-    #[3086, 3140, 3751]
-    start_pose =3140#6579  # 1730
-    end_pose = 3751
+    #[3100, 3140, 3397]
+    start_pose = 3140
+    end_pose =3240#3397
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
@@ -29,9 +28,9 @@ if __name__ == "__main__":
     whole_opt_epoch =1
     if_use_previous_attr = False
     if_use_previous_kinematics =True
-    opposite_direction = True # bat flying direction
-    template_flip = True
-    glitched_camera_indexes = ['11', '12']
+    opposite_direction =True# bat flying direction
+    template_flip =True
+    glitched_camera_indexes = ['5', '12']
     model_template_name = "new_bat_params_version2_backward_membrane_24.pkl"
     driver = Optimize_Driver(project_root_path, 
                              project_name, 
@@ -54,7 +53,7 @@ if __name__ == "__main__":
                              )
     
     #driver.run_raw_kinematic_optimize_pipeline()
-    #driver.calibration_validation(pose_index=5370)
+    #driver.calibration_validation(pose_index=3140)
     #exit(0)
     driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
