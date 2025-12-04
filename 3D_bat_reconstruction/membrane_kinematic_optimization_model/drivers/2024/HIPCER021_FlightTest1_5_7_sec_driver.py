@@ -17,17 +17,17 @@ if __name__ == "__main__":
     test_name = "Brunei_2024_HIPCER021_FlightTest1_5_7"
     membrane_simulation_mode = "ANGULAR"
     #[0, 0, 210]
-    start_pose = 0
-    end_pose =1
+    start_pose = 1
+    end_pose =200
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
-    kinematic_opt_epoch = 300
+    kinematic_opt_epoch = 50
     membrane_opt_epoch =100
     membrane_kinematic_opt_epoch = 10
     whole_opt_epoch =1
     if_use_previous_attr = False
-    if_use_previous_kinematics =False
+    if_use_previous_kinematics =True
     opposite_direction =False# bat flying direction
     template_flip =True
     glitched_camera_indexes = ['5', '12']
@@ -53,18 +53,18 @@ if __name__ == "__main__":
                              )
     #driver.calibration_validation(pose_index=0)
     #exit(0)
-    driver.run_raw_kinematic_optimize_pipeline()
-    exit(0)
+    #driver.run_raw_kinematic_optimize_pipeline()
+    #exit(0)
     driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     driver.run_original_reconstruction()
     #driver.stiffness_visualization()
-    driver.plot_initial_kinematic(kinematic_smoothed=False)
-    driver.plot_initial_kinematic(kinematic_smoothed=True)
+    driver.plot_initial_kinematic(kinematic_smoothed=False,suffix="_sec")
+    driver.plot_initial_kinematic(kinematic_smoothed=True,suffix="_sec")
     #driver.iou_loss_compare()
     driver.iou_loss_original()
     #driver.run_original_kinematic_smooth_rendering()
     #driver.iou_loss_membrane_compare()
     #driver.scale_parameter_plot()
-    driver.generate_flying_trajectory_gif(if_smoothed=True)
+    driver.generate_flying_trajectory_gif(if_smoothed=True,suffix="_sec")
