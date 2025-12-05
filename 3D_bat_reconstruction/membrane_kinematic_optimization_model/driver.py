@@ -305,7 +305,7 @@ class Optimize_Driver():
        
         kinematic_model = Kinematic_model(bone_skining_matrix_name=self.model_template,
                                           opposite_direction=self.opposite_direction).cuda()
-        output_json_path = os.path.join(self.camera_list_path_root, str(pose_index), "output.json")
+        output_json_path = os.path.join(self.camera_list_path_root, str(pose_index), "output_smoothed.json")
         file = open(output_json_path)
         current_pose = json.load(file)
         estimated_location = np.array([current_pose['template_displacement']]).astype('float32')
