@@ -303,7 +303,7 @@ class Kinematic_model(nn.Module):
         else: 
             if(self.template_flip == True and self.opposite_direction == True):
                 self.pose_tensor[0][0] = math.pi / 2 * torch.tanh(self.joint_0[0][0])
-                self.pose_tensor[0][1] = math.pi / 2 * torch.tanh(self.joint_0[0][1])
+                self.pose_tensor[0][1] = math.pi / 2 * torch.tanh(self.joint_0[0][1]) 
                 self.pose_tensor[0][2] = math.pi / 2 * torch.tanh(self.joint_0[0][2]) + 1 * math.pi
             elif(self.template_flip == True and self.opposite_direction == False):
                 self.pose_tensor[0][0] = math.pi / 2 * torch.tanh(self.joint_0[0][0]) + 1 * math.pi
@@ -318,7 +318,7 @@ class Kinematic_model(nn.Module):
                 self.pose_tensor[0][1] = math.pi / 2 * torch.tanh(self.joint_0[0][1]) 
                 self.pose_tensor[0][2] = math.pi / 2 * torch.tanh(self.joint_0[0][2])
 
-            
+
             #self.pose_tensor[0][2] = math.pi / 2 * torch.tanh(self.joint_0[0][2]) +math.pi
             #self.pose_tensor[1][:] = math.pi / 9 * torch.tanh(self.joint_1)
             #self.pose_tensor[2][:] = math.pi / 9 * torch.tanh(self.joint_2)
@@ -419,7 +419,7 @@ class Kinematic_model(nn.Module):
             self.pose_tensor[32][0] = (  math.pi / 18 * torch.tanh(self.joint_32[0][0]))
             self.pose_tensor[32][2] = (  math.pi / 18 * torch.tanh(self.joint_32[0][2]))
             #self.pose_tensor[33][:] = ( prev_pose[33][:] + math.pi / 18 * torch.tanh(self.joint_33))
-    
+
            
             
         #self.pose_tensor[1] = self.joint_0
@@ -427,7 +427,7 @@ class Kinematic_model(nn.Module):
         #self.pose_tensor = self.pose_tensor.unsqueeze(0)
         # model will deform the mesh and then add the predetermined offset and learned displacement
         # apply the small adjustment on template first
-        template_default_scale = 0.01#0.0035#8* 1.53
+        template_default_scale = 0.0035#8* 1.53
         displacement_range = 0.1
         vertex_displacement_range = 0.1
         

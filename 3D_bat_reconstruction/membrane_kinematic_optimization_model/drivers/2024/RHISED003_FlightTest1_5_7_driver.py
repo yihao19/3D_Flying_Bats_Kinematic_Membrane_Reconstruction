@@ -10,13 +10,16 @@ project_root_path = "/home/yihao19/"
 sys.path.append(os.path.join(project_root_path,"3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model"))
 from driver import Optimize_Driver
 
+
+
+
 if __name__ == "__main__":
     project_name = "PhDProject_real_data"
-    test_name = "Brunei_2024_RHIBOR001_FlightTest2_2_4"
+    test_name = "Brunei_2024_RHISED003_FlightTest1_5_7"
     membrane_simulation_mode = "ANGULAR"
-    #[0, 328, 461]
-    start_pose = 1
-    end_pose = 461
+    #[4648, 4950, 5154]
+    start_pose = 4951
+    end_pose = 5154
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
@@ -26,9 +29,8 @@ if __name__ == "__main__":
     whole_opt_epoch =1
     if_use_previous_attr = False
     if_use_previous_kinematics =True
-    opposite_direction = True # bat flying direction
+    opposite_direction = False # bat flying direction
     template_flip = True
-    glitched_camera_indexes = ["3", "12"]
     model_template_name = "new_bat_params_version2_backward_membrane_24.pkl"
     driver = Optimize_Driver(project_root_path, 
                              project_name, 
@@ -46,13 +48,11 @@ if __name__ == "__main__":
                              if_use_previous_attr,
                              if_use_previous_kinematics,
                              opposite_direction,
-                             template_flip=template_flip, 
-                             glitched_camera_indexes = glitched_camera_indexes
+                             template_flip=template_flip
                              )
-    
-    #driver.run_raw_kinematic_optimize_pipeline()
-    #driver.calibration_validation(pose_index = 340)
-    #exit(0)
+    #driver.calibration_validation(pose_index=4950)
+    driver.run_raw_kinematic_optimize_pipeline()
+    exit(0)
     driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
