@@ -427,7 +427,7 @@ class Kinematic_model(nn.Module):
         #self.pose_tensor = self.pose_tensor.unsqueeze(0)
         # model will deform the mesh and then add the predetermined offset and learned displacement
         # apply the small adjustment on template first
-        template_default_scale = 0.0035#8* 1.53
+        template_default_scale = 0.01#0.0035#8* 1.53
         displacement_range = 0.1
         vertex_displacement_range = 0.1
         

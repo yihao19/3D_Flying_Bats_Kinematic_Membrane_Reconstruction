@@ -237,6 +237,9 @@ Camera group two (2): 52,53,54,55,61,64,65,71,72,73,74,75
     <figure  style="text-align: center;">
         <img src="drivers/2024/result_plot/Brunei_2024_RHIBOR002_FlightTest3_5_7/Brunei_2024_RHIBOR002_FlightTest3_5_7_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_RHIBOR002_FlightTest3_5_7"/>
     </figure>
+    <figure  style="text-align: center;">
+        <img src="drivers/2024/result_plot/Brunei_2024_RHIBOR002_FlightTest3_5_7_sec/Brunei_2024_RHIBOR002_FlightTest3_5_7_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_RHIBOR002_FlightTest3_5_7_sec"/>
+    </figure>
 </div>
 
 ### RHITRT
