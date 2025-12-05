@@ -1197,6 +1197,7 @@ class Optimize_Driver():
         else: 
             prefix = "initial"
             kinematic_file_name = "output.json"
+
         gif_output_path = os.path.join(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_{prefix}_trajectory.gif")
         gif_writter = imageio.get_writer(gif_output_path, loop=0, fps=40)
         # get the first reconstruction pose and function as reference
@@ -1269,7 +1270,7 @@ class Optimize_Driver():
         gif_writter.close()
         return
     
-    def run_kinematic_smoothing(self, sigma:float=2):
+    def run_kinematic_smoothing(self, sigma:float=5):
         
 
         rotation_matrix_list = []

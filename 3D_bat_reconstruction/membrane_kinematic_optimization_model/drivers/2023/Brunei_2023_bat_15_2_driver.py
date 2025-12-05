@@ -17,7 +17,7 @@ if __name__ == "__main__":
     test_name = "Brunei_2023_bat_15_2"
     membrane_simulation_mode = "ANGULAR"
     #[3400, 3660]
-    start_pose = 3410
+    start_pose = 3400
     end_pose =3660
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
@@ -48,22 +48,21 @@ if __name__ == "__main__":
                              opposite_direction)
     
     #driver.run_raw_kinematic_optimize_pipeline()
-    
+
     #driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
-    #exit(0)
+    #
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
+    #driver.iou_loss_initial_vs_final()
     #driver.run_original_reconstruction()
-    #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
-    driver.run_original_reconstruction()
     #driver.stiffness_visualization()
+    #exit(0)
     #driver.iou_loss_compare()
-    driver.iou_loss_initial_vs_final()
-    exit(0)
+    
     driver.plot_initial_kinematic(kinematic_smoothed=False)
     driver.plot_initial_kinematic(kinematic_smoothed=True)
-    #driver.iou_loss_compare()
-    driver.iou_loss_original()
+   
+    #driver.iou_loss_original()
     #driver.run_original_kinematic_smooth_rendering()
     #driver.iou_loss_membrane_compare()
     #driver.scale_parameter_plot()
