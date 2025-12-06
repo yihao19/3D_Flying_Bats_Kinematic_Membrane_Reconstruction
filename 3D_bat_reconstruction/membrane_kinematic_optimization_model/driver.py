@@ -291,7 +291,7 @@ class Optimize_Driver():
         save_file_path = os.path.join(self.kinematic_save_path_root,str(pose_index) ,"output.json")
         save_json_file(save_dict, save_file_path)
     
-    def original_reconstruction(self, pose_index):
+    def original_reconstruction(self, pose_index, if_smoothed:bool=True):
         """
         Parameters
         ----------
@@ -305,7 +305,14 @@ class Optimize_Driver():
        
         kinematic_model = Kinematic_model(bone_skining_matrix_name=self.model_template,
                                           opposite_direction=self.opposite_direction).cuda()
-        output_json_path = os.path.join(self.camera_list_path_root, str(pose_index), "output_smoothed.json")
+        if(if_smoothed == True):
+            output_file_name = "output_smoothed.json"
+            mesh_output_root = self.original_reconstruction_smooth_kinematic_path
+        else:
+            output_file_name = "output.json"
+            mesh_output_root = self.original_mesh_save_path_root
+
+        output_json_path = os.path.join(self.camera_list_path_root, str(pose_index), output_file_name)
         file = open(output_json_path)
         current_pose = json.load(file)
         estimated_location = np.array([current_pose['template_displacement']]).astype('float32')
@@ -324,7 +331,7 @@ class Optimize_Driver():
         estimated_location = torch.tensor(estimated_location).cuda()
         pose = torch.tensor(pose).cuda()
         output_mesh = kinematic_model.render_original(estimated_location, pose)
-        output_mesh.save_obj(os.path.join(self.original_mesh_save_path_root, f'{pose_index}.obj'), save_texture=False)
+        output_mesh.save_obj(os.path.join(mesh_output_root, f'{pose_index}.obj'), save_texture=False)
         return
     
     def membrane_optimization_loss_bayes_mode(self, membrane_physical_attribues): 
@@ -463,7 +470,7 @@ class Optimize_Driver():
             obj_path = os.path.join(self.original_mesh_save_path_root, f"{pose_index}.obj")
         elif reconstruction_type == "membrane_opt":
             obj_path = os.path.join(self.membrane_optimize_mesh_save_path_root, f"{pose_index}.obj")
-        elif reconstruction_type == "kinematic_smooth":
+        elif reconstruction_type == "kinematic_smoothed":
             obj_path = os.path.join(self.original_reconstruction_smooth_kinematic_path, f"{pose_index}.obj")
         elif reconstruction_type == "kinematic_membrane_opt":
             obj_path = os.path.join(self.membrane_kinematic_optimized_mesh_save_root, f"{pose_index}.obj")
@@ -908,20 +915,24 @@ class Optimize_Driver():
     def iou_loss_original(self, suffix:str=""):
         original_iou_loss_list = []
         original_raw_iou_loss_list = []
+        original_smoothed_iou_loss_list = []
         for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc="iou_loss cal..."):
             iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="original")
             original_iou_loss_list.append(iou_loss)
+            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="kinematic_smoothed")
+            original_smoothed_iou_loss_list.append(iou_loss)
             json_file = os.path.join(self.kinematic_save_path_root, str(pose_index), "output.json")
             file = open(json_file)
             data = json.load(file)
             original_raw_iou_loss_list.append(data['IOU'])
 
-        plt.plot(original_iou_loss_list, color='black')
+        plt.plot(original_smoothed_iou_loss_list, color='black')
+        plt.plot(original_iou_loss_list, color='black', linestyle=':')
         plt.plot(original_raw_iou_loss_list, color='grey', linestyle=':')
         plt.xlabel("Frame index")
         plt.ylabel("IOU loss")
         plt.savefig(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_IOU_original_wo_legend.svg",format="svg")
-        plt.legend(["fixed template","size&shape varying template",])
+        plt.legend(["fixed template + smoothed kinematic","fixed template + initial kinematic","size&shape varying template + initial_kinematic"])
         if not os.path.exists(f"./result_plot/{self.test_name}{suffix}/"):
             os.makedirs(f"./result_plot/{self.test_name}{suffix}/")
         plt.savefig(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_IOU_original_w_legend.svg",format="svg")
@@ -1182,7 +1193,8 @@ class Optimize_Driver():
     def run_original_reconstruction(self):
         for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc=f"original reconstruction: {self.test_name}"): 
             self.current_pose_index = pose_index
-            self.original_reconstruction(self.current_pose_index)
+            self.original_reconstruction(self.current_pose_index, if_smoothed=False)
+            self.original_reconstruction(self.current_pose_index, if_smoothed=True)
         return None
     
     def generate_flying_trajectory_gif(self, if_smoothed:bool=False, suffix:str=""):
