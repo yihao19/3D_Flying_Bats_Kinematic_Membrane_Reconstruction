@@ -19,7 +19,7 @@ if __name__ == "__main__":
     test_name = "Brunei_2023_bat_14_1"
     membrane_simulation_mode = "ANGULAR"
     #[101, 400]
-    start_pose = 101
+    start_pose = 111
     end_pose =400
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     membrane_opt_epoch =100
     membrane_kinematic_opt_epoch = 20
     whole_opt_epoch =1
-    if_use_previous_attr = True
+    if_use_previous_attr = False
     if_use_previous_kinematics =True
     opposite_direction = True # bat flying direction
     template_flip = False
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     #driver.run_raw_kinematic_optimize_pipeline()
     #exit(0)
     #driver.run_kinematic_smoothing()
-    #driver.run_membrane_optimize_pipeline(epoch_index = 0)
+    driver.run_membrane_optimize_pipeline(epoch_index = 0)
     
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     #driver.run_original_reconstruction()
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     #driver.plot_initial_kinematic(kinematic_smoothed=False)
     #driver.plot_initial_kinematic(kinematic_smoothed=True)
    
-    driver.iou_loss_original()
+    #driver.iou_loss_original()
     #driver.run_original_kinematic_smooth_rendering()
     #driver.iou_loss_membrane_compare()
     #driver.scale_parameter_plot()

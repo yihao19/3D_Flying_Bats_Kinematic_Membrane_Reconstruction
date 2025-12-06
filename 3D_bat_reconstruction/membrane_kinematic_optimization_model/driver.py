@@ -308,14 +308,16 @@ class Optimize_Driver():
         if(if_smoothed == True):
             output_file_name = "output_smoothed.json"
             mesh_output_root = self.original_reconstruction_smooth_kinematic_path
-        else:
+        elif(if_smoothed == False):
             output_file_name = "output.json"
             mesh_output_root = self.original_mesh_save_path_root
+        else: 
+            pass
 
         output_json_path = os.path.join(self.camera_list_path_root, str(pose_index), output_file_name)
         file = open(output_json_path)
         current_pose = json.load(file)
-        estimated_location = np.array([current_pose['template_displacement']]).astype('float32')
+        estimated_location = np.array([current_pose['template_displacement']])#.astype('float32')
         pose = current_pose['pose']
         if(len(pose) == 34):
             # acamodate the new template with 40 bone
@@ -326,7 +328,7 @@ class Optimize_Driver():
             pose.append([0,0,0])
             pose.append([0,0,0])
 
-        pose = np.array(pose).astype('float32')
+        pose = np.array(pose)#.astype('float32')
        
         estimated_location = torch.tensor(estimated_location).cuda()
         pose = torch.tensor(pose).cuda()
@@ -334,115 +336,6 @@ class Optimize_Driver():
         output_mesh.save_obj(os.path.join(mesh_output_root, f'{pose_index}.obj'), save_texture=False)
         return
     
-    def membrane_optimization_loss_bayes_mode(self, membrane_physical_attribues): 
-        """
-        this will call the blender to render the membrane using the passed physical attributes (deprecated)
-        
-        Returns
-        -------
-        None.
-        """
-        name_parts = self.test_name.split('_')
-        blender_test_name = f"{name_parts[-4]}_{name_parts[-3]}_{name_parts[-2]}_{name_parts[-1]}"
-        launch_args = dict(
-            scene=Path(__file__).parent / "membrane_blender" /f"{blender_test_name}"/f"{blender_test_name}.blend",
-            script=Path(__file__).parent / "membrane_blender" /f"{blender_test_name}"/f"{blender_test_name}.blend.py",
-            num_instances=self.SIM_INSTANCES,
-            named_sockets=["DATA", "CTRL"],
-        )
-        with btt.BlenderLauncher(**launch_args) as bl:
-            # Create remote dataset
-            addr = bl.launch_info.addresses["DATA"]
-            sim_ds = btt.RemoteIterableDataset(addr, item_transform=item_transform)
-            sim_dl = data.DataLoader(sim_ds, batch_size=1, num_workers=0, shuffle=False)
-            # Create a control channel to each Blender instance. We use this channel to
-            # communicate new shape parameters to be rendered.
-            addr = bl.launch_info.addresses["CTRL"]
-            remotes = [btt.DuplexChannel(a) for a in addr]
-            # sample the mass of the cloth modifier to modify it 
-            
-            # modify the current mesh renderer
-            update_simulations(remotes, [membrane_physical_attribues])
-            
-            # fetch the objs that you want to optimize the 
-            rendered_frame = half_window_size * 1 + 1 + 1 # total number of frame + buffer size
-            _target_objs_list = get_target_objs(
-                sim_dl, remotes, n= rendered_frame
-            )
-        # the rendered obj will be stored in the temp folder
-        total_iou_loss_list  = []
-        total_iou_loss = 0
-        
-        for pose_index in range(self.current_pose_index-self.membrane_optimized_frame + 1, self.current_pose_index + 1): 
-        #for pose_index in range(self.current_pose_index, self.current_pose_index + 1): 
-            train_dataloader, batch_size = image_dataloader(
-                self.camera_meta_path_root, 
-                self.camera_list_path_root, 
-                self.silhouette_image_path_root, 
-                pose_index, 
-                self.use_previous
-                )
-            for training_sample in train_dataloader:
-                images_gt = training_sample['mask'].cuda()
-                camera_matrix = training_sample['camera_matrix'].cuda()
-            
-            renderer = sr.SoftRenderer(image_height=self.image_size[0], image_width=self.image_size[1],sigma_val=1e-6,
-                                        camera_mode='projection', P = camera_matrix ,orig_height=self.image_size[0], orig_width=self.image_size[1], 
-                                        near=0, far=100)
-            
-            if not os.path.exists(self.blender_render_save_path):
-                os.makedirs(self.blender_render_save_path)
-                
-            #cloth_obj_path = 'D:/PhDProject_real_data/cloth_simulation/{}/{}.obj'.format(test_name, pose_index)
-            cloth_obj_path = os.path.join(self.blender_render_save_path, f"{pose_index}.obj")
-            
-            mesh = sr.Mesh.from_obj(cloth_obj_path, load_texture=False, texture_res = 1, texture_type='surface')
-            vertices = mesh.vertices
-            faces = mesh.faces
-            vertices = y_forward_z_up(vertices) # manually change the orientation of the exported obj
-            mesh = sr.Mesh(vertices.repeat(batch_size, 1, 1),faces.repeat(batch_size, 1, 1))
-            
-            # save the orientation correct obj for future use
-            if not os.path.exists(self.membrane_optimize_mesh_save_path_root):
-                os.makedirs(self.membrane_optimize_mesh_save_path_root)
-                
-            mesh.save_obj(os.path.join(self.membrane_optimize_mesh_save_path_root, '{}.obj'.format(pose_index)), save_texture=False)
-            #if(pose_index == self.current_pose_index):
-            images_pred = renderer.render_mesh(mesh)
-            with torch.no_grad():
-                iou_loss = neg_iou_loss(images_pred[:, -1], images_gt[:, 0])      
-                total_iou_loss_list.append(iou_loss.item())
-                total_iou_loss += iou_loss.item()
-            print(f"IOU loss: {iou_loss.item()}") 
-            #np.save(f"{self.result_path_root}/{self.test_name}_membrane_optimize_{pose_index}_{self.current_epoch}.npy", np.array(iou_loss.item()))
-        frame_number =  self.half_window_size + 1
-        average_iou_loss = total_iou_loss / self.membrane_optimized_frame
-        max_loss = max(total_iou_loss_list)
-        output_attribute_list = {"physical_attributes":membrane_physical_attribues} # only save the attributes that are stiffness related
-        output_path= os.path.join(self.membrane_optimize_attributes_save_path_root, f"bayesian_attrib_opt_linear_{self.current_pose_index}_{self.current_epoch}_{self.membrane_opt_counter}.json")
-        save_json_file(output_attribute_list, output_path)
-        self.membrane_opt_counter += 1
-        # check if the previous stiffness exist, if so, read as reference
-        
-        ref_coef = 40
-        use_previous = False
-        pre_coef = 60
-        if(not use_previous):
-            print("max_loss: ", max_loss, "   reg_term: ", ref_coef * membrane_physical_attribues[0]**2 )
-            print("mean_loss: ", average_iou_loss, "   reg_term: ", ref_coef * membrane_physical_attribues[0]**2)
-            return average_iou_loss + ref_coef * membrane_physical_attribues[0]**2  # add it as regularization
-        else: 
-            # if using the previous read the tension attributes of the previous frame
-            prev_attribute_list = []
-            for counter in range(self.membrane_opt_epoch - 2, self.membrane_opt_epoch):
-                prev_attributes_path =  os.path.join(self.membrane_optimize_attributes_save_path_root, f"bayesian_attrib_opt_linear_{self.current_pose_index-1}_{self.current_epoch}_{counter}.json")
-                attrib = read_json_file(prev_attributes_path)
-                prev_attribute_list.append(attrib['physical_attributes'][0])
-            prev_tension = np.min(prev_attribute_list)
-            print("max_loss: ", max_loss, "   reg_term: ", ref_coef * (membrane_physical_attribues[0] - prev_tension)**2 )
-            print("mean_loss: ", average_iou_loss, "   reg_term: ", ref_coef * (membrane_physical_attribues[0] - prev_tension)**2 )
-            print("prev pose: ", self.current_pose_index-1 )
-            return average_iou_loss + ref_coef * (membrane_physical_attribues[0] - prev_tension)**2 +  pre_coef * (membrane_physical_attribues[0])**2 # add it as regularization
 
     def iou_loss_cal(self, pose_index:int, reconstruction_type:str = "original") -> None:
         """Calculate the iou loss using the corresponding obj and images. 
@@ -783,7 +676,7 @@ class Optimize_Driver():
         plt.legend(["original kinematic", "after optimization"])
         plt.show()
         
-    def initialize_membrane_kinematic_training(self, epoch_number = 0): 
+    def initialize_membrane_kinematic_training(self, epoch_number:int = 0): 
         """
         Purpose of this function is to initialize the membrane_output.json with output.json (raw) for each pose
 
@@ -793,7 +686,6 @@ class Optimize_Driver():
 
         """
         if(epoch_number == 0):
-            
             for index in range(self.current_pose_index -self.half_window_size-1, self.current_pose_index+1): 
                 source_json_path = os.path.join(self.kinematic_save_path_root, str(index), "output_smoothed.json")
                 target_json_path = os.path.join(self.kinematic_save_path_root, str(index), f"membrane_output_{epoch_number}.json")
@@ -919,7 +811,7 @@ class Optimize_Driver():
         for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc="iou_loss cal..."):
             iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="original")
             original_iou_loss_list.append(iou_loss)
-            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="kinematic_smoothed")
+            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="original_smoothed")
             original_smoothed_iou_loss_list.append(iou_loss)
             json_file = os.path.join(self.kinematic_save_path_root, str(pose_index), "output.json")
             file = open(json_file)

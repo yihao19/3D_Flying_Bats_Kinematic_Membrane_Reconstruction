@@ -33,7 +33,7 @@ def read_json_file(file_path):
 
 def save_json_file(input_dict, file_path): 
     with open(file_path, "w") as output:
-        json.dump(input_dict, output)
+        json.dump(input_dict, output, indent=4)
     
 def neg_iou_loss(predict, target):
     dims = tuple(range(predict.ndimension())[1:])
@@ -116,7 +116,7 @@ def kinematic_smoothing(kinematic_list:list, sigma:float = 1.0):
 
     
     smoothed_kinematic = [gaussian_filter1d(kinematic_array[frame_index], sigma = sigma, axis=0) for frame_index in range(kinematic_array.shape[0])]
-    smoothed_kinematic = np.array(smoothed_kinematic)
+    smoothed_kinematic = np.array(smoothed_kinematic).astype('float32')
     smoothed_kinematic = np.swapaxes(smoothed_kinematic, 0, 1)
     return smoothed_kinematic 
 def displacement_smoothing(displacement_list:list, sigma:float=1.0):
@@ -125,7 +125,7 @@ def displacement_smoothing(displacement_list:list, sigma:float=1.0):
     output shape: N * 3
     """
     displacement_array = np.array(displacement_list)
-    smoothed_data = gaussian_filter1d(displacement_array, sigma=sigma, axis=0)
+    smoothed_data = gaussian_filter1d(displacement_array, sigma=sigma, axis=0).astype('float32')
 
     return smoothed_data
 

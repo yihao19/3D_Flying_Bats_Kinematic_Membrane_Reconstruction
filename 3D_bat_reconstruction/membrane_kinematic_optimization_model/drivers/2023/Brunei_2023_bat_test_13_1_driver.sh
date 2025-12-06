@@ -14,4 +14,4 @@ module load CUDA/12.1.1
 
 source activate softRas
 
-python /home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/drivers/2023/Brunei_2023_bat_test_13_1_driver.py
+python Brunei_2023_bat_test_13_1_driver.py

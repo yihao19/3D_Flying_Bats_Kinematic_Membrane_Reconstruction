@@ -217,7 +217,7 @@ def pose_reset(armature_name:str="Armature.001"):
 def kinematic_smoothing(factor:int=1, sigma:float=0.33, filter_width:int=6) -> None: 
     # Find the Graph Editor area
     """
-    function to use gaussian smoothing for kinamtic
+    function to use gaussian smoothing for kinamtic( deprecated)
     """
     
     bpy.ops.object.mode_set(mode='POSE')
@@ -230,7 +230,6 @@ def kinematic_smoothing(factor:int=1, sigma:float=0.33, filter_width:int=6) -> N
     else:
         print("Graph Editor area not found.")
     bpy.ops.object.mode_set(mode='OBJECT') # don't forget this step for normal rendering
-    
     return
 
 def load_kinematics(armature, start_frame:int, end_frame:int, reconstruction_project:str,epoch_index:int = 0, if_membrane_opt:bool=True) -> None:
@@ -292,7 +291,7 @@ def load_kinematics(armature, start_frame:int, end_frame:int, reconstruction_pro
         bone_rest_rotation = read_json_file('/home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/model_template/template_bone_rest_rotation.json')
         bone_rest_rotation = bone_rest_rotation['bone_rest_rotation']
         
-        template_displacement = Vector(pose_dict['template_displacement']) 
+        template_displacement = Vector(pose_dict['template_displacement'])
         scale = 0.005
         
         pose_array = pose_dict['pose']
@@ -438,7 +437,7 @@ def mesh_render(obj_save_root:str,
                 reconstruction_project:str,
                 start_frame:int,
                 end_frame:int,
-                mesh_name:str='Icosphere.001', ) -> None:
+                mesh_name:str='Icosphere.001') -> None:
     scene = bpy.context.scene
     for frame_index in range(start_frame, end_frame +1): 
         scene.frame_set(frame_index)
@@ -448,7 +447,6 @@ def mesh_render(obj_save_root:str,
         if not os.path.exists(os.path.join(obj_save_root, reconstruction_project, "blender_render")):
             os.makedirs(os.path.join(obj_save_root, reconstruction_project, "blender_render"))
         save_path = os.path.join(obj_save_root, reconstruction_project, "blender_render",f"{frame_index}.obj")
-        print(save_path)
         bpy.ops.wm.obj_export(filepath=save_path)
         original_vertices, original_faces = load_obj(save_path)
         rectified_vertices = y_forward_z_up(original_vertices)

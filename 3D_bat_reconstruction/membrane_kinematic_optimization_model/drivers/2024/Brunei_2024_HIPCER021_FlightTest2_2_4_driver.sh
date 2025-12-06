@@ -14,4 +14,4 @@ module load CUDA/12.1.1
 
 source activate softRas
 
-python /home/yihao19/PhD_research/3D_bat_reconstruction/SoftRas/models/membrane_kinematic_optimization_model/drivers/2024/HIPCER021_FlightTest2_2_4_driver.py
+python HIPCER021_FlightTest2_2_4_driver.py
