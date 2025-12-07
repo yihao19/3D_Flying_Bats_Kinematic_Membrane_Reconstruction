@@ -820,7 +820,7 @@ class Optimize_Driver():
         for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc="iou_loss cal..."):
             iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="original")
             original_iou_loss_list.append(iou_loss)
-            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="original_smoothed")
+            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="kinematic_smoothed")
             original_smoothed_iou_loss_list.append(iou_loss)
             json_file = os.path.join(self.kinematic_save_path_root, str(pose_index), "output.json")
             file = open(json_file)
