@@ -275,4 +275,5 @@ Camera group two (2): 52,53,54,55,61,64,65,71,72,73,74,75
         <img src="drivers/2024/result_plot/Brunei_2024_RHISED003_FlightTest1_5_7/Brunei_2024_RHISED003_FlightTest1_5_7_smoothed_trajectory.gif" width="330" height="330" alt="Brunei_2024_RHISED003_FlightTest1_5_7"/>
     </figure>
 </div>
-## Summary
+
+## Summary (statistics)

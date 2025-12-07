@@ -9,6 +9,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation as R
 from scipy.ndimage import gaussian_filter1d
 import cv2
+import os
 def read_pose_json(json_file, bone_index):
     output_json = 1
     f = open(json_file)
@@ -202,3 +203,11 @@ def point_to_image(xyzs, image, camera_matrix):
         y = proj[index][1]
         cv2.circle(image, (x, y), 5, (255, 255, 0), -1)
     return image  
+
+def list_subfolders(path) -> list:
+    subfolders = []
+    for entry in os.listdir(path):
+        full_path = os.path.join(path, entry)
+        if os.path.isdir(full_path):
+            subfolders.append(entry)
+    return subfolders

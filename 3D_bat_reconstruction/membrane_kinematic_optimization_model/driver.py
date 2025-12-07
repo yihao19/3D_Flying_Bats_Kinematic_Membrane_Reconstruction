@@ -20,7 +20,8 @@ from utils.general_utils import (neg_iou_loss,
                                 displacement_smoothing,
                                 sample_sphere_volume,
                                 if_keep_via_projection,
-                                point_to_image)
+                                point_to_image,
+                                list_subfolders)
 from utils.blender_utils import update_simulations, get_target_objs, y_forward_z_up
 import torch
 from skopt import gp_minimize
@@ -780,7 +781,7 @@ class Optimize_Driver():
         for pose in range(self.start_pose, self.end_pose):
             temp_list = []
             baseline_temp_list=  []
-            for counter in range(97,100):
+            for counter in range(95,100):
                 try:
                     attrib = read_json_file(f"{PROJECT_ROOT}/PhDProject_real_data/{self.test_name}/membrane_optimization_physical_attributes/{self.membrane_optimized_frame_str}_average/bayesian_attrib_opt_linear_{pose}_{iteration}_{counter}.json")
                     temp_list.append(attrib['physical_attributes'][0])
@@ -945,6 +946,34 @@ class Optimize_Driver():
         plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_loss_membrane_opt_w_prev.svg",format="svg")
         plt.close()
 
+    def plot_camera_number(self) -> None:
+    
+        
+        camera_number_list = []
+        indexes = []
+        fig = plt.figure()
+        for index in range(self.start_pose, self.end_pose, 1): 
+            txt_file_path = os.path.join(self.camera_list_path_root, str(index), 'camera.txt')
+            try: 
+                f = open(txt_file_path, "r")
+            except:
+                continue
+            
+            camera_number =f.read()[1:-1].split(', ')
+            if(len(camera_number) < 3): 
+                continue
+            indexes.append(index)
+            camera_number_list.append(len(camera_number))
+            
+
+        #plt.xlabel("dataset")
+        #plt.ylabel("IOU Loss")
+        plt.plot(camera_number_list,color='black')
+        plt.xlabel('Frame index')
+        plt.ylabel('Camera number')
+        fig.savefig(f"./result_plot/{self.test_name}/{self.test_name}_camera_number.svg",format="svg")
+        return 
+
     def plot_initial_kinematic(self, bone_index = [0,6,19], kinematic_smoothed:bool=False, suffix:str=""):
         output_path = os.path.join(self.camera_list_path_root)
         if not os.path.exists(f"./result_plot/{self.test_name}{suffix}/"):
@@ -1089,6 +1118,7 @@ class Optimize_Driver():
             self.original_reconstruction(self.current_pose_index, if_smoothed=True)
         return None
     
+
     def generate_flying_trajectory_gif(self, if_smoothed:bool=False, suffix:str=""):
         """
         generate the gif that contains the flying trajectory of the point cloud in bev view
