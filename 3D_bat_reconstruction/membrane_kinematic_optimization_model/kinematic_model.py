@@ -16,7 +16,8 @@ class Kinematic_model(nn.Module):
                  train_skining_matrix = False,
                  use_previous = True, 
                  opposite_direction=False, 
-                 template_flip=False):
+                 template_flip=False,
+                 template_initial_scale:float=0.0035):
         super(Kinematic_model, self).__init__()
         # set template mesh
         # the mesh object no need to change since the vertices will move with the
@@ -27,6 +28,7 @@ class Kinematic_model(nn.Module):
         self.opposite_direction = opposite_direction
         self.use_previous = use_previous
         self.template_flip = template_flip
+        self.template_initial_scale = template_initial_scale
         self.template_mesh = sr.Mesh.from_obj(template_obj_path, load_texture=False, texture_res = 5, texture_type='surface')
         with open(os.path.join(PROJECT_ROOT,"3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/model_template", bone_skining_matrix_name), 'rb') as f:
             data = pickle.load(f)
@@ -427,7 +429,7 @@ class Kinematic_model(nn.Module):
         #self.pose_tensor = self.pose_tensor.unsqueeze(0)
         # model will deform the mesh and then add the predetermined offset and learned displacement
         # apply the small adjustment on template first
-        template_default_scale = 0.0035#8* 1.53
+        template_default_scale = self.template_initial_scale#0.0035#8* 1.53
         displacement_range = 0.1
         vertex_displacement_range = 0.1
         
@@ -571,7 +573,7 @@ class Kinematic_model(nn.Module):
     def render_original(self,location,current_pose):
 
             
-        template_default_scale = 0.005/1.349  #blender precision difference
+        template_default_scale =self.template_initial_scale #0.005/1.349 #blender precision difference
      
         vertices = self.vertices
 

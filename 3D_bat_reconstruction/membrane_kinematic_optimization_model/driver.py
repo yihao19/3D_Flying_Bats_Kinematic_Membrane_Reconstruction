@@ -189,6 +189,11 @@ class Optimize_Driver():
             self.reverse = True
         else:
             self.reverse = False
+        # to deal with different camera calibration
+        if("5_7" in self.test_name):
+            self.template_initial_scale = 0.01
+        else: 
+            self.template_initial_scale = 0.0035
         self.opposite_direction = opposite_direction  # back and force
         self.template_flip = template_flip   # to accomodate calibration difference between 2023 and 2024  2023:False, 2024:True
         self.image_size = (1024,1280)
@@ -208,7 +213,8 @@ class Optimize_Driver():
         kinematic_model = Kinematic_model(bone_skining_matrix_name=self.model_template, 
                                           use_previous=use_previous,
                                           opposite_direction=self.opposite_direction,
-                                          template_flip=self.template_flip).cuda()
+                                          template_flip=self.template_flip,
+                                          template_initial_scale = self.template_initial_scale).cuda()
         optimizer = torch.optim.Adam(kinematic_model.parameters(), 0.005,betas=(0.5, 0.99))
         train_dataloader, batch_size = image_dataloader(
             self.camera_meta_path_root, 
@@ -305,7 +311,8 @@ class Optimize_Driver():
         """
        
         kinematic_model = Kinematic_model(bone_skining_matrix_name=self.model_template,
-                                          opposite_direction=self.opposite_direction).cuda()
+                                          opposite_direction=self.opposite_direction,
+                                          template_initial_scale=self.template_initial_scale).cuda()
         if(if_smoothed == True):
             output_file_name = "output_smoothed.json"
             mesh_output_root = self.original_reconstruction_smooth_kinematic_path
@@ -551,7 +558,8 @@ class Optimize_Driver():
         pose_original_kinematic_path = os.path.join(self.kinematic_save_path_root, f"{pose_index}", f"membrane_output_{pipeline_epoch}.json")
         membrane_kinematic_model = Membrane_kinematic_model(bone_skining_matrix_path=self.model_template,
                                                             membrane_modified_obj_path=membrane_modified_obj_path, 
-                                                            pose_original_kinematic_path=pose_original_kinematic_path).cuda()
+                                                            pose_original_kinematic_path=pose_original_kinematic_path,
+                                                            template_scale_factor=self.template_initial_scale).cuda()
         optimizer = torch.optim.Adam(membrane_kinematic_model.parameters(), 0.005 ,betas=(0.5, 0.99))
         train_dataloader, batch_size = image_dataloader(
             self.camera_meta_path_root, 

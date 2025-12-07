@@ -44,7 +44,7 @@ class Membrane_kinematic_model(nn.Module):
                  bone_skining_matrix_path:str, 
                  membrane_modified_obj_path:str,
                  pose_original_kinematic_path:str, 
-                 template_scale_factor = 0.0035, 
+                 template_scale_factor:float= 0.0035, 
                  device = "GPU"):
         super(Membrane_kinematic_model, self).__init__()
         """
