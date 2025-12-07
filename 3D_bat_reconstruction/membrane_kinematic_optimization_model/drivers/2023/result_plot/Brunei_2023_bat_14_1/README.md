@@ -1,7 +1,8 @@
 # General information
+## Number of camera available
 <div>
     <figure  style="text-align: center;">
-        <img src="Brunei_2023_bat_14_1_camera_number.svg"  height="350",alt="" />
+        <img src="Brunei_2023_bat_14_1_camera_number.svg"  height="350",alt=""/>
     </figure>
 </div>
 

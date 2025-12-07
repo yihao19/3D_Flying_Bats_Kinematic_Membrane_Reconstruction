@@ -993,7 +993,6 @@ class Optimize_Driver():
             output_jsons_y.append(output_json_y)
             output_jsons_z.append(output_json_z)
             displacement_list.append(displacement)
-            
 
         output_json_x_array = np.array(output_jsons_x)
         output_json_y_array = np.array(output_jsons_y)

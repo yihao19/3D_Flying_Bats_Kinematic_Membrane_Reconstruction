@@ -1,3 +1,11 @@
+# General information
+## Number of camera available
+<div>
+    <figure  style="text-align: center;">
+        <img src="Brunei_2023_bat_15_2_camera_number.svg"  height="350",alt=""/>
+    </figure>
+</div>
+
 # Kinematic and membrane simulation result for Brunei_2023_bat_15_2
 ## Initial kinematic reconstruction (fixed VS size varying template)
 <div>
