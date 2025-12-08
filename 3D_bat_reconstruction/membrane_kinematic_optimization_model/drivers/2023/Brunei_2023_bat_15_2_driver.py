@@ -17,7 +17,7 @@ if __name__ == "__main__":
     test_name = "Brunei_2023_bat_15_2"
     membrane_simulation_mode = "ANGULAR"
     #[3400, 3660]
-    start_pose = 3400
+    start_pose = 3410
     end_pose =3660
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
