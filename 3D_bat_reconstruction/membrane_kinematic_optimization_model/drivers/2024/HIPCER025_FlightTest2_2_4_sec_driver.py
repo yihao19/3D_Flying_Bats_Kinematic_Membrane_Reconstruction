@@ -19,8 +19,8 @@ if __name__ == "__main__":
     membrane_simulation_mode = "ANGULAR"
     #[start, seed, end]
     #[1499, 1730, 2540]
-    start_pose = 1730  # 1730
-    end_pose = 2451
+    start_pose = 1729  # 1730
+    end_pose = 1499
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized

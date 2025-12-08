@@ -20,7 +20,7 @@ if __name__ == "__main__":
     #[10, 600, 760]
     #
     start_pose = 10
-    end_pose = 601
+    end_pose = 760
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized

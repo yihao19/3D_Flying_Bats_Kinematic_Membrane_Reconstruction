@@ -17,6 +17,7 @@ if __name__ == "__main__":
     project_name = "PhDProject_real_data"
     test_name = "Brunei_2024_HIPCER023_FlightTest4_2_4"
     membrane_simulation_mode = "ANGULAR"
+    #[2195, 2755]
     start_pose = 2195
     end_pose =2756
     current_pose_index = start_pose

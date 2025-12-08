@@ -304,9 +304,9 @@ class Kinematic_model(nn.Module):
             # since the template is fully streched, some angle value can only be negative
         else: 
             if(self.template_flip == True and self.opposite_direction == True):
-                self.pose_tensor[0][0] = math.pi / 2 * torch.tanh(self.joint_0[0][0])
+                self.pose_tensor[0][0] = math.pi / 2 * torch.tanh(self.joint_0[0][0]) 
                 self.pose_tensor[0][1] = math.pi / 2 * torch.tanh(self.joint_0[0][1]) 
-                self.pose_tensor[0][2] = math.pi / 2 * torch.tanh(self.joint_0[0][2]) + 1 * math.pi
+                self.pose_tensor[0][2] = math.pi / 2 * torch.tanh(self.joint_0[0][2]) +1 * math.pi
             elif(self.template_flip == True and self.opposite_direction == False):
                 self.pose_tensor[0][0] = math.pi / 2 * torch.tanh(self.joint_0[0][0]) + 1 * math.pi
                 self.pose_tensor[0][1] = math.pi / 2 * torch.tanh(self.joint_0[0][1])
@@ -319,6 +319,7 @@ class Kinematic_model(nn.Module):
                 self.pose_tensor[0][0] = math.pi / 2 * torch.tanh(self.joint_0[0][0]) 
                 self.pose_tensor[0][1] = math.pi / 2 * torch.tanh(self.joint_0[0][1]) 
                 self.pose_tensor[0][2] = math.pi / 2 * torch.tanh(self.joint_0[0][2])
+
 
             #self.pose_tensor[0][2] = math.pi / 2 * torch.tanh(self.joint_0[0][2]) +math.pi
             #self.pose_tensor[1][:] = math.pi / 9 * torch.tanh(self.joint_1)
@@ -421,7 +422,7 @@ class Kinematic_model(nn.Module):
             self.pose_tensor[32][2] = (  math.pi / 18 * torch.tanh(self.joint_32[0][2]))
             #self.pose_tensor[33][:] = ( prev_pose[33][:] + math.pi / 18 * torch.tanh(self.joint_33))
 
-
+           
             
         #self.pose_tensor[1] = self.joint_0
         
@@ -572,7 +573,7 @@ class Kinematic_model(nn.Module):
     def render_original(self,location,current_pose):
 
             
-        template_default_scale =self.template_initial_scale #0.005/1.349 #blender precision difference
+        template_default_scale =self.template_initial_scale #0.005/1.349  #blender precision difference
      
         vertices = self.vertices
 

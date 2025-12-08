@@ -18,7 +18,7 @@ if __name__ == "__main__":
     test_name = "Brunei_2024_HIPCER025_FlightTest2_2_4"
     membrane_simulation_mode = "ANGULAR"
     #[start, seed, end]
-    #[4385, 4640, 5100]
+    #[4385, 4640, 5067]
     #[1499, 1730, 1530]
     start_pose = 4385  # 1730
     end_pose = 5067
@@ -55,15 +55,15 @@ if __name__ == "__main__":
     
     #driver.run_raw_kinematic_optimize_pipeline()
     #exit(0)
-    #driver.run_kinematic_smoothing()
+    driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
-    #driver.run_original_reconstruction()
+    driver.run_original_reconstruction()
     #driver.stiffness_visualization()
-    #driver.plot_initial_kinematic(kinematic_smoothed=False)
-    #driver.plot_initial_kinematic(kinematic_smoothed=True)
+    driver.plot_initial_kinematic(kinematic_smoothed=False)
+    driver.plot_initial_kinematic(kinematic_smoothed=True)
     #driver.iou_loss_compare()
-    #driver.iou_loss_original()
+    driver.iou_loss_original()
     #driver.run_original_kinematic_smooth_rendering()
     #driver.iou_loss_membrane_compare()
     #driver.scale_parameter_plot()
