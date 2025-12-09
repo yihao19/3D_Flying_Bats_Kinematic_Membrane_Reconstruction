@@ -1295,13 +1295,14 @@ def project_statistics() -> None:
             else: 
                 continue
     plt.bar(sequence_name, sequence_number)
-    plt.figtext(0.5, 0.01, f"Total number of reconstruction: {total_reconstruction}   Max: {max(sequence_number)}   Min {min(sequence_number)}", 
-                ha='center', fontsize=12)
+    plt.figtext(0.5, 0.01, f"Total number of reconstruction: {total_reconstruction}  Max length: {max(sequence_number)}  Min length {min(sequence_number)} \nNumber of sequence: {total_sequence}", 
+                ha='center', fontsize=10)
+
     #Add labels and title
     #plt.xlabel('')
     plt.ylabel('Number of reconstruction')
     plt.xticks(rotation=90, fontsize=5)
-    plt.tight_layout(pad=2.0)
+    plt.tight_layout(pad=2.5)
     plt.savefig("./images/reconstruction_number.svg")
     plt.close()
     print("Total reconstruction: ", total_reconstruction)
@@ -1324,12 +1325,19 @@ def project_average_iou_loss():
             if search_path.exists():
                 file_names = [p for p in search_path.iterdir() if p.is_file()]
                 total_iou_loss = []
+                if(len(file_names) == 0): 
+                    continue
                 for file_name in file_names: 
                     index = str(file_name).split('.')[0].split('_')[-1]
-                    
                     json_path = os.path.join(f"{project_root}", f"{project}", "rearrange_pose", index, "output.json")
                     json_data = read_json_file(json_path)
-                    total_iou_loss.append(json_data["IOU"])
+                    try:
+                        iou_loss = float(json_data["IOU"])
+                    except:
+                        continue
+                    total_iou_loss.append(iou_loss)
+                if(len(total_iou_loss) == 0):
+                    continue
                 sequence_name.append(project[12:])
                 sequence_iou_average.append(np.mean(total_iou_loss))
                 sequence_iou_std.append(np.std(total_iou_loss))
@@ -1337,14 +1345,16 @@ def project_average_iou_loss():
                 continue
     # plot bar with std
     plt.bar(sequence_name, sequence_iou_average, yerr=sequence_iou_std)
-
+    plt.figtext(0.5, 0.01, "Average/Std IOU loss", 
+                ha='center', fontsize=12)
     plt.ylabel("IOU loss")
     plt.xticks(rotation=90, fontsize=5)
     plt.tight_layout(pad=2.0)
     plt.savefig("./images/sequence_mean_std.svg")
     plt.close()
     return
+
 if __name__=="__main__":
-   # _ = project_statistics()
+    _ = project_statistics()
     _ = project_average_iou_loss()
     
