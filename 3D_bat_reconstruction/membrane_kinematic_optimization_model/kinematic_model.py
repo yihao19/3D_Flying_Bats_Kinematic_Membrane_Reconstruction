@@ -551,9 +551,7 @@ class Kinematic_model(nn.Module):
                           
         #bone_symmetric = 0.1 * bone_symmetric_1 + 0.3 * bone_symmetric_2 + 0.5 * bone_symmetric_3
         bone_symmetric = 0.5 * bone_symmetric_1 + 0.5* bone_symmetric_2 + 0.01 * bone_symmetric_3
-        
-        
-        
+    
         laplacian_loss = self.laplacian_smoothing(vertices).mean()
         return sr.Mesh(vertices.repeat(batch_size, 1, 1),self.faces.repeat(batch_size, 1, 1)), \
                        laplacian_loss, \
@@ -571,25 +569,18 @@ class Kinematic_model(nn.Module):
                        self.training_skining_weight
                        
     def render_original(self,location,current_pose):
-
-            
+        """
+        Docstring for render_original
+        
+        :param self: Description
+        :param location: Description
+        :param current_pose: Description
+        """
         template_default_scale =self.template_initial_scale #0.005/1.349  #blender precision difference
-     
         vertices = self.vertices
-
-        
         vertices, joints = self.LBS_model(vertices,self.joints, current_pose, to_rotmats=True)
-        
-        
-        _, joints_tail = self.LBS_model(vertices,self.joints_tail, current_pose, to_rotmats=True)
-        #self.pose_tensor = self.pose_tensor.squeeze()
-        
         estimated_location = location.unsqueeze(dim = 1)
-        
-      
         vertices =  template_default_scale * vertices + estimated_location[0].repeat(1, self.vertices_number, 1).cuda()  
         joints =   template_default_scale  * joints + estimated_location[0].repeat(1, self.joint_number, 1).cuda() 
-        
-        
         return sr.Mesh(vertices.repeat(1, 1, 1),self.faces.repeat(1, 1, 1))
                           

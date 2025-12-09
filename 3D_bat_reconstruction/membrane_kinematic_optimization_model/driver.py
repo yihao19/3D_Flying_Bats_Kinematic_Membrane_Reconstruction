@@ -1164,7 +1164,8 @@ class Optimize_Driver():
             pose_json['pose'][0] = rect_rotation_euler
 
             kinematic_model = Kinematic_model(bone_skining_matrix_name=self.model_template,
-                                          opposite_direction=self.opposite_direction).cuda()
+                                          opposite_direction=self.opposite_direction, 
+                                          template_initial_scale=self.template_initial_scale).cuda()
 
             estimated_location = np.array([pose_json['template_displacement']]).astype('float32')
             pose = pose_json['pose']
