@@ -16,7 +16,7 @@ if __name__ == "__main__":
     project_name = "PhDProject_real_data"
     test_name = "Brunei_2023_bat_test_15_1"
     membrane_simulation_mode = "ANGULAR"
-    start_pose = 1
+    start_pose = 10
     end_pose = 350
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
@@ -52,13 +52,13 @@ if __name__ == "__main__":
     #driver.run_raw_kinematic_optimize_pipeline()
     #exit(0)
     #driver.run_kinematic_smoothing()
-    driver.plot_camera_number()
+    #driver.plot_camera_number()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     #driver.run_original_reconstruction()
     #driver.iou_loss_initial_vs_final()
-    #driver.stiffness_visualization()
+    driver.stiffness_visualization()
     #driver.iou_loss_compare()
     #driver.iou_loss_compare()
     #driver.stiffness_visualization()

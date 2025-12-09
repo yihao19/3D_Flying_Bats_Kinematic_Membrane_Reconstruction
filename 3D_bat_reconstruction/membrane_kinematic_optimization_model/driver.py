@@ -5,6 +5,7 @@ Created on Fri May  9 22:52:28 2025
 @author: yihao
 """
 import os
+from pathlib import Path
 from image_data_loader import image_dataloader
 from membrane_kinematic_model import Membrane_kinematic_model
 from kinematic_model import Kinematic_model
@@ -481,7 +482,7 @@ class Optimize_Driver():
         self.membrane_opt_counter += 1
         # check if the previous stiffness exist, if so, read as reference
         
-        ref_coef = 40
+        ref_coef = 100
         pre_coef = 200
         IOU_coef = 1
         if(not self.use_previous_attr):
@@ -496,9 +497,6 @@ class Optimize_Driver():
                 attrib = read_json_file(prev_attributes_path)
                 prev_attribute_list.append(attrib['physical_attributes'][0])
             prev_tension = np.min(prev_attribute_list)
-            #print("max_loss: ", max_loss, "   reg_term: ", ref_coef * (membrane_physical_attribues[0] - prev_tension)**2 )
-            #print("mean_loss: ", average_iou_loss, "   reg_term: ", ref_coef * (membrane_physical_attribues[0] - prev_tension)**2 )
-            #print("prev pose: ", self.current_pose_index-1 )
             return IOU_coef * average_iou_loss + pre_coef * (membrane_physical_attribues[0] - prev_tension)**2 +  ref_coef * (membrane_physical_attribues[0])**2 # add it as regularization
         
     def membrane_optimize_bayesian(self, epoch_number): 
@@ -1270,6 +1268,44 @@ class Optimize_Driver():
             self.membrane_kinematic_optimize(pose_index, pipeline_epoch=self.current_epoch)
         
         return
-    
-  
+
+def project_statistics() -> None:
+    """
+    generate some basic statistics
+    """
+    project_root = "/home/yihao19/PhDProject_real_data"
+    subdirectories = [
+    name for name in os.listdir(project_root)
+    if os.path.isdir(os.path.join(project_root, name))]
+    total_reconstruction =0
+    total_sequence = 0
+    sequence_name = []
+    sequence_number = []
+    for project in tqdm(subdirectories, desc="counting reconstructions"):
+        if("Brunei" in project): 
+            # this is a project subfoler
+            # count the total reconstructions
+            search_path = Path(os.path.join(f"{project_root}", f"{project}", "reconstruction"))
+            if search_path.exists():
+                n_files = len([p for p in search_path.iterdir() if p.is_file()])
+                total_reconstruction += n_files
+                total_sequence += 1
+                sequence_name.append(project[12:])
+                sequence_number.append(n_files)
+            else: 
+                continue
+    plt.bar(sequence_name, sequence_number)
+    plt.figtext(0.5, 0.01, f"Total number of reconstruction: {total_reconstruction}", ha='center', fontsize=12)
+    #Add labels and title
+    #plt.xlabel('')
+    plt.ylabel('Number of reconstruction')
+    plt.xticks(rotation=90, fontsize=5)
+    plt.tight_layout(pad=2.0)
+    plt.savefig("./images/reconstruction_number.svg")
+    plt.close()
+    print("Total reconstruction: ", total_reconstruction)
+    print("Total sequence: ", total_sequence)
+    return 
+if __name__=="__main__":
+    subdirectories = project_statistics()
     

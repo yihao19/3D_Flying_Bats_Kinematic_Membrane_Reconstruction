@@ -283,3 +283,9 @@ Camera group two (2): 52,53,54,55,61,64,65,71,72,73,74,75
 </div>
 
 ## Summary (statistics)
+<div>
+    <figure  style="text-align: center;">
+        <img src="images/reconstruction_number.svg" width="330" height="330" alt="total reconstruction"/>
+    </figure>
+</div>
+
