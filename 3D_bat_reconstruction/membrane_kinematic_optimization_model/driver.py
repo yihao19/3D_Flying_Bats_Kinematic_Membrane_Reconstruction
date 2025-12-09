@@ -1295,7 +1295,8 @@ def project_statistics() -> None:
             else: 
                 continue
     plt.bar(sequence_name, sequence_number)
-    plt.figtext(0.5, 0.01, f"Total number of reconstruction: {total_reconstruction}", ha='center', fontsize=12)
+    plt.figtext(0.5, 0.01, f"Total number of reconstruction: {total_reconstruction}   Max: {max(sequence_number)}   Min {min(sequence_number)}", 
+                ha='center', fontsize=12)
     #Add labels and title
     #plt.xlabel('')
     plt.ylabel('Number of reconstruction')
