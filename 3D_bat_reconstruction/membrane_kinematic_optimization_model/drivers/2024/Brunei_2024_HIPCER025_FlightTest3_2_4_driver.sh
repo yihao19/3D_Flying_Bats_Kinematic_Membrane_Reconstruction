@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J Brunei_2024_HIPCER025_FlightTest3_2_4_driver_reverse   # Name of the job
+#SBATCH -J Brunei_2024_HIPCER025_FlightTest3_2_4_driver   # Name of the job
 #SBATCH --account=bat_flight_kinematics   # Account allocation
 #SBATCH --partition=v100_normal_q   # Partition of the cluster
 #SBATCH --nodes=1   # Number of compute nodes
