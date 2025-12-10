@@ -1357,5 +1357,5 @@ def project_average_iou_loss():
 
 if __name__=="__main__":
     _ = project_statistics()
-    _ = project_average_iou_loss()
+    #_ = project_average_iou_loss()
     
