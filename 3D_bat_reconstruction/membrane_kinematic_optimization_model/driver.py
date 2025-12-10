@@ -5,10 +5,24 @@ Created on Fri May  9 22:52:28 2025
 @author: yihao
 """
 import os
+from pathlib import Path
 from image_data_loader import image_dataloader
 from membrane_kinematic_model import Membrane_kinematic_model
 from kinematic_model import Kinematic_model
-from utils.general_utils import neg_iou_loss, item_transform, read_json_file,save_json_file,read_pose_json, quat_to_rotmat, rotmat_to_euler,rodrigues, kinematic_smoothing, displacement_smoothing
+from utils.general_utils import (neg_iou_loss, 
+                                item_transform, 
+                                read_json_file,
+                                save_json_file,
+                                read_pose_json, 
+                                quat_to_rotmat, 
+                                rotmat_to_euler,
+                                rodrigues, 
+                                kinematic_smoothing, 
+                                displacement_smoothing,
+                                sample_sphere_volume,
+                                if_keep_via_projection,
+                                point_to_image,
+                                list_subfolders)
 from utils.blender_utils import update_simulations, get_target_objs, y_forward_z_up
 import torch
 from skopt import gp_minimize
@@ -71,7 +85,8 @@ class Optimize_Driver():
                  if_use_previous_attr:bool,
                  if_use_previous_kinamatics:bool,
                  opposite_direction:bool,
-                 template_flip:bool=False):
+                 template_flip:bool=False, 
+                 glitched_camera_indexes:list = []):
         self.project_root_path = project_root_path
         self.project_name = project_name
         self.test_name = test_name
@@ -162,6 +177,12 @@ class Optimize_Driver():
         if not os.path.exists(self.original_reconstruction_smooth_kinematic_path):
              os.makedirs(self.original_reconstruction_smooth_kinematic_path)
 
+        self.calibration_check_path = os.path.join(self.project_root_path, 
+                                                   self.project_name, 
+                                                   self.test_name, 
+                                                   "calibration_check")
+        if not os.path.exists(self.calibration_check_path):
+            os.makedirs(self.calibration_check_path)
         self.result_path_root = './result'
         self.use_previous_attr = if_use_previous_attr
         self.use_previous = if_use_previous_kinamatics
@@ -169,13 +190,15 @@ class Optimize_Driver():
             self.reverse = True
         else:
             self.reverse = False
+        # to deal with different camera calibration
+        if("5_7" in self.test_name):
+            self.template_initial_scale = 0.01
+        else: 
+            self.template_initial_scale = 0.0035
         self.opposite_direction = opposite_direction  # back and force
         self.template_flip = template_flip   # to accomodate calibration difference between 2023 and 2024  2023:False, 2024:True
         self.image_size = (1024,1280)
-        self.SIM_INSTANCES = 1
-        self.membrane_parameter = {
-            
-            }
+        self.glitched_camera_indexes = glitched_camera_indexes
     def kinematic_optimize(self, pose_index, use_previous = False, reverse = False) -> None: 
         """
         Parameters
@@ -191,7 +214,8 @@ class Optimize_Driver():
         kinematic_model = Kinematic_model(bone_skining_matrix_name=self.model_template, 
                                           use_previous=use_previous,
                                           opposite_direction=self.opposite_direction,
-                                          template_flip=self.template_flip).cuda()
+                                          template_flip=self.template_flip,
+                                          template_initial_scale = self.template_initial_scale).cuda()
         optimizer = torch.optim.Adam(kinematic_model.parameters(), 0.005,betas=(0.5, 0.99))
         train_dataloader, batch_size = image_dataloader(
             self.camera_meta_path_root, 
@@ -199,7 +223,8 @@ class Optimize_Driver():
             self.silhouette_image_path_root, 
             pose_index, 
             self.use_previous, 
-            self.reverse
+            self.reverse, 
+            self.glitched_camera_indexes
             )
         epoch = tqdm(list(range(0,self.kinematic_opt_epoch)))
         for i in epoch:
@@ -228,15 +253,15 @@ class Optimize_Driver():
                     #l2_adjust = 0.02 * torch.norm(local_adjust - prev_local_adjust)
                 image_number = len(images_gt)
                 bone_symmetric_coeff = 0.005
-                bone_prior_coeff = 0.002
+                bone_prior_coeff =0.0
                 if(image_number >= 10):
                     bone_symmetric_coeff = 0.0
                 elif(image_number >= 5 and image_number < 10):
-                    bone_symmetric_coeff = 0.005
-                elif(image_number >= 3 and image_number < 5):
                     bone_symmetric_coeff = 0.01
+                elif(image_number >= 3 and image_number < 5):
+                    bone_symmetric_coeff = 0.5
                 elif(image_number < 3):
-                    bone_symmetric_coeff = 0.1
+                    bone_symmetric_coeff = 1
                 loss = IOU_loss + pose_loss  + bone_prior_coeff * bone_prior + bone_symmetric_coeff * bone_symmetric 
                 epoch.set_description(f'Project name: {self.test_name} Image_num: {len(images_gt)} pose: {pose_index} IOU loss: {IOU_loss.item():.4f}')
                 #epoch.set_description('IOU Loss: %.4f   Pose Loss: %.4f  Wingtip_reg: %.4f  Bone prior: %.4f  Bone symmetry: %.4f  L2 adjust: %.4f' % (IOU_loss.item(),pose_loss.item(), wing_tip_reg.item(), 0.1 * bone_prior.item(), bone_symmetric.item(), l2_adjust.item()))
@@ -274,7 +299,7 @@ class Optimize_Driver():
         save_file_path = os.path.join(self.kinematic_save_path_root,str(pose_index) ,"output.json")
         save_json_file(save_dict, save_file_path)
     
-    def original_reconstruction(self, pose_index):
+    def original_reconstruction(self, pose_index, if_smoothed:bool=True):
         """
         Parameters
         ----------
@@ -287,11 +312,21 @@ class Optimize_Driver():
         """
        
         kinematic_model = Kinematic_model(bone_skining_matrix_name=self.model_template,
-                                          opposite_direction=self.opposite_direction).cuda()
-        output_json_path = os.path.join(self.camera_list_path_root, str(pose_index), "output.json")
+                                          opposite_direction=self.opposite_direction,
+                                          template_initial_scale=self.template_initial_scale).cuda()
+        if(if_smoothed == True):
+            output_file_name = "output_smoothed.json"
+            mesh_output_root = self.original_reconstruction_smooth_kinematic_path
+        elif(if_smoothed == False):
+            output_file_name = "output.json"
+            mesh_output_root = self.original_mesh_save_path_root
+        else: 
+            pass
+
+        output_json_path = os.path.join(self.camera_list_path_root, str(pose_index), output_file_name)
         file = open(output_json_path)
         current_pose = json.load(file)
-        estimated_location = np.array([current_pose['template_displacement']]).astype('float32')
+        estimated_location = np.array([current_pose['template_displacement']])#.astype('float32')
         pose = current_pose['pose']
         if(len(pose) == 34):
             # acamodate the new template with 40 bone
@@ -302,123 +337,14 @@ class Optimize_Driver():
             pose.append([0,0,0])
             pose.append([0,0,0])
 
-        pose = np.array(pose).astype('float32')
+        pose = np.array(pose)#.astype('float32')
        
         estimated_location = torch.tensor(estimated_location).cuda()
         pose = torch.tensor(pose).cuda()
         output_mesh = kinematic_model.render_original(estimated_location, pose)
-        output_mesh.save_obj(os.path.join(self.original_mesh_save_path_root, f'{pose_index}.obj'), save_texture=False)
+        output_mesh.save_obj(os.path.join(mesh_output_root, f'{pose_index}.obj'), save_texture=False)
         return
     
-    def membrane_optimization_loss_bayes_mode(self, membrane_physical_attribues): 
-        """
-        this will call the blender to render the membrane using the passed physical attributes (deprecated)
-        
-        Returns
-        -------
-        None.
-        """
-        name_parts = self.test_name.split('_')
-        blender_test_name = f"{name_parts[-4]}_{name_parts[-3]}_{name_parts[-2]}_{name_parts[-1]}"
-        launch_args = dict(
-            scene=Path(__file__).parent / "membrane_blender" /f"{blender_test_name}"/f"{blender_test_name}.blend",
-            script=Path(__file__).parent / "membrane_blender" /f"{blender_test_name}"/f"{blender_test_name}.blend.py",
-            num_instances=self.SIM_INSTANCES,
-            named_sockets=["DATA", "CTRL"],
-        )
-        with btt.BlenderLauncher(**launch_args) as bl:
-            # Create remote dataset
-            addr = bl.launch_info.addresses["DATA"]
-            sim_ds = btt.RemoteIterableDataset(addr, item_transform=item_transform)
-            sim_dl = data.DataLoader(sim_ds, batch_size=1, num_workers=0, shuffle=False)
-            # Create a control channel to each Blender instance. We use this channel to
-            # communicate new shape parameters to be rendered.
-            addr = bl.launch_info.addresses["CTRL"]
-            remotes = [btt.DuplexChannel(a) for a in addr]
-            # sample the mass of the cloth modifier to modify it 
-            
-            # modify the current mesh renderer
-            update_simulations(remotes, [membrane_physical_attribues])
-            
-            # fetch the objs that you want to optimize the 
-            rendered_frame = half_window_size * 1 + 1 + 1 # total number of frame + buffer size
-            _target_objs_list = get_target_objs(
-                sim_dl, remotes, n= rendered_frame
-            )
-        # the rendered obj will be stored in the temp folder
-        total_iou_loss_list  = []
-        total_iou_loss = 0
-        
-        for pose_index in range(self.current_pose_index-self.membrane_optimized_frame + 1, self.current_pose_index + 1): 
-        #for pose_index in range(self.current_pose_index, self.current_pose_index + 1): 
-            train_dataloader, batch_size = image_dataloader(
-                self.camera_meta_path_root, 
-                self.camera_list_path_root, 
-                self.silhouette_image_path_root, 
-                pose_index, 
-                self.use_previous
-                )
-            for training_sample in train_dataloader:
-                images_gt = training_sample['mask'].cuda()
-                camera_matrix = training_sample['camera_matrix'].cuda()
-            
-            renderer = sr.SoftRenderer(image_height=self.image_size[0], image_width=self.image_size[1],sigma_val=1e-6,
-                                        camera_mode='projection', P = camera_matrix ,orig_height=self.image_size[0], orig_width=self.image_size[1], 
-                                        near=0, far=100)
-            
-            if not os.path.exists(self.blender_render_save_path):
-                os.makedirs(self.blender_render_save_path)
-                
-            #cloth_obj_path = 'D:/PhDProject_real_data/cloth_simulation/{}/{}.obj'.format(test_name, pose_index)
-            cloth_obj_path = os.path.join(self.blender_render_save_path, f"{pose_index}.obj")
-            
-            mesh = sr.Mesh.from_obj(cloth_obj_path, load_texture=False, texture_res = 1, texture_type='surface')
-            vertices = mesh.vertices
-            faces = mesh.faces
-            vertices = y_forward_z_up(vertices) # manually change the orientation of the exported obj
-            mesh = sr.Mesh(vertices.repeat(batch_size, 1, 1),faces.repeat(batch_size, 1, 1))
-            
-            # save the orientation correct obj for future use
-            if not os.path.exists(self.membrane_optimize_mesh_save_path_root):
-                os.makedirs(self.membrane_optimize_mesh_save_path_root)
-                
-            mesh.save_obj(os.path.join(self.membrane_optimize_mesh_save_path_root, '{}.obj'.format(pose_index)), save_texture=False)
-            #if(pose_index == self.current_pose_index):
-            images_pred = renderer.render_mesh(mesh)
-            with torch.no_grad():
-                iou_loss = neg_iou_loss(images_pred[:, -1], images_gt[:, 0])      
-                total_iou_loss_list.append(iou_loss.item())
-                total_iou_loss += iou_loss.item()
-            print(f"IOU loss: {iou_loss.item()}") 
-            #np.save(f"{self.result_path_root}/{self.test_name}_membrane_optimize_{pose_index}_{self.current_epoch}.npy", np.array(iou_loss.item()))
-        frame_number =  self.half_window_size + 1
-        average_iou_loss = total_iou_loss / self.membrane_optimized_frame
-        max_loss = max(total_iou_loss_list)
-        output_attribute_list = {"physical_attributes":membrane_physical_attribues} # only save the attributes that are stiffness related
-        output_path= os.path.join(self.membrane_optimize_attributes_save_path_root, f"bayesian_attrib_opt_linear_{self.current_pose_index}_{self.current_epoch}_{self.membrane_opt_counter}.json")
-        save_json_file(output_attribute_list, output_path)
-        self.membrane_opt_counter += 1
-        # check if the previous stiffness exist, if so, read as reference
-        
-        ref_coef = 40
-        use_previous = False
-        pre_coef = 60
-        if(not use_previous):
-            print("max_loss: ", max_loss, "   reg_term: ", ref_coef * membrane_physical_attribues[0]**2 )
-            print("mean_loss: ", average_iou_loss, "   reg_term: ", ref_coef * membrane_physical_attribues[0]**2)
-            return average_iou_loss + ref_coef * membrane_physical_attribues[0]**2  # add it as regularization
-        else: 
-            # if using the previous read the tension attributes of the previous frame
-            prev_attribute_list = []
-            for counter in range(self.membrane_opt_epoch - 2, self.membrane_opt_epoch):
-                prev_attributes_path =  os.path.join(self.membrane_optimize_attributes_save_path_root, f"bayesian_attrib_opt_linear_{self.current_pose_index-1}_{self.current_epoch}_{counter}.json")
-                attrib = read_json_file(prev_attributes_path)
-                prev_attribute_list.append(attrib['physical_attributes'][0])
-            prev_tension = np.min(prev_attribute_list)
-            print("max_loss: ", max_loss, "   reg_term: ", ref_coef * (membrane_physical_attribues[0] - prev_tension)**2 )
-            print("mean_loss: ", average_iou_loss, "   reg_term: ", ref_coef * (membrane_physical_attribues[0] - prev_tension)**2 )
-            print("prev pose: ", self.current_pose_index-1 )
-            return average_iou_loss + ref_coef * (membrane_physical_attribues[0] - prev_tension)**2 +  pre_coef * (membrane_physical_attribues[0])**2 # add it as regularization
 
     def iou_loss_cal(self, pose_index:int, reconstruction_type:str = "original") -> None:
         """Calculate the iou loss using the corresponding obj and images. 
@@ -446,7 +372,7 @@ class Optimize_Driver():
             obj_path = os.path.join(self.original_mesh_save_path_root, f"{pose_index}.obj")
         elif reconstruction_type == "membrane_opt":
             obj_path = os.path.join(self.membrane_optimize_mesh_save_path_root, f"{pose_index}.obj")
-        elif reconstruction_type == "kinematic_smooth":
+        elif reconstruction_type == "kinematic_smoothed":
             obj_path = os.path.join(self.original_reconstruction_smooth_kinematic_path, f"{pose_index}.obj")
         elif reconstruction_type == "kinematic_membrane_opt":
             obj_path = os.path.join(self.membrane_kinematic_optimized_mesh_save_root, f"{pose_index}.obj")
@@ -485,11 +411,11 @@ class Optimize_Driver():
         #1. render the mesh optimized mesh
         cmd = []
         cmd.append("./blender")
-        cmd.append(f"{PROJECT_ROOT}/PhD_research/3D_bat_reconstruction/SoftRas/models/membrane_kinematic_optimization_model/membrane_blender/{blender_test_name}/{blender_test_name}.blend")
+        cmd.append(f"{PROJECT_ROOT}/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/membrane_blender/{blender_test_name}/{blender_test_name}.blend")
         cmd.append("-b")  # run in backgroud
         cmd.append("--python-use-system-env")
         cmd.append("--python")
-        cmd.append(f"{PROJECT_ROOT}/PhD_research/3D_bat_reconstruction/SoftRas/models/membrane_kinematic_optimization_model/blender_script_template.blend.py")
+        cmd.append(f"{PROJECT_ROOT}/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/blender_script_template.blend.py")
         cmd.append("--")
 
         cmd.append(f"{self.project_root_path}{self.project_name}")
@@ -556,7 +482,7 @@ class Optimize_Driver():
         self.membrane_opt_counter += 1
         # check if the previous stiffness exist, if so, read as reference
         
-        ref_coef = 40
+        ref_coef = 100
         pre_coef = 200
         IOU_coef = 1
         if(not self.use_previous_attr):
@@ -571,9 +497,6 @@ class Optimize_Driver():
                 attrib = read_json_file(prev_attributes_path)
                 prev_attribute_list.append(attrib['physical_attributes'][0])
             prev_tension = np.min(prev_attribute_list)
-            #print("max_loss: ", max_loss, "   reg_term: ", ref_coef * (membrane_physical_attribues[0] - prev_tension)**2 )
-            #print("mean_loss: ", average_iou_loss, "   reg_term: ", ref_coef * (membrane_physical_attribues[0] - prev_tension)**2 )
-            #print("prev pose: ", self.current_pose_index-1 )
             return IOU_coef * average_iou_loss + pre_coef * (membrane_physical_attribues[0] - prev_tension)**2 +  ref_coef * (membrane_physical_attribues[0])**2 # add it as regularization
         
     def membrane_optimize_bayesian(self, epoch_number): 
@@ -633,7 +556,8 @@ class Optimize_Driver():
         pose_original_kinematic_path = os.path.join(self.kinematic_save_path_root, f"{pose_index}", f"membrane_output_{pipeline_epoch}.json")
         membrane_kinematic_model = Membrane_kinematic_model(bone_skining_matrix_path=self.model_template,
                                                             membrane_modified_obj_path=membrane_modified_obj_path, 
-                                                            pose_original_kinematic_path=pose_original_kinematic_path).cuda()
+                                                            pose_original_kinematic_path=pose_original_kinematic_path,
+                                                            template_scale_factor=self.template_initial_scale).cuda()
         optimizer = torch.optim.Adam(membrane_kinematic_model.parameters(), 0.005 ,betas=(0.5, 0.99))
         train_dataloader, batch_size = image_dataloader(
             self.camera_meta_path_root, 
@@ -697,7 +621,7 @@ class Optimize_Driver():
                      "vertices_mean": vertices_mean.tolist(),
                      "template_displacement":template_displacement}
         if(pose_index == self.current_pose_index):
-            output_mesh.save_obj(os.path.join(self.membrane_kinematic_optimized_mesh_save_root, '{}_bat_{}.obj'.format(self.test_name, pose_index)), save_texture=False)
+            output_mesh.save_obj(os.path.join(self.membrane_kinematic_optimized_mesh_save_root, f"{pose_index}.obj"), save_texture=False)
             save_file_path = os.path.join(self.kinematic_save_path_root,str(pose_index), f"membrane_output_{pipeline_epoch}.json")
             save_json_file(save_dict, save_file_path)
         return
@@ -759,7 +683,7 @@ class Optimize_Driver():
         plt.legend(["original kinematic", "after optimization"])
         plt.show()
         
-    def initialize_membrane_kinematic_training(self, epoch_number = 0): 
+    def initialize_membrane_kinematic_training(self, epoch_number:int = 0): 
         """
         Purpose of this function is to initialize the membrane_output.json with output.json (raw) for each pose
 
@@ -769,9 +693,8 @@ class Optimize_Driver():
 
         """
         if(epoch_number == 0):
-            
             for index in range(self.current_pose_index -self.half_window_size-1, self.current_pose_index+1): 
-                source_json_path = os.path.join(self.kinematic_save_path_root, str(index), "output.json")
+                source_json_path = os.path.join(self.kinematic_save_path_root, str(index), "output_smoothed.json")
                 target_json_path = os.path.join(self.kinematic_save_path_root, str(index), f"membrane_output_{epoch_number}.json")
                 source_json = read_json_file(source_json_path)
                 save_json_file(source_json, target_json_path)
@@ -888,39 +811,73 @@ class Optimize_Driver():
         plt.close()
         return
     
-    def iou_loss_original(self):
+    def iou_loss_original(self, suffix:str=""):
         original_iou_loss_list = []
         original_raw_iou_loss_list = []
+        original_smoothed_iou_loss_list = []
         for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc="iou_loss cal..."):
             iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="original")
             original_iou_loss_list.append(iou_loss)
+            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="kinematic_smoothed")
+            original_smoothed_iou_loss_list.append(iou_loss)
             json_file = os.path.join(self.kinematic_save_path_root, str(pose_index), "output.json")
             file = open(json_file)
             data = json.load(file)
             original_raw_iou_loss_list.append(data['IOU'])
 
-        plt.plot(original_iou_loss_list, color='black')
+        plt.plot(original_smoothed_iou_loss_list, color='black')
+        plt.plot(original_iou_loss_list, color='black', linestyle=':')
         plt.plot(original_raw_iou_loss_list, color='grey', linestyle=':')
         plt.xlabel("Frame index")
         plt.ylabel("IOU loss")
-        plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_original_wo_legend.svg",format="svg")
-        plt.legend(["fixed template","size&shape varying template",])
-        if not os.path.exists(f"./result_plot/{self.test_name}/"):
-            os.makedirs(f"./result_plot/{self.test_name}/")
-        plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_original_w_legend.svg",format="svg")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_IOU_original_wo_legend.svg",format="svg")
+        plt.legend(["fixed template + smoothed kinematic","fixed template + initial kinematic","size&shape varying template + initial_kinematic"])
+        if not os.path.exists(f"./result_plot/{self.test_name}{suffix}/"):
+            os.makedirs(f"./result_plot/{self.test_name}{suffix}/")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_IOU_original_w_legend.svg",format="svg")
         plt.close()
         return None
-    
+    def iou_loss_initial_vs_final(self): 
+        original_iou_loss_list = []
+        final_optimized_loss_list = []
+        for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc="iou_loss cal..."):
+            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="original")
+            original_iou_loss_list.append(iou_loss)
+            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="kinematic_membrane_opt")
+            final_optimized_loss_list.append(iou_loss)
+        plt.plot(original_iou_loss_list, color='black',linestyle = ':')
+        plt.plot(final_optimized_loss_list,color = 'black')
+        x = np.array([index for index in range(len(original_iou_loss_list))])
+        original_iou_loss_list = np.array(original_iou_loss_list)
+        final_optimized_loss_list = np.array(final_optimized_loss_list)
+        plt.fill_between(x, original_iou_loss_list,final_optimized_loss_list, 
+                 where=(original_iou_loss_list >= final_optimized_loss_list),
+                 facecolor='green',
+                 alpha=0.2)
+
+        plt.fill_between(x, np.array(original_iou_loss_list), np.array(final_optimized_loss_list), 
+                         where=(original_iou_loss_list < final_optimized_loss_list),
+                         facecolor='red',
+                         alpha=0.2
+                         )
+        plt.xlabel("Frame index")
+        plt.ylabel("IOU loss")
+        #plt.legend(["original","membrane optimized",])
+        if not os.path.exists(f"./result_plot/{self.test_name}/"):
+            os.makedirs(f"./result_plot/{self.test_name}/")
+        plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_initial_vs_final_wo_legend.svg",format="svg")
+        plt.legend(["initial kinematic + LBS","updated kinematic + cloth-based membrane"])
+        plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_initial_vs_final_w_legend.svg",format="svg")
+        plt.close()
+
     def iou_loss_compare(self):
         original_iou_loss_list = []
         membrane_optimized_loss_list = []
         for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc="iou_loss cal..."):
-            iou_loss = self.iou_loss_cal(pose_index, original=True)
+            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="original")
             original_iou_loss_list.append(iou_loss)
-            json_file = os.path.join(self.kinematic_save_path_root, str(pose_index), "membrane_output_0.json")
-            file = open(json_file)
-            data = json.load(file)
-            membrane_optimized_loss_list.append(data['IOU'])
+            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="membrane_opt")
+            membrane_optimized_loss_list.append(iou_loss)
         plt.plot(original_iou_loss_list, color='black',linestyle = ':')
         plt.plot(membrane_optimized_loss_list,color = 'black')
         x = np.array([index for index in range(len(original_iou_loss_list))])
@@ -942,7 +899,7 @@ class Optimize_Driver():
         if not os.path.exists(f"./result_plot/{self.test_name}/"):
             os.makedirs(f"./result_plot/{self.test_name}/")
         plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_compare_wo_legend.svg",format="svg")
-        plt.legend(["initial kinematic + LBS","updated kinematic + cloth-based membrane"])
+        plt.legend(["initial kinematic + LBS","initial kinematic + cloth-based membrane"])
         plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_compare_w_legend.svg",format="svg")
         plt.close()
         '''
@@ -995,10 +952,38 @@ class Optimize_Driver():
         plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_loss_membrane_opt_w_prev.svg",format="svg")
         plt.close()
 
-    def plot_initial_kinematic(self, bone_index = [0,6,19], kinematic_smoothed:bool=False):
+    def plot_camera_number(self) -> None:
+    
+        
+        camera_number_list = []
+        indexes = []
+        fig = plt.figure()
+        for index in range(self.start_pose, self.end_pose, 1): 
+            txt_file_path = os.path.join(self.camera_list_path_root, str(index), 'camera.txt')
+            try: 
+                f = open(txt_file_path, "r")
+            except:
+                continue
+            
+            camera_number =f.read()[1:-1].split(', ')
+            if(len(camera_number) < 3): 
+                continue
+            indexes.append(index)
+            camera_number_list.append(len(camera_number))
+            
+
+        #plt.xlabel("dataset")
+        #plt.ylabel("IOU Loss")
+        plt.plot(camera_number_list,color='black')
+        plt.xlabel('Frame index')
+        plt.ylabel('Camera number')
+        fig.savefig(f"./result_plot/{self.test_name}/{self.test_name}_camera_number.svg",format="svg")
+        return 
+
+    def plot_initial_kinematic(self, bone_index = [0,6,19], kinematic_smoothed:bool=False, suffix:str=""):
         output_path = os.path.join(self.camera_list_path_root)
-        if not os.path.exists(f"./result_plot/{self.test_name}/"):
-            os.makedirs(f"./result_plot/{self.test_name}/")
+        if not os.path.exists(f"./result_plot/{self.test_name}{suffix}/"):
+            os.makedirs(f"./result_plot/{self.test_name}{suffix}/")
         output_jsons_x = []
         output_jsons_y = []
         output_jsons_z = []
@@ -1014,7 +999,6 @@ class Optimize_Driver():
             output_jsons_y.append(output_json_y)
             output_jsons_z.append(output_json_z)
             displacement_list.append(displacement)
-            
 
         output_json_x_array = np.array(output_jsons_x)
         output_json_y_array = np.array(output_jsons_y)
@@ -1034,7 +1018,7 @@ class Optimize_Driver():
         plt.axhline(y = 0, color = 'black', linestyle = '--') 
         plt.ylim(-1, 1)
 
-        plt.savefig(f"./result_plot/{self.test_name}/{prefix}_Kinematic_X.svg")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{prefix}_Kinematic_X.svg")
         plt.close()
         fig = plt.figure()
         plt.title("Y axis")
@@ -1048,7 +1032,7 @@ class Optimize_Driver():
         plt.axhline(y = 0, color = 'black', linestyle = '--') 
         plt.ylim(-1, 1)
 
-        plt.savefig(f"./result_plot/{self.test_name}/{prefix}_Kinematic_Y.svg")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{prefix}_Kinematic_Y.svg")
         plt.close()
 
         fig = plt.figure()
@@ -1062,45 +1046,98 @@ class Optimize_Driver():
         plt.legend(["Bone: {}".format(bone_index[1]), "Bone: {}".format(bone_index[2])])
         plt.axhline(y = 0, color = 'black', linestyle = '--')
         plt.ylim(-1, 1)
-        plt.savefig(f"./result_plot/{self.test_name}/{prefix}_Kinematic_Z.svg")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{prefix}_Kinematic_Z.svg")
         plt.close()
 
         fig = plt.figure()
         plt.title("Displacement X axis")
         plt.plot(displacement_array[:, 0], color = "black")
-        plt.savefig(f"./result_plot/{self.test_name}/{prefix}_displacement_X.svg")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{prefix}_displacement_X.svg")
         plt.close()
 
         fig = plt.figure()
         plt.title("Displacement Y axis")
         plt.plot(displacement_array[:, 1], color = "black")
-        plt.savefig(f"./result_plot/{self.test_name}/{prefix}_displacement_Y.svg")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{prefix}_displacement_Y.svg")
         plt.close()
 
         fig = plt.figure()
         plt.title("Displacement Z axis")
         plt.plot(displacement_array[:, 2], color = "black")
-        plt.savefig(f"./result_plot/{self.test_name}/{prefix}_displacement_Z.svg")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{prefix}_displacement_Z.svg")
         plt.close()
+        return
+    
+    def calibration_validation(self, pose_index:int, threshold:int = 5) -> None: 
+        """
+        function to generate a small cube around the pose to validate the projection and select the "most" calibrated camera list. 
+        Function will return the projection of all the calibration
+        :param self: Description
+        :param pose_index: Description
+        :type pose_index: int
+        """
+        pose_json_path = os.path.join(self.kinematic_save_path_root, str(pose_index), "output.json")
+        file = open(pose_json_path)
+        pose_json = json.load(file)
+        center = pose_json['template_displacement']
+        sample_point = sample_sphere_volume(center=center)
+        # turn it into homogeneous
+        camera_matrix = np.loadtxt(os.path.join(self.camera_meta_path_root, "camera_meta.txt"))
+        camera_list_txt_path = os.path.join(self.camera_list_path_root, str(pose_index), "camera.txt")
+        with open(camera_list_txt_path) as f:
+            text = f.read()
+            data = json.loads(text)
+        camera_list = str(data)[1:-1].split(", ")
+        camera_number = camera_matrix.shape[0]
+        camera_matrix = np.reshape(camera_matrix, (camera_number, 3, 4))
+        candidate = []
+        for point in tqdm(sample_point, desc="projecting points to images..."): 
+            keeps = 0
+            for _index, camera_index in enumerate(camera_list):
+                image_path = os.path.join(self.camera_list_path_root, str(pose_index),f"camera{camera_index}.png")
+                image =cv2.imread(image_path, cv2.COLOR_RGB2GRAY)
+                matrix = camera_matrix[int(camera_index) - 1]
+                keep = if_keep_via_projection(point, image, matrix)
+                if(keep == 1): 
+                    keeps +=1
+            if(keeps >= threshold):
+                candidate.append(point)
+        # projects all the points onto all the images
+        for _index, camera_index in enumerate(camera_list):
+            image_path = os.path.join(self.camera_list_path_root, str(pose_index),f"camera{camera_index}.png")
+            image =cv2.imread(image_path, cv2.COLOR_RGB2GRAY)
+            matrix = camera_matrix[int(camera_index) - 1]
+            image = point_to_image(candidate, image, matrix)
+            # write it into calibration check folder
+            save_path_root = os.path.join(self.calibration_check_path, str(pose_index))
+            if not os.path.exists(save_path_root):
+                os.makedirs(save_path_root)
+            save_path = os.path.join(save_path_root, f"camera{camera_index}.png")
+            cv2.imwrite(save_path, image)
         return
     
     def run_original_reconstruction(self):
         for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc=f"original reconstruction: {self.test_name}"): 
             self.current_pose_index = pose_index
-            self.original_reconstruction(self.current_pose_index)
+            self.original_reconstruction(self.current_pose_index, if_smoothed=False)
+            self.original_reconstruction(self.current_pose_index, if_smoothed=True)
         return None
     
-    def generate_flying_trajectory_gif(self, if_smoothed:bool=False):
+
+    def generate_flying_trajectory_gif(self, if_smoothed:bool=False, suffix:str=""):
         """
         generate the gif that contains the flying trajectory of the point cloud in bev view
         """
+        if not os.path.exists(f"./result_plot/{self.test_name}{suffix}/"):
+            os.makedirs(f"./result_plot/{self.test_name}{suffix}/")
         if(if_smoothed == True):
             prefix = "smoothed"
             kinematic_file_name = "output_smoothed.json"
         else: 
             prefix = "initial"
             kinematic_file_name = "output.json"
-        gif_output_path = os.path.join(f"./result_plot/{self.test_name}/{self.test_name}_{prefix}_trajectory.gif")
+
+        gif_output_path = os.path.join(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_{prefix}_trajectory.gif")
         gif_writter = imageio.get_writer(gif_output_path, loop=0, fps=40)
         # get the first reconstruction pose and function as reference
         first_pose_json_path =  os.path.join(self.kinematic_save_path_root, str(self.start_pose), kinematic_file_name)
@@ -1127,7 +1164,8 @@ class Optimize_Driver():
             pose_json['pose'][0] = rect_rotation_euler
 
             kinematic_model = Kinematic_model(bone_skining_matrix_name=self.model_template,
-                                          opposite_direction=self.opposite_direction).cuda()
+                                          opposite_direction=self.opposite_direction, 
+                                          template_initial_scale=self.template_initial_scale).cuda()
 
             estimated_location = np.array([pose_json['template_displacement']]).astype('float32')
             pose = pose_json['pose']
@@ -1172,7 +1210,7 @@ class Optimize_Driver():
         gif_writter.close()
         return
     
-    def run_kinematic_smoothing(self, sigma:float=2):
+    def run_kinematic_smoothing(self, sigma:float=5):
         
 
         rotation_matrix_list = []
@@ -1231,6 +1269,93 @@ class Optimize_Driver():
             self.membrane_kinematic_optimize(pose_index, pipeline_epoch=self.current_epoch)
         
         return
-    
-  
+
+def project_statistics() -> None:
+    """
+    generate some basic statistics
+    """
+    project_root = "/home/yihao19/PhDProject_real_data"
+    subdirectories = [
+    name for name in os.listdir(project_root)
+    if os.path.isdir(os.path.join(project_root, name))]
+    total_reconstruction =0
+    total_sequence = 0
+    sequence_name = []
+    sequence_number = []
+    for project in tqdm(subdirectories, desc="counting reconstructions"):
+        if("Brunei" in project): 
+            # this is a project subfoler
+            # count the total reconstructions
+            search_path = Path(os.path.join(f"{project_root}", f"{project}", "reconstruction"))
+            if search_path.exists():
+                n_files = len([p for p in search_path.iterdir() if p.is_file()])
+                total_reconstruction += n_files
+                total_sequence += 1
+                sequence_name.append(project[12:])
+                sequence_number.append(n_files)
+            else: 
+                continue
+    plt.bar(sequence_name, sequence_number)
+    plt.figtext(0.5, 0.01, f"Total number of reconstruction: {total_reconstruction}  Max length: {max(sequence_number)}  Min length {min(sequence_number)} \nNumber of sequence: {total_sequence}", 
+                ha='center', fontsize=10)
+
+    #Add labels and title
+    #plt.xlabel('')
+    plt.ylabel('Number of reconstruction')
+    plt.xticks(rotation=90, fontsize=5)
+    plt.tight_layout(pad=2.5)
+    plt.savefig("./images/reconstruction_number.svg")
+    plt.close()
+    print("Total reconstruction: ", total_reconstruction)
+    print("Total sequence: ", total_sequence)
+    return 
+def project_average_iou_loss(): 
+    project_root = "/home/yihao19/PhDProject_real_data"
+    subdirectories = [
+    name for name in os.listdir(project_root)
+    if os.path.isdir(os.path.join(project_root, name))]
+    sequence_iou_average = []
+    sequence_iou_std = []
+    sequence_name = []
+    for project in tqdm(subdirectories[:], desc="counting reconstructions"):
+        if("Brunei" in project): 
+            # this is a project subfoler
+            # count the total reconstructions
+            search_path = Path(os.path.join(f"{project_root}", f"{project}", "reconstruction"))
+
+            if search_path.exists():
+                file_names = [p for p in search_path.iterdir() if p.is_file()]
+                total_iou_loss = []
+                if(len(file_names) == 0): 
+                    continue
+                for file_name in file_names: 
+                    index = str(file_name).split('.')[0].split('_')[-1]
+                    json_path = os.path.join(f"{project_root}", f"{project}", "rearrange_pose", index, "output.json")
+                    json_data = read_json_file(json_path)
+                    try:
+                        iou_loss = float(json_data["IOU"])
+                    except:
+                        continue
+                    total_iou_loss.append(iou_loss)
+                if(len(total_iou_loss) == 0):
+                    continue
+                sequence_name.append(project[12:])
+                sequence_iou_average.append(np.mean(total_iou_loss))
+                sequence_iou_std.append(np.std(total_iou_loss))
+            else: 
+                continue
+    # plot bar with std
+    plt.bar(sequence_name, sequence_iou_average, yerr=sequence_iou_std)
+    plt.figtext(0.5, 0.01, "Initial Kinematic Average/Std IOU loss", 
+                ha='center', fontsize=12)
+    plt.ylabel("IOU loss")
+    plt.xticks(rotation=90, fontsize=5)
+    plt.tight_layout(pad=2.0)
+    plt.savefig("./images/sequence_mean_std.svg")
+    plt.close()
+    return
+
+if __name__=="__main__":
+    _ = project_statistics()
+    _ = project_average_iou_loss()
     

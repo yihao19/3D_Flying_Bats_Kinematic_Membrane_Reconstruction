@@ -7,9 +7,8 @@ Created on Mon Nov  3 21:59:25 2025
 import sys
 import os
 project_root_path = "/home/yihao19/"
-sys.path.append(os.path.join(project_root_path,"PhD_research/3D_bat_reconstruction/SoftRas/models/membrane_kinematic_optimization_model"))
+sys.path.append(os.path.join(project_root_path,"3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model"))
 from driver import Optimize_Driver
-
 
 
 
@@ -18,7 +17,8 @@ if __name__ == "__main__":
     project_name = "PhDProject_real_data"
     test_name = "Brunei_2023_bat_16"
     membrane_simulation_mode = "ANGULAR"
-    start_pose = 578
+    #[580, 1300]
+    start_pose = 580
     end_pose =1300
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
@@ -49,14 +49,22 @@ if __name__ == "__main__":
                              opposite_direction)
     
     #driver.run_raw_kinematic_optimize_pipeline()
+    #exit(0)
+    #driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
+    driver.plot_camera_number()
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     #driver.run_original_reconstruction()
-    #driver.stiffness_visualization()
-    #driver.plot_initial_kinematic()
+    #driver.iou_loss_initial_vs_final()
+    driver.stiffness_visualization()
     #driver.iou_loss_compare()
+    #driver.iou_loss_compare()
+    #driver.stiffness_visualization()
+    #driver.plot_initial_kinematic(kinematic_smoothed=False)
+    #driver.plot_initial_kinematic(kinematic_smoothed=True)
+   
     #driver.iou_loss_original()
     #driver.run_original_kinematic_smooth_rendering()
     #driver.iou_loss_membrane_compare()
     #driver.scale_parameter_plot()
-    driver.generate_flying_trajectory_gif()
+    #driver.generate_flying_trajectory_gif(if_smoothed=True)

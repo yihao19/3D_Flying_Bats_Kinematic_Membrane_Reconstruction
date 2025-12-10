@@ -21,13 +21,15 @@ class Image_dataset(Dataset):
                  silouette_image_path:str, 
                  current_pose:int, 
                  use_previous:bool,
-                 reverse:bool):
+                 reverse:bool, 
+                 glitched_camera_indexes:list):
         self.camera_meta_path = camera_meta_path
         self.camera_list_path = camera_list_path
         self.silouette_image_path = silouette_image_path
         self.use_previous = use_previous
         self.current_pose = current_pose
         self.reverse = reverse
+        self.glitched_camera_indexes = glitched_camera_indexes
         # read the file
         
         camera_list_file = os.path.join(self.camera_list_path,str(self.current_pose), "camera.txt")
@@ -46,8 +48,7 @@ class Image_dataset(Dataset):
         self.image_list = []  # store the image path
         
         counter = 0
-        glitch_camera_index = []#['2', '6', '11', '12', '13']  # glithes camera index that need to get rid of
-        camera_list = set(camera_list).difference(set(glitch_camera_index))
+        camera_list = set(camera_list).difference(set(self.glitched_camera_indexes))
         self.camera_number = len(camera_list)
         camera_matrix = np.zeros((self.camera_number, 12))
         for index in camera_list:
@@ -80,6 +81,11 @@ class Image_dataset(Dataset):
             prev_pose = 0
             pre_local_adjust = 0
             try: 
+                output_json_path = os.path.join(self.camera_list_path, str(self.current_pose), "output.json")
+                file = open(output_json_path)
+                current_pose = json.load(file)
+                estimated_location = np.array(current_pose['template_displacement']).astype('float32')
+            except FileNotFoundError: 
                 estimated_location_file = open(os.path.join(self.silouette_image_path, str(self.current_pose),'estimated_location.txt'))
                 estimated_location_string = estimated_location_file.read()
                 parts = estimated_location_string.split(' ')
@@ -87,27 +93,7 @@ class Image_dataset(Dataset):
                 y_average = float(parts[1])
                 z_average = float(parts[2])
                 estimated_location = np.array([x_average, y_average, z_average]).astype('float32') # randomly assign offset for
-            except: 
-                output_json_path = os.path.join(self.camera_list_path, str(self.current_pose), "output.json")
-                file = open(output_json_path)
-                current_pose = json.load(file)
-                estimated_location = np.array(current_pose['template_displacement']).astype('float32')
-                
-            current_path = Path(self.silouette_image_path)
-            curr_root = current_path.parent
-            curr_output_path = os.path.join(curr_root,"rearrange_pose", str(self.current_pose), "output.json")
-            file = open(curr_output_path)
-            curr_output = json.load(file)
-            if(len(curr_output['pose']) == 34): 
-                # this is the paper one design, append 6 more bones
-                curr_output['pose'].append([0,0,0])
-                curr_output['pose'].append([0,0,0])
-                curr_output['pose'].append([0,0,0])
-                curr_output['pose'].append([0,0,0])
-                curr_output['pose'].append([0,0,0])
-                curr_output['pose'].append([0,0,0])
-            prev_pose = np.array(curr_output['pose'])
-
+            prev_pose  = np.zeros((40, 3))
         else:
             if(self.reverse == False):
                 prev_pose_index = self.current_pose - 1
@@ -145,8 +131,9 @@ def image_dataloader(camera_meta_path:str,
                      silhouette_image_path:str, 
                      current_pose:int, 
                      use_previous:bool,
-                     reverse:bool=False):
-    dataset =  Image_dataset(camera_meta_path, camera_list_path, silhouette_image_path, current_pose, use_previous, reverse)
+                     reverse:bool=False,
+                     glitched_camera_indexes:list = []):
+    dataset =  Image_dataset(camera_meta_path, camera_list_path, silhouette_image_path, current_pose, use_previous, reverse, glitched_camera_indexes)
     
     batch_size =dataset.camera_number 
     train_dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, drop_last=False)

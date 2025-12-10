@@ -6,8 +6,10 @@ Created on Mon Nov  3 21:59:25 2025
 """
 import sys
 import os
-sys.path.append("/home/yihao19/PhD_research/3D_bat_reconstruction/SoftRas/models/membrane_kinematic_optimization_model")
+project_root_path = "/home/yihao19/"
+sys.path.append(os.path.join(project_root_path,"3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model"))
 from driver import Optimize_Driver
+
 
 
 if __name__ == "__main__":
@@ -15,14 +17,15 @@ if __name__ == "__main__":
     project_name = "PhDProject_real_data"
     test_name = "Brunei_2023_bat_15_1"
     membrane_simulation_mode = "ANGULAR"
-    start_pose = 100
+    #[100, 450]
+    start_pose = 110
     end_pose =450
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
     kinematic_opt_epoch = 50
     membrane_opt_epoch =100
-    membrane_kinematic_opt_epoch = 10
+    membrane_kinematic_opt_epoch = 20
     whole_opt_epoch =1
     if_use_previous_attr = True
     if_use_previous_kinematics =True
@@ -48,15 +51,23 @@ if __name__ == "__main__":
                              template_flip=template_flip)
     
     #driver.run_raw_kinematic_optimize_pipeline()
+    #exit(0)
+    driver.plot_camera_number()
     #driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
+    
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
-    driver.run_original_reconstruction()
+    #driver.run_original_reconstruction()
+    #driver.iou_loss_initial_vs_final()
     #driver.stiffness_visualization()
-    driver.plot_initial_kinematic()
     #driver.iou_loss_compare()
-    driver.iou_loss_original()
+    #driver.iou_loss_compare()
+    driver.stiffness_visualization()
+    #driver.plot_initial_kinematic(kinematic_smoothed=False)
+    #driver.plot_initial_kinematic(kinematic_smoothed=True)
+   
+    #driver.iou_loss_original()
     #driver.run_original_kinematic_smooth_rendering()
     #driver.iou_loss_membrane_compare()
-    driver.scale_parameter_plot()
-    driver.generate_flying_trajectory_gif()
+    #driver.scale_parameter_plot()
+    #driver.generate_flying_trajectory_gif(if_smoothed=True)

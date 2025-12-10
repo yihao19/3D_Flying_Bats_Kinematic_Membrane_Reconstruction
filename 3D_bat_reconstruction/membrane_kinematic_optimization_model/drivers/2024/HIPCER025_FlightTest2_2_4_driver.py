@@ -18,7 +18,7 @@ if __name__ == "__main__":
     test_name = "Brunei_2024_HIPCER025_FlightTest2_2_4"
     membrane_simulation_mode = "ANGULAR"
     #[start, seed, end]
-    #[4385, 4640, 5100]
+    #[4385, 4640, 5067]
     #[1499, 1730, 1530]
     start_pose = 4385  # 1730
     end_pose = 5067

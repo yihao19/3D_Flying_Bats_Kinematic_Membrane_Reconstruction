@@ -217,7 +217,7 @@ def pose_reset(armature_name:str="Armature.001"):
 def kinematic_smoothing(factor:int=1, sigma:float=0.33, filter_width:int=6) -> None: 
     # Find the Graph Editor area
     """
-    function to use gaussian smoothing for kinamtic
+    function to use gaussian smoothing for kinamtic( deprecated)
     """
     
     bpy.ops.object.mode_set(mode='POSE')
@@ -230,7 +230,6 @@ def kinematic_smoothing(factor:int=1, sigma:float=0.33, filter_width:int=6) -> N
     else:
         print("Graph Editor area not found.")
     bpy.ops.object.mode_set(mode='OBJECT') # don't forget this step for normal rendering
-    
     return
 
 def load_kinematics(armature, start_frame:int, end_frame:int, reconstruction_project:str,epoch_index:int = 0, if_membrane_opt:bool=True) -> None:
@@ -284,15 +283,15 @@ def load_kinematics(armature, start_frame:int, end_frame:int, reconstruction_pro
         if if_membrane_opt:
             json_file_path = f"/home/yihao19/PhDProject_real_data/{reconstruction_project}/rearrange_pose/{file_index}/membrane_output_{epoch_index}.json"
         else:
-            json_file_path = f"/home/yihao19/PhDProject_real_data/{reconstruction_project}/rearrange_pose/{file_index}/output.json"
+            json_file_path = f"/home/yihao19/PhDProject_real_data/{reconstruction_project}/rearrange_pose/{file_index}/output_smoothed.json"
         pose_dict = read_json_file(json_file_path)
         #template_displacement = [math.floor(pose_dict['template_displacement'][0]*1e4)/1e4, math.ceil(pose_dict['template_displacement'][1]*1e4)/1e4,math.ceil(pose_dict['template_displacement'][2]*1e4)/1e4]
         
         
-        bone_rest_rotation = read_json_file('/home/yihao19/PhD_research/3D_bat_reconstruction/SoftRas/models/membrane_kinematic_optimization_model/model_template/template_bone_rest_rotation.json')
+        bone_rest_rotation = read_json_file('/home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/model_template/template_bone_rest_rotation.json')
         bone_rest_rotation = bone_rest_rotation['bone_rest_rotation']
         
-        template_displacement = Vector(pose_dict['template_displacement']) 
+        template_displacement = Vector(pose_dict['template_displacement'])
         scale = 0.005
         
         pose_array = pose_dict['pose']
@@ -438,7 +437,7 @@ def mesh_render(obj_save_root:str,
                 reconstruction_project:str,
                 start_frame:int,
                 end_frame:int,
-                mesh_name:str='Icosphere.001', ) -> None:
+                mesh_name:str='Icosphere.001') -> None:
     scene = bpy.context.scene
     for frame_index in range(start_frame, end_frame +1): 
         scene.frame_set(frame_index)
@@ -448,7 +447,6 @@ def mesh_render(obj_save_root:str,
         if not os.path.exists(os.path.join(obj_save_root, reconstruction_project, "blender_render")):
             os.makedirs(os.path.join(obj_save_root, reconstruction_project, "blender_render"))
         save_path = os.path.join(obj_save_root, reconstruction_project, "blender_render",f"{frame_index}.obj")
-        print(save_path)
         bpy.ops.wm.obj_export(filepath=save_path)
         original_vertices, original_faces = load_obj(save_path)
         rectified_vertices = y_forward_z_up(original_vertices)
@@ -523,7 +521,7 @@ def membrane_reconstruction_render(config) -> None:
         #3. load kinematic  of the project
         load_kinematics(armature, start_frame, end_frame, reconstruction_project, epoch_index = epoch_index, if_membrane_opt=if_membrane_opt)
         #4. smooth the loaded kinematic
-        kinematic_smoothing()
+        #kinematic_smoothing()
         #5. render the membrane enabled mesh
         mesh_render(project_root, reconstruction_project, start_frame, end_frame)
           # quit blender
@@ -531,7 +529,7 @@ def membrane_reconstruction_render(config) -> None:
         #3. load the kinematics
         load_kinematics(armature, start_frame, end_frame, reconstruction_project, epoch_index = epoch_index, if_membrane_opt=if_membrane_opt)
         #4. smooth the loaded kinematic
-        kinematic_smoothing()
+        #kinematic_smoothing()
         #5. render the membrane enabled mesh
         original_mesh_render(project_root, reconstruction_project, start_frame, end_frame)
     bpy.ops.wm.quit_blender()

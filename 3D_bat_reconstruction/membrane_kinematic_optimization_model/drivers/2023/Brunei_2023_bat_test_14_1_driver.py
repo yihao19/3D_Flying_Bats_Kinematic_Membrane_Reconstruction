@@ -7,10 +7,8 @@ Created on Mon Nov  3 21:59:25 2025
 import sys
 import os
 project_root_path = "/home/yihao19/"
-sys.path.append(os.path.join(project_root_path,"PhD_research/3D_bat_reconstruction/SoftRas/models/membrane_kinematic_optimization_model"))
+sys.path.append(os.path.join(project_root_path,"3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model"))
 from driver import Optimize_Driver
-
-
 
 
 
