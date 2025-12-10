@@ -1346,7 +1346,7 @@ def project_average_iou_loss():
                 continue
     # plot bar with std
     plt.bar(sequence_name, sequence_iou_average, yerr=sequence_iou_std)
-    plt.figtext(0.5, 0.01, "Average/Std IOU loss", 
+    plt.figtext(0.5, 0.01, "Initial Kinematic Average/Std IOU loss", 
                 ha='center', fontsize=12)
     plt.ylabel("IOU loss")
     plt.xticks(rotation=90, fontsize=5)

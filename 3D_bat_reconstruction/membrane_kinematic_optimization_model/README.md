@@ -299,7 +299,7 @@ Camera group two (2): 52,53,54,55,61,64,65,71,72,73,74,75
     </figure>
 </div>
 
-### Average IOU loss
+### Initial Kinematic Average IOU loss
 <div>
     <figure  style="text-align: center;">
         <img src="images/sequence_mean_std.svg" width="1000" height="1000" alt="average iou loss"/>
