@@ -53,6 +53,8 @@ if __name__ == "__main__":
                              )
     
     #driver.run_raw_kinematic_optimize_pipeline()
+    driver.plot_camera_number()
+    exit(0)
     #exit(0)
     #driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)

@@ -50,7 +50,8 @@ if __name__ == "__main__":
                              opposite_direction,
                              template_flip=template_flip
                              )
-    
+    driver.plot_camera_number()
+    exit(0)
     #driver.run_raw_kinematic_optimize_pipeline()
     #exit(0)
     driver.run_kinematic_smoothing()

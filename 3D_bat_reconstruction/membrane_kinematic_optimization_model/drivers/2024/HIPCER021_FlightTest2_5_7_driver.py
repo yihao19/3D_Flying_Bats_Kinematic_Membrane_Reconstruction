@@ -51,7 +51,8 @@ if __name__ == "__main__":
                              template_flip=template_flip, 
                              glitched_camera_indexes = glitched_camera_indexes
                              )
-    
+    driver.plot_camera_number()
+    exit(0)
     #driver.run_raw_kinematic_optimize_pipeline()
     #driver.calibration_validation(pose_index=3450)
     #exit(0)

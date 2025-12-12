@@ -13,6 +13,36 @@ import json
 import time
 import sys
 import os
+
+import bpy
+
+def enable_gpus(device_type, use_cpus=False):
+    preferences = bpy.context.preferences
+    cycles_preferences = preferences.addons["cycles"].preferences
+    cycles_preferences.refresh_devices()
+    devices = cycles_preferences.devices
+
+    if not devices:
+        raise RuntimeError("Unsupported device type")
+
+    activated_gpus = []
+    for device in devices:
+        if device.type == "CPU":
+            device.use = use_cpus
+        else:
+            device.use = True
+            activated_gpus.append(device.name)
+            print('activated gpu', device.name)
+
+    cycles_preferences.compute_device_type = device_type
+    bpy.context.scene.cycles.device = "GPU"
+
+    return activated_gpus
+
+
+enable_gpus("CUDA")
+
+
 def y_forward_z_up(vertices): 
     print(vertices.shape)
     x = np.expand_dims(vertices[:,  0], 1)
@@ -562,7 +592,5 @@ if __name__=="__main__":
                       "epoch_index":int(epoch_index),
                       "if_membrane_opt":True if if_membrane_opt.lower()=='true' else False}
     membrane_reconstruction_render(blender_config)
-    """
-    ['C:\\Program Files\\Blender Foundation\\Blender 4.1\\blender.EXE', 'membrane_blender\\bat_test_13_2\\bat_test_13_2.blend', '--python-use-system-env', '--python', 'membrane_blender\\bat_test_13_2\\bat_test_13_2.blend.py', '--enable-autoexec', '--', '-btid', '0', '-btseed', '476353223', '-btsockets', 'DATA=tcp://127.0.0.1:11000', 'CTRL=tcp://127.0.0.1:11001']
-    blender ./membrane_blender/bat_test_13_2/bat_test_13_2.blend --python-use-system-env --python blender_script_template.blend.py -- D:/PhDProject_real_data bat_test_13_2 3 10 0 0.08670005921693345
-    """
+
+    #./blender /home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/membrane_blender/bat_15_1/bat_15_1.blend -b --python-use-system-env --python /home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/blender_script_template.blend.py -- /home/yihao19/PhDProject_real_data bat_15_1 102 110 0.018193772992058585 0 True

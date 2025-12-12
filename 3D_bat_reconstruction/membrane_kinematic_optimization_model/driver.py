@@ -184,8 +184,13 @@ class Optimize_Driver():
         if not os.path.exists(self.calibration_check_path):
             os.makedirs(self.calibration_check_path)
         self.result_path_root = './result'
-        self.use_previous_attr = if_use_previous_attr
-        self.use_previous = if_use_previous_kinamatics
+        if(abs(self.end_pose - self.start_pose) == 1):
+            self.use_previous_attr = False
+            self.use_previous = False
+        else:
+            self.use_previous_attr = True
+            self.use_previous = True
+            
         if(self.start_pose > self.end_pose):
             self.reverse = True
         else:
@@ -837,7 +842,14 @@ class Optimize_Driver():
         plt.savefig(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_IOU_original_w_legend.svg",format="svg")
         plt.close()
         return None
-    def iou_loss_initial_vs_final(self): 
+    def iou_loss_initial_vs_final(self):
+        """
+        Docstring for iou_loss_initial_vs_final
+        
+        :param self: Description
+        :return: Description
+        :rtype: Any
+        """
         original_iou_loss_list = []
         final_optimized_loss_list = []
         for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc="iou_loss cal..."):
@@ -870,7 +882,7 @@ class Optimize_Driver():
         plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_initial_vs_final_w_legend.svg",format="svg")
         plt.close()
 
-    def iou_loss_compare(self):
+    def iou_loss_compare_membrane_only(self):
         original_iou_loss_list = []
         membrane_optimized_loss_list = []
         for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc="iou_loss cal..."):
@@ -927,34 +939,13 @@ class Optimize_Driver():
         plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_scale_parameter_w_legend.svg",format="svg")
         plt.close()
         return
-    
-    def iou_loss_w_wo_membrane(self):
-        iou_loss_list_prev = []
-        iou_loss_list_wo_prev = []
-        iou_loss_list_original = []
-        for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc="iou_loss cal..."):
-            iou_loss = self.iou_loss_cal(pose_index,original=False,use_prev=True)
-            iou_loss_list_prev.append(iou_loss)
-            iou_loss = self.iou_loss_cal(pose_index, original=False,use_prev=False)
-            iou_loss_list_wo_prev.append(iou_loss)
-            iou_loss = self.iou_loss_cal(pose_index, original=True)
-            iou_loss_list_original.append(iou_loss)
-        plt.plot(iou_loss_list_prev, color='black')
-        plt.plot(iou_loss_list_wo_prev, color='black', linestyle=':')
-        plt.plot(iou_loss_list_original, color='grey')
-        plt.xlabel("Frame index")
-        plt.ylabel("IOU loss")
-        #plt.legend(["original","membrane optimized",])
-        if not os.path.exists(f"./result_plot/{self.test_name}/"):
-            os.makedirs(f"./result_plot/{self.test_name}/")
-        plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_loss_membrane_opt_w_prev.svg",format="svg")
-        plt.legend(["with prev","without prev","no membrane opt"])
-        plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_loss_membrane_opt_w_prev.svg",format="svg")
-        plt.close()
 
     def plot_camera_number(self) -> None:
-    
+        """
+        Docstring for plot_camera_number
         
+        :param self: Description
+        """
         camera_number_list = []
         indexes = []
         fig = plt.figure()
@@ -1236,6 +1227,25 @@ class Optimize_Driver():
             with open(smooth_json_path, 'w') as file: 
                 json.dump(pose_json,file, indent=4)
         return
+    
+    def result_plot_bundle(self, suffix:str=None):
+        """
+        Docstring for result_plot_bundle
+        
+        :param self: Description
+        """
+        self.plot_camera_number()
+        self.run_kinematic_smoothing() 
+        self.run_original_reconstruction()
+        self.plot_initial_kinematic(kinematic_smoothed=False,suffix=suffix)
+        self.plot_initial_kinematic(kinematic_smoothed=True,suffix=suffix)
+        self.iou_loss_original()
+        self.generate_flying_trajectory_gif(if_smoothed=True,suffix=suffix)
+        # membrane simulation related
+        self.stiffness_visualization()
+        self.iou_loss_compare_membrane_only()
+        self.iou_loss_initial_vs_final()
+
     #three major pipelines
 
     def run_raw_kinematic_optimize_pipeline(self):
