@@ -9,7 +9,9 @@ import os
 project_root_path = "/home/yihao19/"
 sys.path.append(os.path.join(project_root_path,"3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model"))
 from driver import Optimize_Driver
-
+import kinematic_reconstruction_config
+import membrane_opt_config
+import kinematic_update_config
 
 
 
@@ -20,20 +22,24 @@ if __name__ == "__main__":
     test_name = "Brunei_2023_bat_test_13_2"
     membrane_simulation_mode = "ANGULAR"
     #[1, 510]
-    start_pose = 10
+    start_pose = 1
     end_pose = 510
     current_pose_index = start_pose
-    half_window_size = 8  # animation rendering window size
-    membrane_optimized_frame = 1# frame number that will be optimized
-    kinematic_opt_epoch = 50
-    membrane_opt_epoch =100
-    membrane_kinematic_opt_epoch = 10
-    whole_opt_epoch =1
-    if_use_previous_attr =True
-    if_use_previous_kinematics =True
+
+    membrane_simulation_mode = membrane_opt_config.membrane_simulation_mode
+    half_window_size = membrane_opt_config.half_window_size  # animation rendering window size
+    membrane_optimized_frame = membrane_opt_config.membrane_optimized_frame# frame number that will be optimized
+    kinematic_opt_epoch = kinematic_reconstruction_config.kinematic_opt_epoch
+    membrane_opt_epoch = membrane_opt_config.membrane_opt_epoch
+    membrane_kinematic_opt_epoch = kinematic_update_config.membrane_kinematic_opt_epoch
+    whole_opt_epoch =kinematic_update_config.whole_opt_epoch
+    if_use_previous_attr = membrane_opt_config.if_use_previous_attr
+    if_use_previous_kinematics =kinematic_reconstruction_config.if_use_previous_kinematics
+    model_template_name = kinematic_reconstruction_config.model_template_name
+
     opposite_direction = False # bat flying direction
     template_flip = False
-    model_template_name = "new_bat_params_version2_backward_membrane_24.pkl"
+
     driver = Optimize_Driver(project_root_path, 
                              project_name, 
                              test_name, 
@@ -55,12 +61,14 @@ if __name__ == "__main__":
     #driver.run_raw_kinematic_optimize_pipeline()
     #exit(0)
     #driver.run_kinematic_smoothing()
-    #driver.run_membrane_optimize_pipeline(epoch_index = 0)
-    driver.plot_camera_number()
+    driver.run_membrane_optimize_pipeline(epoch_index = 0)
+    exit(0)
+    #driver.plot_camera_number()
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     #driver.run_original_reconstruction()
     #driver.iou_loss_initial_vs_final()
-    driver.stiffness_visualization()
+    #driver.up_down_stroke_stiffness()
+    #driver.stiffness_visualization()
     #driver.iou_loss_compare()
     #driver.iou_loss_compare()
     #driver.stiffness_visualization()

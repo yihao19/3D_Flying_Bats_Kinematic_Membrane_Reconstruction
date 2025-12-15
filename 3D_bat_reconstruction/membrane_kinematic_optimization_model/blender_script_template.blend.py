@@ -574,7 +574,7 @@ if __name__=="__main__":
         custom_args = sys.argv[sys.argv.index('--') + 1:]
     else:
         custom_args = []
-    
+    PROJECT_YEAR = "2023"
     project_root =  custom_args[0]
     reconstruction_project = custom_args[1]
     start_frame = custom_args[2]
@@ -587,10 +587,12 @@ if __name__=="__main__":
     blender_config = {"start_frame":int(start_frame), 
                       "end_frame":int(end_frame), 
                       "project_root":str(project_root),
-                      "reconstruction_project":str("Brunei_2023_"+reconstruction_project),
+                      "reconstruction_project":str(f"Brunei_{PROJECT_YEAR}_"+reconstruction_project),
+                      #"reconstruction_project":str(reconstruction_project),
                       "tension_stiffness":float(tension_stiffness),
                       "epoch_index":int(epoch_index),
                       "if_membrane_opt":True if if_membrane_opt.lower()=='true' else False}
     membrane_reconstruction_render(blender_config)
 
     #./blender /home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/membrane_blender/bat_15_1/bat_15_1.blend -b --python-use-system-env --python /home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/blender_script_template.blend.py -- /home/yihao19/PhDProject_real_data bat_15_1 102 110 0.018193772992058585 0 True
+    #./blender /home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/membrane_blender/2024/bat.blend -b --python-use-system-env --python /home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/blender_script_template.blend.py -- /home/yihao19/PhDProject_real_data Brunei_2024_HIPCER019_FlightTest1_2_4 5692 5700 0.018193772992058585 0 True
