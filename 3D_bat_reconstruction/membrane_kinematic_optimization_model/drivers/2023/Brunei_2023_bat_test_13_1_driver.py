@@ -34,7 +34,7 @@ if __name__ == "__main__":
     if_use_previous_attr = membrane_opt_config.if_use_previous_attr
     if_use_previous_kinematics =kinematic_reconstruction_config.if_use_previous_kinematics
     model_template_name = kinematic_reconstruction_config.model_template_name
-    
+
     opposite_direction = True # bat flying direction
     template_flip = False
     driver = Optimize_Driver(project_root_path, 
@@ -60,7 +60,8 @@ if __name__ == "__main__":
     #driver.run_kinematic_smoothing()
     #driver.plot_camera_number()
     #driver.up_down_stroke_stiffness()
-    driver.run_membrane_optimize_pipeline(epoch_index = 0)
+    driver.generate_flight_speed()
+    #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     exit(0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     #driver.run_original_reconstruction()

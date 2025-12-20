@@ -60,7 +60,9 @@ if __name__ == "__main__":
    
     #driver.plot_camera_number()
     #driver.run_kinematic_smoothing()
+    #driver.generate_flight_speed()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
+    #driver.up_down_stroke_stiffness()
     #exit(0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     #driver.run_original_reconstruction()

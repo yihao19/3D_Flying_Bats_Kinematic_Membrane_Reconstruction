@@ -41,3 +41,13 @@
     </figure>
 
 </div>
+
+## Number of optimized frame and the smoothness of the membrane stiffness
+<div>
+    <figure  style="text-align: center;">
+        <img src="Brunei_2023_bat_15_1_one_average_physical_attrib.svg"  height="350",alt="" />
+    </figure>
+    <figure  style="text-align: center;">
+        <img src="Brunei_2023_bat_15_1_three_average_physical_attrib.svg"  height="350",alt="" />
+    </figure>
+</div>

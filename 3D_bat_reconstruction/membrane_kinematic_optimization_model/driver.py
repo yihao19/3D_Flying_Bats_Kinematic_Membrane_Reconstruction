@@ -489,7 +489,7 @@ class Optimize_Driver():
         # check if the previous stiffness exist, if so, read as reference
         
         ref_coef = 100
-        pre_coef = 100
+        pre_coef = 200
         IOU_coef = 1
         if(not self.use_previous_attr):
             #print("max_loss: ", max_loss, "   reg_term: ", ref_coef * membrane_physical_attribues[0]**2 )
@@ -498,7 +498,7 @@ class Optimize_Driver():
         else: 
             # if using the previous read the tension attributes of the previous frame
             prev_attribute_list = []
-            for counter in range(self.membrane_opt_epoch - 5, self.membrane_opt_epoch):
+            for counter in range(self.membrane_opt_epoch - 3, self.membrane_opt_epoch):
                 prev_attributes_path =  os.path.join(self.membrane_optimize_attributes_save_path_root, f"bayesian_attrib_opt_linear_{self.current_pose_index-1}_{self.current_epoch}_{counter}.json")
                 attrib = read_json_file(prev_attributes_path)
                 prev_attribute_list.append(attrib['physical_attributes'][0])
@@ -742,12 +742,22 @@ class Optimize_Driver():
         return None
     
     def run_original_kinematic_smooth_rendering(self):
+        """
+        Docstring for run_original_kinematic_smooth_rendering
+        
+        :param self: Description
+        :return: Description
+        :rtype: Any
+        """
         for pose in range(self.start_pose, self.end_pose):
             self.original_kinematic_smooth_rendering(pose - self.half_window_size, pose)
         return
     
     def iou_loss_membrane_compare(self) -> None:
-        """iou loss before and after membrane optimization
+        """
+        Docstring for iou_loss_membrane_compare
+        
+        :param self: Description
         """
         iou_loss_original_list = []
         iou_loss_membrane_opt_list = []
@@ -787,13 +797,20 @@ class Optimize_Driver():
         return
     
     def stiffness_visualization(self):
+        """
+        Docstring for stiffness_visualization
+        
+        :param self: Description
+        :return: Description
+        :rtype: Any
+        """
         iteration = 0
         attrib_list = []
         baseline_list = []
         for pose in range(self.start_pose, self.end_pose):
             temp_list = []
             baseline_temp_list=  []
-            for counter in range(self.membrane_opt_epoch-5,self.membrane_opt_epoch):
+            for counter in range(self.membrane_opt_epoch-3,self.membrane_opt_epoch):
                 try:
                     attrib = read_json_file(f"{PROJECT_ROOT}/PhDProject_real_data/{self.test_name}/membrane_optimization_physical_attributes/{self.membrane_optimized_frame_str}_average/bayesian_attrib_opt_linear_{pose}_{iteration}_{counter}.json")
                     temp_list.append(attrib['physical_attributes'][0])
@@ -814,10 +831,20 @@ class Optimize_Driver():
         if not os.path.exists(f"./result_plot/{self.test_name}/"):
             os.makedirs(f"./result_plot/{self.test_name}/")
         plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_{self.membrane_optimized_frame_str}_average_physical_attrib.svg",format="svg")
+        save_json_file({"stiffness":attrib_list},f"./result_plot/{self.test_name}/stiffness.json" )
         plt.close()
         return
     
-    def stiffness_visualization_frame(self, pose_index:int): 
+    def stiffness_visualization_frame(self, pose_index:int):
+        """
+        Docstring for stiffness_visualization_frame
+        
+        :param self: Description
+        :param pose_index: Description
+        :type pose_index: int
+        :return: Description
+        :rtype: Any
+        """
         iteration = 0
         temp_list = []
 
@@ -842,6 +869,15 @@ class Optimize_Driver():
         plt.close()
         return
     def iou_loss_original(self, suffix:str=""):
+        """
+        Docstring for iou_loss_original
+        
+        :param self: Description
+        :param suffix: Description
+        :type suffix: str
+        :return: Description
+        :rtype: Any
+        """
         original_iou_loss_list = []
         original_raw_iou_loss_list = []
         original_smoothed_iou_loss_list = []
@@ -908,6 +944,13 @@ class Optimize_Driver():
         plt.close()
 
     def iou_loss_compare_membrane_only(self):
+        """
+        Docstring for iou_loss_compare_membrane_only
+        
+        :param self: Description
+        :return: Description
+        :rtype: Any
+        """
         original_iou_loss_list = []
         membrane_optimized_loss_list = []
         for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc="iou_loss cal..."):
@@ -996,7 +1039,19 @@ class Optimize_Driver():
         fig.savefig(f"./result_plot/{self.test_name}/{self.test_name}_camera_number.svg",format="svg")
         return 
 
-    def plot_initial_kinematic(self, bone_index = [0,6,19], kinematic_smoothed:bool=False, suffix:str=""):
+    def plot_initial_kinematic(self, bone_index = [0,5,18], kinematic_smoothed:bool=False, suffix:str=""):
+        """
+        Docstring for plot_initial_kinematic
+        
+        :param self: Description
+        :param bone_index: Description
+        :param kinematic_smoothed: Description
+        :type kinematic_smoothed: bool
+        :param suffix: Description
+        :type suffix: str
+        :return: Description
+        :rtype: Any
+        """
         output_path = os.path.join(self.camera_list_path_root)
         if not os.path.exists(f"./result_plot/{self.test_name}{suffix}/"):
             os.makedirs(f"./result_plot/{self.test_name}{suffix}/")
@@ -1085,6 +1140,15 @@ class Optimize_Driver():
         return
     
     def up_down_stroke_stiffness(self, kinematic_smoothed:bool=True, bone_index:list=[6]) -> None:
+        """
+        Docstring for up_down_stroke_stiffness
+        
+        :param self: Description
+        :param kinematic_smoothed: Description
+        :type kinematic_smoothed: bool
+        :param bone_index: Description
+        :type bone_index: list
+        """
         output_path = os.path.join(self.camera_list_path_root)
         output_jsons_z = []
         stiffness = []
@@ -1111,7 +1175,7 @@ class Optimize_Driver():
         stiffness = np.array(stiffness)
         radiant = np.array(output_jsons_z)
         dy_dx = np.gradient(radiant)
-        upstroke_index = dy_dx < 0
+        upstroke_index = dy_dx <= 0
         downstroke_index = dy_dx > 0
 
         upstroke_mean = np.mean(stiffness[upstroke_index])
@@ -1127,7 +1191,7 @@ class Optimize_Driver():
         spacing =1.5   # absolute spacing between categories
         positions = np.arange(len( sequence_names)) * spacing
 
-        plt.boxplot(data, positions=positions, widths=1.0)
+        plt.boxplot(data, positions=positions,showmeans=True, widths=1.0)
         plt.xticks(positions,  sequence_names)
         plt.ylabel("Stiffness")
         plt.ylim([0,0.01])
@@ -1191,6 +1255,27 @@ class Optimize_Driver():
             self.original_reconstruction(self.current_pose_index, if_smoothed=True)
         return None
     
+    def generate_flight_speed(self): 
+        """function that will plot the flying speed in regular scale
+        
+        :param self: Descri
+        """
+        frame_speed = []
+        for pose_index in tqdm(range(self.start_pose+1, self.end_pose, 1), desc=f"calculating flying speed: {self.test_name}"):
+            prev_json_path = os.path.join(self.camera_list_path_root, str(pose_index-1), "output_smoothed.json")
+            current_json_path = os.path.join(self.camera_list_path_root, str(pose_index), "output_smoothed.json")
+            prev_loc = np.array(read_json_file(prev_json_path)['template_displacement'])
+            curr_loc = np.array(read_json_file(current_json_path)['template_displacement'])
+            distance = np.linalg.norm(curr_loc - prev_loc) * 4.64
+            frame_speed.append(distance * 1069)
+        fig = plt.figure()
+        plt.title("Flight speed")
+        plt.plot(frame_speed, color = "black")
+        plt.savefig(f"./result_plot/{self.test_name}/flight_speed.svg")
+        plt.close()
+
+            
+        return None
 
     def generate_flying_trajectory_gif(self, if_smoothed:bool=False, suffix:str=""):
         """
@@ -1279,8 +1364,13 @@ class Optimize_Driver():
         return
     
     def run_kinematic_smoothing(self, sigma:float=5):
+        """
+        Docstring for run_kinematic_smoothing
         
-
+        :param self: Description
+        :param sigma: Description
+        :type sigma: float
+        """
         rotation_matrix_list = []
         displacement_vector_list = []
         for pose_index in tqdm(range(self.start_pose, self.end_pose), desc="reading initial kinematics..."):
@@ -1413,8 +1503,49 @@ def project_statistics(if_paper:bool=False) -> None:
         plt.close()
         print("Total reconstruction: ", total_reconstruction)
         print("Total sequence: ", total_sequence)
-    return 
-def project_average_iou_loss(if_paper:bool=False): 
+    return
+
+def project_membrane_stiffness(if_paper:bool=False):
+    project_root = "/home/yihao19/PhDProject_real_data"
+    subdirectories = [
+    name for name in os.listdir(project_root)
+    if os.path.isdir(os.path.join(project_root, name))]
+    sequence_name = []
+    stiffness_sequence_list = []
+    for project in tqdm(subdirectories[:], desc="counting stiffness"):
+        if("Brunei" in project): 
+            # this is a project subfoler
+            # count the total reconstructions
+            search_path = Path(os.path.join(f"{project_root}", f"{project}", "membrane_optimized_mesh"))
+
+            if search_path.exists():
+                file_names = [p for p in search_path.iterdir() if p.is_file()]
+                total_iou_loss = []
+                if(len(file_names) == 0): 
+                    continue
+                for file_name in file_names: 
+                    index = str(file_name).split('.')[0].split('_')[-1]
+                    json_path = os.path.join(f"{project_root}", f"{project}", "rearrange_pose", index, "output.json")
+                    json_data = read_json_file(json_path)
+                    try:
+                        iou_loss = float(json_data["IOU"])
+                    except:
+                        continue
+                    total_iou_loss.append(iou_loss)
+                if(len(total_iou_loss) == 0):
+                    continue
+                sequence_name.append(project[12:])
+            else: 
+                continue
+    # plot bar with std
+    return
+def project_average_iou_loss(if_paper:bool=False):
+    """
+    Docstring for project_average_iou_loss
+    
+    :param if_paper: Description
+    :type if_paper: bool
+    """
     project_root = "/home/yihao19/PhDProject_real_data"
     subdirectories = [
     name for name in os.listdir(project_root)
