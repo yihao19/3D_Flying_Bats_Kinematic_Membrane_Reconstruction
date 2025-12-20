@@ -42,7 +42,7 @@
 
 </div>
 
-## Number of optimized frame and the smoothness of the membrane stiffness
+## Number of optimized frame and the smoothness of the membrane stiffness (one VS three frames)
 <div>
     <figure  style="text-align: center;">
         <img src="Brunei_2023_bat_15_1_one_average_physical_attrib.svg"  height="350",alt="" />
