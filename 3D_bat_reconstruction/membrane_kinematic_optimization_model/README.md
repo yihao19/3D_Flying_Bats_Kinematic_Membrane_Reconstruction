@@ -295,6 +295,13 @@ Camera group two (2): 52,53,54,55,61,64,65,71,72,73,74,75
 </div>
 
 ## Summary (statistics)
+### Recordings and frame extraction
+<div>
+    <figure  style="text-align: center;">
+        <img src="images/frame_number_portion.svg" width="1000" height="1000" alt="frame number portion"/>
+    </figure>
+</div>
+
 ### Number of reconstructions
 <div>
     <figure  style="text-align: center;">

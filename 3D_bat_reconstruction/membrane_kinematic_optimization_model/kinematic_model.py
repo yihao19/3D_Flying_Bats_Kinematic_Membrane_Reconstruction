@@ -306,7 +306,7 @@ class Kinematic_model(nn.Module):
             if(self.template_flip == True and self.opposite_direction == True):
                 self.pose_tensor[0][0] = math.pi / 2 * torch.tanh(self.joint_0[0][0]) 
                 self.pose_tensor[0][1] = math.pi / 2 * torch.tanh(self.joint_0[0][1]) 
-                self.pose_tensor[0][2] = math.pi / 2 * torch.tanh(self.joint_0[0][2]) +1 * math.pi
+                self.pose_tensor[0][2] = math.pi / 2 * torch.tanh(self.joint_0[0][2]) + 1 * math.pi
             elif(self.template_flip == True and self.opposite_direction == False):
                 self.pose_tensor[0][0] = math.pi / 2 * torch.tanh(self.joint_0[0][0]) + 1 * math.pi
                 self.pose_tensor[0][1] = math.pi / 2 * torch.tanh(self.joint_0[0][1])
@@ -325,7 +325,7 @@ class Kinematic_model(nn.Module):
             #self.pose_tensor[1][:] = math.pi / 9 * torch.tanh(self.joint_1)
             #self.pose_tensor[2][:] = math.pi / 9 * torch.tanh(self.joint_2)
             #self.pose_tensor[3][:] = math.pi / 18 * torch.tanh(self.joint_3)
-            
+
             self.pose_tensor[1][0] = math.pi / 3 * torch.tanh(self.joint_1[0][0])
             #self.pose_tensor[1][0] = ( prev_pose[1][0] + math.pi / 3 * torch.tanh(self.joint_1[0][0])) 
             self.pose_tensor[2][0] = ( math.pi / 6 * torch.tanh(self.joint_2[0][0])) 

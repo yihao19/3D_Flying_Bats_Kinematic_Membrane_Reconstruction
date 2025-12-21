@@ -211,3 +211,13 @@ def list_subfolders(path) -> list:
         if os.path.isdir(full_path):
             subfolders.append(entry)
     return subfolders
+
+def count_continuous_sublists(indices):
+    if not indices:
+        return 0
+
+    count = 1
+    for i in range(1, len(indices)):
+        if indices[i] != indices[i - 1] + 1:
+            count += 1
+    return count

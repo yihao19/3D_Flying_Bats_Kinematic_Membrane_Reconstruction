@@ -22,7 +22,8 @@ from utils.general_utils import (neg_iou_loss,
                                 sample_sphere_volume,
                                 if_keep_via_projection,
                                 point_to_image,
-                                list_subfolders)
+                                list_subfolders,
+                                count_continuous_sublists)
 from utils.blender_utils import update_simulations, get_target_objs, y_forward_z_up
 import torch
 from skopt import gp_minimize
@@ -1466,7 +1467,11 @@ def project_statistics(if_paper:bool=False) -> None:
     total_sequence = 0
     sequence_name = []
     sequence_number = []
-    for project in tqdm(subdirectories, desc="counting reconstructions"):
+    candidate_frame_number = []
+    above_5s = []
+    camera_4s = []
+    camera_3s = []
+    for project in tqdm(subdirectories[:], desc="counting reconstructions"):
         if("Brunei" in project): 
             # this is a project subfoler
             # count the total reconstructions
@@ -1477,32 +1482,78 @@ def project_statistics(if_paper:bool=False) -> None:
                 total_sequence += 1
                 sequence_name.append(project[12:])
                 sequence_number.append(n_files)
+                rearrange_pose = Path(os.path.join(f"{project_root}", f"{project}", "rearrange_pose"))
+                subdirs = [x for x in rearrange_pose.iterdir() if x.is_dir()]
+                candidate_frame_number.append(len(subdirs))
             else: 
                 continue
-    
-    if not if_paper:
-        plt.bar(sequence_name, sequence_number)
-        plt.figtext(0.5, 0.01, f"Total number of reconstruction: {total_reconstruction}  Max length: {max(sequence_number)}  Min length {min(sequence_number)} \nNumber of sequence: {total_sequence}", 
-                    ha='center', fontsize=10)
+            above_5 = 0
+            camera_4 = 0
+            camera_3 = 0
+            for sub_dir in subdirs: 
+                
+                text_file = os.path.join(rearrange_pose, sub_dir, "camera.txt")
+                with open(text_file, 'r') as file:
+                    string = file.read()
+                camera_number = string.split(',')
+                if(len(camera_number) >= 5):
+                    above_5 += 1
+                if(len(camera_number) >= 4):
+                    camera_4 += 1
+                if(len(camera_number) >= 3):
+                    camera_3 +=1
+            above_5s.append(above_5)
+            camera_4s.append(camera_4)
+            camera_3s.append(camera_3)
 
-        #Add labels and title
-        #plt.xlabel('')
-        plt.ylabel('Number of reconstruction')
-        plt.xticks(rotation=90, fontsize=5)
-        plt.tight_layout(pad=2.5)
-        plt.savefig("./images/reconstruction_number.svg")
-        plt.close()
-        print("Total reconstruction: ", total_reconstruction)
-        print("Total sequence: ", total_sequence)
-    else:
-        
-        index_location = np.arange(0, total_sequence)
-        plt.bar(index_location,sequence_number,color='gray')
-        plt.xticks(index_location[::5])
-        plt.savefig("./paper_images/reconstruction_number.svg")
-        plt.close()
-        print("Total reconstruction: ", total_reconstruction)
-        print("Total sequence: ", total_sequence)
+    bars = plt.bar(sequence_name,candidate_frame_number,color="grey")
+    plt.bar(sequence_name, sequence_number, color="black")
+    for index, bar in enumerate(bars):
+        height = bar.get_height() # Get the height of the bar
+        # Place the text at x-position (center of the bar) and y-position (height + small offset)
+        yield_rate = sequence_number[index] / candidate_frame_number[index]
+        plt.text(bar.get_x() + bar.get_width() / 5.0, height, f'{yield_rate:.2f}', ha='center', va='bottom',fontsize=3)
+
+    plt.figtext(0.5, 0.01, f"Total number of frames: {sum(candidate_frame_number)} reconstruction: {total_reconstruction} Max length: {max(sequence_number)} Min length {min(sequence_number)} \nNumber of sequence: {total_sequence}", 
+                ha='center', fontsize=10)
+    #Add labels and title
+    #plt.xlabel('')
+    plt.ylabel('Number of reconstruction')
+    plt.xticks(rotation=90, fontsize=5)
+    plt.tight_layout(pad=2.5)
+    plt.savefig("./images/reconstruction_number.svg")
+    plt.close()
+     #plot individual frame number
+    index_location = np.arange(0, total_sequence)
+    plt.bar(sequence_name,camera_3s,alpha=0.7, color='red')
+    plt.bar(sequence_name,camera_4s,alpha=0.7,color="orange")
+    plt.bar(sequence_name,above_5s, alpha=0.7,color="green")
+    plt.xticks(rotation=90, fontsize=5)
+    plt.tight_layout(pad=2.5)
+    plt.savefig("./images/frame_number_portion.svg")
+    plt.close()
+    print("Total_extracted_frame: ", sum(candidate_frame_number), "Max: ", max(candidate_frame_number), "Min: ", min(candidate_frame_number))
+    print("Total reconstruction: ", total_reconstruction)
+    print("Total sequence: ", total_sequence)
+    yield_rate = (sum(sequence_number)/sum(candidate_frame_number))
+    print("Total yield rate: ", f"{(sum(sequence_number)/sum(candidate_frame_number)):.2f}")
+    
+
+    index_location = np.arange(0, total_sequence)
+    plt.bar(index_location,candidate_frame_number,color="grey")
+    plt.bar(index_location, sequence_number, color="black")
+    plt.xticks(index_location[::5])
+    plt.savefig("./paper_images/reconstruction_number.svg")
+    plt.close()
+
+    #plot individual frame number
+    index_location = np.arange(0, total_sequence)
+    plt.bar(index_location,camera_3s,alpha=0.7, color='red' )
+    plt.bar(index_location,camera_4s,alpha=0.7,color="orange")
+    plt.bar(index_location,above_5s, alpha=0.7,color="green")
+    plt.xticks(index_location[::5])
+    plt.savefig("./paper_images/frame_number_portion.svg")
+    plt.close()
     return
 
 def project_membrane_stiffness(if_paper:bool=False):
@@ -1558,7 +1609,6 @@ def project_average_iou_loss(if_paper:bool=False):
             # this is a project subfoler
             # count the total reconstructions
             search_path = Path(os.path.join(f"{project_root}", f"{project}", "reconstruction"))
-
             if search_path.exists():
                 file_names = [p for p in search_path.iterdir() if p.is_file()]
                 total_iou_loss = []
@@ -1598,8 +1648,67 @@ def project_average_iou_loss(if_paper:bool=False):
         plt.close()
     return
 
-if __name__=="__main__":
-    #_ = project_statistics(if_paper=True)
 
-    _ = project_average_iou_loss(if_paper=True)
+def wingbeat_cycle(if_paper:bool=False) -> None:
+    """
+    generate some basic statistics
+    """
+    wingbeat_cycle_json = "wingbeat_cycle.json"
+    wingbeat_cycle_dict = read_json_file(wingbeat_cycle_json)
+    project_root = "/home/yihao19/PhDProject_real_data"
+    subdirectories = [
+    name for name in os.listdir(project_root)
+    if os.path.isdir(os.path.join(project_root, name))]
+    total_reconstruction =0
+    total_sequence = 0
+    sequence_name = []
+    sequence_number = []
+    candidate_frame_number = []
+    wingbeat_cycle_hz = []
+    for project in tqdm(subdirectories[:], desc="counting reconstructions"):
+        if("Brunei_2023" in project): 
+            if("14" in project):
+                continue
+            
+            # this is a project subfoler
+            # count the total reconstructions
+            search_path = Path(os.path.join(f"{project_root}", f"{project}", "reconstruction"))
+            if search_path.exists():
+                reconstructions = [p for p in search_path.iterdir() if p.is_file()]
+
+                n_files = len(reconstructions)
+                total_reconstruction += n_files
+                total_sequence += 1
+                sequence_name.append(project[12:])
+                sequence_number.append(n_files)
+                rearrange_pose = Path(os.path.join(f"{project_root}", f"{project}", "rearrange_pose"))
+            else: 
+                continue
+            bone_5_rotation = []
+            reconstruction_indexes = [int(str(file).split('/')[-1].split('.')[0].split('_')[-1]) for file in reconstructions]
+            reconstruction_indexes.sort()
+            for index in tqdm(reconstruction_indexes, desc="reading rotation..."): 
+
+                json_file = os.path.join(rearrange_pose, str(index), "output.json")
+                json_data = read_json_file(json_file)
+                bone_5_rotation.append(json_data['pose'][4][2])
+            # calculate the derivative
+            index = np.array([counter for counter in range(len(bone_5_rotation))])
+            dy_dx = np.gradient(np.array(bone_5_rotation), index)
+            indices = list(np.where(dy_dx < 0)[0])
+            wingbeat_cycle = wingbeat_cycle_dict[project]
+            hz = (1096/ (len(reconstruction_indexes)/wingbeat_cycle))
+            print(f"project: {project}, wingbeat_cycle: {wingbeat_cycle}")
+            wingbeat_cycle_hz.append(hz)  
+    plt.bar(sequence_name, wingbeat_cycle_hz)
+    plt.xticks(rotation=90, fontsize=5)
+    plt.tight_layout(pad=2.0)
+    plt.savefig("test.svg")
+    return
+
+
+if __name__=="__main__":
+    _ = project_statistics(if_paper=True)
+    #_ = wingbeat_cycle(if_paper=True)
+    #_ = project_average_iou_loss(if_paper=True)
     
