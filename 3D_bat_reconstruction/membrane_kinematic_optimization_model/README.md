@@ -309,6 +309,20 @@ Camera group two (2): 52,53,54,55,61,64,65,71,72,73,74,75
     </figure>
 </div>
 
+### Number of reconstructions (camera number) 
+<div>
+    <figure  style="text-align: center;">
+        <img src="images/camera_number_reconstruction_camera_number_5.svg" width="330" height="330" alt="camera_number_reconstruction_camera_number_5"/>
+    </figure>
+    <figure  style="text-align: center;">
+        <img src="images/camera_number_reconstruction_camera_number_4.svg" width="330" height="330" alt="camera_number_reconstruction_camera_number_4"/>
+    </figure>
+    <figure  style="text-align: center;">
+        <img src="images/camera_number_reconstruction_camera_number_3.svg" width="330" height="330" alt="camera_number_reconstruction_camera_number_3"/>
+    </figure>
+</div>
+
+
 ### Initial Kinematic Average IOU loss
 <div>
     <figure  style="text-align: center;">

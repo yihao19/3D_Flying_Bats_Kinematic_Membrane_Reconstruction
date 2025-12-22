@@ -1471,6 +1471,9 @@ def project_statistics(if_paper:bool=False) -> None:
     above_5s = []
     camera_4s = []
     camera_3s = []
+    reconstruction_above_5s = []
+    reconstruction_4s = []
+    reconstruction_3s = []
     for project in tqdm(subdirectories[:], desc="counting reconstructions"):
         if("Brunei" in project): 
             # this is a project subfoler
@@ -1490,8 +1493,12 @@ def project_statistics(if_paper:bool=False) -> None:
             above_5 = 0
             camera_4 = 0
             camera_3 = 0
+            reconstruction_above_5 = 0
+            reconstruction_4 = 0
+            reconstruction_3 = 0
+            reconstructed_index = [str(p).split('_')[-1].split('.')[0] for p in search_path.iterdir() if p.is_file()]
             for sub_dir in subdirs: 
-                
+                sub_dir_index = str(sub_dir).split('/')[-1]
                 text_file = os.path.join(rearrange_pose, sub_dir, "camera.txt")
                 with open(text_file, 'r') as file:
                     string = file.read()
@@ -1502,10 +1509,55 @@ def project_statistics(if_paper:bool=False) -> None:
                     camera_4 += 1
                 if(len(camera_number) >= 3):
                     camera_3 +=1
+                if(sub_dir_index in reconstructed_index):
+                    if(len(camera_number) >= 5):
+                        reconstruction_above_5 += 1
+                    if(len(camera_number) >= 4):
+                        reconstruction_4 += 1
+                    if(len(camera_number) >= 3):
+                        reconstruction_3 +=1
+                else:
+                    continue
+            
             above_5s.append(above_5)
             camera_4s.append(camera_4)
             camera_3s.append(camera_3)
+            reconstruction_above_5s.append(reconstruction_above_5)
+            reconstruction_4s.append(reconstruction_4)
+            reconstruction_3s.append(reconstruction_3)
+    # plot the percentation of camera number
+    width = 0.25
+    x = np.arange(len(sequence_name))
+    reconstruction_above_5_ratio_list = [reconstruction_above_5s[index]/(above_5s[index]+1e-5) for index, _item in enumerate(above_5s)]
+    reconstruction_4_ratio_list = [(reconstruction_4s[index]-reconstruction_above_5s[index])/(camera_4s[index]-above_5s[index]+1e-5) for index, _item in enumerate(above_5s)]
+    reconstruction_3_ratio_list = [(reconstruction_3s[index]-reconstruction_4s[index])/(camera_3s[index]-camera_4s[index]+1e-5) for index, _item in enumerate(above_5s)]
+    plt.bar(x, reconstruction_above_5_ratio_list)
+    plt.xticks(x, sequence_name)
+    plt.xticks(rotation=90, fontsize=5)
+    plt.figtext(0.5, 0.01, f"Camera number: >=5, Average rate: {np.mean(reconstruction_above_5_ratio_list):.2f}", 
+                ha='center', fontsize=10)
+    plt.tight_layout(pad=2.5)
+    plt.savefig('./images/camera_number_reconstruction_camera_number_5.svg')
+    plt.close()
+    plt.bar(x, reconstruction_4_ratio_list)
+    plt.xticks(x, sequence_name)
+    plt.xticks(rotation=90, fontsize=5)
+    plt.figtext(0.5, 0.01, f"Camera number: 4, Average rate: {np.mean(reconstruction_4_ratio_list):.2f}", 
+                ha='center', fontsize=10)
+    plt.tight_layout(pad=2.5)
+    plt.savefig('./images/camera_number_reconstruction_camera_number_4.svg')
+    plt.close()
+    plt.bar(x, reconstruction_3_ratio_list)
+    plt.xticks(x, sequence_name)
+    plt.xticks(rotation=90, fontsize=5)
+    plt.figtext(0.5, 0.01, f"Camera number: 3, Average ratio: {np.mean(reconstruction_3_ratio_list):.2f}", 
+                ha='center', fontsize=10)
+    plt.tight_layout(pad=2.5)
+    plt.savefig('./images/camera_number_reconstruction_camera_number_3.svg')
+    plt.close()
+    exit(0)
 
+    
     bars = plt.bar(sequence_name,candidate_frame_number,color="grey")
     plt.bar(sequence_name, sequence_number, color="black")
     for index, bar in enumerate(bars):
