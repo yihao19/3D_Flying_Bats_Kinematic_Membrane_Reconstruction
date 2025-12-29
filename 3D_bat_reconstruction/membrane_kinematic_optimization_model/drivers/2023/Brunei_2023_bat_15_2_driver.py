@@ -64,7 +64,7 @@ if __name__ == "__main__":
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     #driver.run_original_reconstruction()
     #driver.iou_loss_initial_vs_final()
-    #driver.generate_flight_speed()
+    driver.generate_flight_speed()
     driver.stiffness_visualization()
     #driver.iou_loss_compare()
     #driver.iou_loss_compare()

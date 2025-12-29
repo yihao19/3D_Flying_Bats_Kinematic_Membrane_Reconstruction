@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J Brunei_2024_HIPCER022_FlightTest1_2_4_driver_reverse   # Name of the job
+#SBATCH -J Brunei_2024_HIPCER022_FlightTest1_2_4_driver_membrane_opt   # Name of the job
 #SBATCH --account=bat_flight_kinematics   # Account allocation
 #SBATCH --partition=v100_normal_q   # Partition of the cluster
 #SBATCH --nodes=1   # Number of compute nodes
@@ -14,4 +14,4 @@ module load CUDA/12.1.1
 
 source activate softRas
 
-python /home/yihao19/PhD_research/3D_bat_reconstruction/SoftRas/models/membrane_kinematic_optimization_model/drivers/2024/HIPCER022_FlightTest1_2_4_driver.py
+python /home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/drivers/2024/HIPCER022_FlightTest1_2_4_driver.py

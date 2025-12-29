@@ -17,8 +17,8 @@ if __name__ == "__main__":
     test_name = "Brunei_2024_HIPCER021_FlightTest1_2_4"
     membrane_simulation_mode = "ANGULAR"
     #[3430, 3520, 3627]
-    start_pose = 3502
-    end_pose =3516
+    start_pose = 3430
+    end_pose =3627
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
@@ -50,10 +50,12 @@ if __name__ == "__main__":
                              template_flip=template_flip
                              )
     
-    driver.run_raw_kinematic_optimize_pipeline()
-    exit(0)
-    driver.run_kinematic_smoothing()
-    driver.run_membrane_optimize_pipeline(epoch_index = 0)
+    #driver.run_raw_kinematic_optimize_pipeline()
+    #exit(0)
+    #driver.run_kinematic_smoothing()
+    #driver.run_membrane_optimize_pipeline(epoch_index = 0)
+    driver.generate_flight_speed()
+    driver.stiffness_visualization()
     exit(0)
     #exit(0)
     driver.run_kinematic_smoothing()

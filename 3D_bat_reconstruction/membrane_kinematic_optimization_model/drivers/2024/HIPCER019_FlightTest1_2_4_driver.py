@@ -22,7 +22,7 @@ if __name__ == "__main__":
     end_pose =6190
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
-    membrane_optimized_frame = 1# frame number that will be optimized
+    membrane_optimized_frame = 3# frame number that will be optimized
     kinematic_opt_epoch = 50
     membrane_opt_epoch =100
     membrane_kinematic_opt_epoch = 10
@@ -58,9 +58,12 @@ if __name__ == "__main__":
     #exit(0)
     
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
-    #driver.run_kinematic_smoothing()
+    driver.generate_flight_speed()
     driver.stiffness_visualization()
     exit(0)
+    #driver.run_kinematic_smoothing()
+    
+
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     driver.run_original_reconstruction()
     #driver.stiffness_visualization()

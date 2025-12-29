@@ -23,7 +23,9 @@ from utils.general_utils import (neg_iou_loss,
                                 if_keep_via_projection,
                                 point_to_image,
                                 list_subfolders,
-                                count_continuous_sublists)
+                                count_continuous_sublists,
+                                std_without_outliers,
+                                mean_without_outliers)
 from utils.blender_utils import update_simulations, get_target_objs, y_forward_z_up
 import torch
 from skopt import gp_minimize
@@ -47,7 +49,7 @@ import subprocess
 from num2words import num2words
 import imageio
 import cv2
-
+from scipy.stats import linregress, pearsonr
 
 
 
@@ -417,8 +419,8 @@ class Optimize_Driver():
         #1. render the mesh optimized mesh
         cmd = []
         cmd.append("./blender")
-        cmd.append(f"{PROJECT_ROOT}/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/membrane_blender/{blender_test_name}/{blender_test_name}.blend")
-        #cmd.append(f"{PROJECT_ROOT}/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/membrane_blender/2024/bat.blend")
+        #cmd.append(f"{PROJECT_ROOT}/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/membrane_blender/{blender_test_name}/{blender_test_name}.blend")
+        cmd.append(f"{PROJECT_ROOT}/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/membrane_blender/2024/bat.blend")
         cmd.append("-b")  # run in backgroud
         cmd.append("--python-use-system-env")
         cmd.append("--python")
@@ -460,11 +462,15 @@ class Optimize_Driver():
                 
             #cloth_obj_path = 'D:/PhDProject_real_data/cloth_simulation/{}/{}.obj'.format(test_name, pose_index)
             cloth_obj_path = os.path.join(self.blender_render_save_path, f"{pose_index}.obj")
-            
+            if('_5_7' in self.test_name):
+                scale_factor = 0.31
+            else:
+                scale_factor = 1
             mesh = sr.Mesh.from_obj(cloth_obj_path, load_texture=False, texture_res = 1, texture_type='surface')
             vertices = mesh.vertices
+            # scale the vertices based on the scale of model
             faces = mesh.faces
-            vertices = y_forward_z_up(vertices) # manually change the orientation of the exported obj
+            vertices = y_forward_z_up(vertices, scale_factor=1/scale_factor) # manually change the orientation of the exported obj
             mesh = sr.Mesh(vertices.repeat(batch_size, 1, 1),faces.repeat(batch_size, 1, 1))
             
             # save the orientation correct obj for future use
@@ -763,7 +769,7 @@ class Optimize_Driver():
         iou_loss_original_list = []
         iou_loss_membrane_opt_list = []
         for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc="iou_loss cal..."):
-            iou_loss = self.iou_loss_cal(pose_index,reconstruction_type = "kinematic_smooth")
+            iou_loss = self.iou_loss_cal(pose_index,reconstruction_type = "kinematic_smoothed")
             iou_loss_original_list.append(iou_loss)
             iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="membrane_opt")
             iou_loss_membrane_opt_list.append(iou_loss)
@@ -797,7 +803,7 @@ class Optimize_Driver():
 
         return
     
-    def stiffness_visualization(self):
+    def stiffness_visualization(self, cropped_range:list = [], suffix:str=""):
         """
         Docstring for stiffness_visualization
         
@@ -805,6 +811,8 @@ class Optimize_Driver():
         :return: Description
         :rtype: Any
         """
+        if not os.path.exists(f"./result_plot/{self.test_name}{suffix}/"):
+            os.makedirs(f"./result_plot/{self.test_name}{suffix}/")
         iteration = 0
         attrib_list = []
         baseline_list = []
@@ -831,9 +839,30 @@ class Optimize_Driver():
         #plt.plot(overall_iou_loss, color = 'black')
         if not os.path.exists(f"./result_plot/{self.test_name}/"):
             os.makedirs(f"./result_plot/{self.test_name}/")
-        plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_{self.membrane_optimized_frame_str}_average_physical_attrib.svg",format="svg")
-        save_json_file({"stiffness":attrib_list},f"./result_plot/{self.test_name}/stiffness.json" )
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_{self.membrane_optimized_frame_str}_average_physical_attrib.svg",format="svg")
+        save_json_file({"stiffness":attrib_list},f"./result_plot/{self.test_name}{suffix}/stiffness.json" )
         plt.close()
+        meanpointprops = dict(marker='D', markeredgecolor='black',
+                      markerfacecolor='red')
+
+        plt.boxplot(attrib_list[:],showmeans=True, meanprops=meanpointprops)
+        mean = mean_without_outliers(np.array(attrib_list[:]))
+        std  = std_without_outliers(np.array(attrib_list[:]))
+        plt.text(
+        1 + 0.15,        # x position (right of box)
+        mean,            # y position
+        f"mean: {mean:.4f}, std: {std:.4f}",   # formatted mean
+        va='center',
+        fontsize=10
+         )
+        plt.ylim(0.0, 0.015)
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_{self.membrane_optimized_frame_str}_average_physical_attrib_avg.svg",format="svg")
+        stiffness_json = {'mean': mean, 
+                          'std':std,
+                          'frame':attrib_list}
+        stiffness_json_path = f"./result_plot/{self.test_name}{suffix}/stiffness.json"
+        with open(stiffness_json_path, 'w') as file: 
+            json.dump(stiffness_json, file, indent=4)
         return
     
     def stiffness_visualization_frame(self, pose_index:int):
@@ -914,11 +943,13 @@ class Optimize_Driver():
         """
         original_iou_loss_list = []
         final_optimized_loss_list = []
-        for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc="iou_loss cal..."):
-            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="original")
+        for pose_index in tqdm(range(self.start_pose+10, self.end_pose-10, 1), desc="iou_loss cal..."):
+            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="kinematic_smoothed")
             original_iou_loss_list.append(iou_loss)
             iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="kinematic_membrane_opt")
             final_optimized_loss_list.append(iou_loss)
+        #original_iou_loss_list= original_iou_loss_list[20:20]
+        #final_optimized_loss_list = final_optimized_loss_list[20:-20]
         plt.plot(original_iou_loss_list, color='black',linestyle = ':')
         plt.plot(final_optimized_loss_list,color = 'black')
         x = np.array([index for index in range(len(original_iou_loss_list))])
@@ -936,6 +967,7 @@ class Optimize_Driver():
                          )
         plt.xlabel("Frame index")
         plt.ylabel("IOU loss")
+        plt.ylim([0.15, 0.3])
         #plt.legend(["original","membrane optimized",])
         if not os.path.exists(f"./result_plot/{self.test_name}/"):
             os.makedirs(f"./result_plot/{self.test_name}/")
@@ -954,11 +986,13 @@ class Optimize_Driver():
         """
         original_iou_loss_list = []
         membrane_optimized_loss_list = []
-        for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc="iou_loss cal..."):
-            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="original")
+        for pose_index in tqdm(range(self.start_pose+10, self.end_pose-10, 1), desc="iou_loss cal..."):
+            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="kinematic_smoothed")
             original_iou_loss_list.append(iou_loss)
             iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="membrane_opt")
             membrane_optimized_loss_list.append(iou_loss)
+        #original_iou_loss_list = original_iou_loss_list[20:-20]
+        #membrane_optimized_loss_list = membrane_optimized_loss_list[20:-20]
         plt.plot(original_iou_loss_list, color='black',linestyle = ':')
         plt.plot(membrane_optimized_loss_list,color = 'black')
         x = np.array([index for index in range(len(original_iou_loss_list))])
@@ -975,6 +1009,7 @@ class Optimize_Driver():
                          alpha=0.2
                          )
         plt.xlabel("Frame index")
+        plt.ylim([0.15, 0.3])
         plt.ylabel("IOU loss")
         #plt.legend(["original","membrane optimized",])
         if not os.path.exists(f"./result_plot/{self.test_name}/"):
@@ -1081,26 +1116,25 @@ class Optimize_Driver():
         else: 
             prefix = "Smoothed_initial"
         fig = plt.figure()    
-        plt.title("X axis")
+
         plt.xlabel("Frame index")
         plt.ylabel("Rotation in radiant")
-        plt.plot(output_json_x_array[:, 1], color = "black", linestyle=':')
-        plt.plot(-output_json_x_array[:, 2], color = "black")
-        plt.legend(["Bone: {}".format(bone_index[1]), "Bone: {}".format(bone_index[2])])
+        plt.plot(output_json_x_array[20:-20, 1], color = "black", linestyle=':')
+        plt.plot(-output_json_x_array[20:-20, 2], color = "black")
+        #plt.legend(["Bone: {}".format(bone_index[1]), "Bone: {}".format(bone_index[2])])
         plt.axhline(y = 0, color = 'black', linestyle = '--') 
         plt.ylim(-1, 1)
 
         plt.savefig(f"./result_plot/{self.test_name}{suffix}/{prefix}_Kinematic_X.svg")
         plt.close()
         fig = plt.figure()
-        plt.title("Y axis")
         #plt.plot(output_json_array[:, 0])
         plt.xlabel("Frame index")
         plt.ylabel("Rotation in radiant")
 
-        plt.plot(output_json_y_array[:, 1], color = "black", linestyle=':')
-        plt.plot(output_json_y_array[:, 2], color = "black")
-        plt.legend(["Bone: {}".format(bone_index[1]), "Bone: {}".format(bone_index[2])])
+        plt.plot(output_json_y_array[20:-20, 1], color = "black", linestyle=':')
+        plt.plot(output_json_y_array[20:-20, 2], color = "black")
+        #plt.legend(["Bone: {}".format(bone_index[1]), "Bone: {}".format(bone_index[2])])
         plt.axhline(y = 0, color = 'black', linestyle = '--') 
         plt.ylim(-1, 1)
 
@@ -1108,14 +1142,13 @@ class Optimize_Driver():
         plt.close()
 
         fig = plt.figure()
-        plt.title("Z axis")
         #plt.plot(output_json_array[:, 0])
         plt.xlabel("Frame index")
         plt.ylabel("Rotation in radiant")
 
-        plt.plot(output_json_z_array[:, 1], color = "black", linestyle=':')
-        plt.plot(output_json_z_array[:, 2], color = "black")
-        plt.legend(["Bone: {}".format(bone_index[1]), "Bone: {}".format(bone_index[2])])
+        plt.plot(output_json_z_array[20:-20, 1], color = "black", linestyle=':')
+        plt.plot(output_json_z_array[20:-20, 2], color = "black")
+        #plt.legend(["Bone: {}".format(bone_index[1]), "Bone: {}".format(bone_index[2])])
         plt.axhline(y = 0, color = 'black', linestyle = '--')
         plt.ylim(-1, 1)
         plt.savefig(f"./result_plot/{self.test_name}{suffix}/{prefix}_Kinematic_Z.svg")
@@ -1123,19 +1156,19 @@ class Optimize_Driver():
 
         fig = plt.figure()
         plt.title("Displacement X axis")
-        plt.plot(displacement_array[:, 0], color = "black")
+        plt.plot(displacement_array[20:-20, 0], color = "black")
         plt.savefig(f"./result_plot/{self.test_name}{suffix}/{prefix}_displacement_X.svg")
         plt.close()
 
         fig = plt.figure()
         plt.title("Displacement Y axis")
-        plt.plot(displacement_array[:, 1], color = "black")
+        plt.plot(displacement_array[20:-20, 1], color = "black")
         plt.savefig(f"./result_plot/{self.test_name}{suffix}/{prefix}_displacement_Y.svg")
         plt.close()
 
         fig = plt.figure()
         plt.title("Displacement Z axis")
-        plt.plot(displacement_array[:, 2], color = "black")
+        plt.plot(displacement_array[20:-20, 2], color = "black")
         plt.savefig(f"./result_plot/{self.test_name}{suffix}/{prefix}_displacement_Z.svg")
         plt.close()
         return
@@ -1256,26 +1289,45 @@ class Optimize_Driver():
             self.original_reconstruction(self.current_pose_index, if_smoothed=True)
         return None
     
-    def generate_flight_speed(self): 
+    def generate_flight_speed(self, suffix:str=""): 
         """function that will plot the flying speed in regular scale
         
         :param self: Descri
         """
+        if not os.path.exists(f"./result_plot/{self.test_name}{suffix}/"):
+            os.makedirs(f"./result_plot/{self.test_name}{suffix}/")
         frame_speed = []
+        if("_5_7" in self.test_name):
+            scale = 0.31
+        else:
+            scale = 1.0
         for pose_index in tqdm(range(self.start_pose+1, self.end_pose, 1), desc=f"calculating flying speed: {self.test_name}"):
             prev_json_path = os.path.join(self.camera_list_path_root, str(pose_index-1), "output_smoothed.json")
             current_json_path = os.path.join(self.camera_list_path_root, str(pose_index), "output_smoothed.json")
             prev_loc = np.array(read_json_file(prev_json_path)['template_displacement'])
             curr_loc = np.array(read_json_file(current_json_path)['template_displacement'])
-            distance = np.linalg.norm(curr_loc - prev_loc) * 4.64
+            distance = np.linalg.norm(curr_loc - prev_loc) * 4.64 * scale
             frame_speed.append(distance * 1069)
         fig = plt.figure()
-        plt.title("Flight speed")
-        plt.plot(frame_speed, color = "black")
-        plt.savefig(f"./result_plot/{self.test_name}/flight_speed.svg")
+        plt.plot(frame_speed[20:-20], color = "black")
+        plt.ylim([0, 10])
+        plt.ylabel("Flying speed (m/s)")
+        plt.xlabel("Frame index")
+        mean = np.mean(frame_speed[20:-20])
+        plt.text(
+        len(frame_speed)//2,        # x position (right of box)
+        mean + 1,                   # y position
+        f"{mean:.4f} m/s",          # formatted mean
+        va='center',
+        fontsize=10
+        )
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/flight_speed.svg")
         plt.close()
+        speed_json = {'speed':frame_speed[20:-20]}
+        speed_json_path = f"./result_plot/{self.test_name}{suffix}/flying_speed.json"
+        with open(speed_json_path, 'w') as file: 
+                json.dump(speed_json,file, indent=4)
 
-            
         return None
 
     def generate_flying_trajectory_gif(self, if_smoothed:bool=False, suffix:str=""):
@@ -1531,31 +1583,31 @@ def project_statistics(if_paper:bool=False) -> None:
     reconstruction_above_5_ratio_list = [reconstruction_above_5s[index]/(above_5s[index]+1e-5) for index, _item in enumerate(above_5s)]
     reconstruction_4_ratio_list = [(reconstruction_4s[index]-reconstruction_above_5s[index])/(camera_4s[index]-above_5s[index]+1e-5) for index, _item in enumerate(above_5s)]
     reconstruction_3_ratio_list = [(reconstruction_3s[index]-reconstruction_4s[index])/(camera_3s[index]-camera_4s[index]+1e-5) for index, _item in enumerate(above_5s)]
-    plt.bar(x, reconstruction_above_5_ratio_list)
+    
+    plt.bar(x, reconstruction_above_5_ratio_list, alpha=0.7,color="green")
     plt.xticks(x, sequence_name)
     plt.xticks(rotation=90, fontsize=5)
-    plt.figtext(0.5, 0.01, f"Camera number: >=5, Average rate: {np.mean(reconstruction_above_5_ratio_list):.2f}", 
+    plt.figtext(0.5, 0.01, f"Camera number: >=5, number: {sum(above_5s)} Average rate: {np.mean(reconstruction_above_5_ratio_list):.2f}", 
                 ha='center', fontsize=10)
     plt.tight_layout(pad=2.5)
     plt.savefig('./images/camera_number_reconstruction_camera_number_5.svg')
     plt.close()
-    plt.bar(x, reconstruction_4_ratio_list)
+    plt.bar(x, reconstruction_4_ratio_list, alpha=0.7,color="orange")
     plt.xticks(x, sequence_name)
     plt.xticks(rotation=90, fontsize=5)
-    plt.figtext(0.5, 0.01, f"Camera number: 4, Average rate: {np.mean(reconstruction_4_ratio_list):.2f}", 
+    plt.figtext(0.5, 0.01, f"Camera number: 4, number: {sum([camera_4s[index]-above_5s[index] for index, _item in enumerate(above_5s)])}, Average rate: {np.mean(reconstruction_4_ratio_list):.2f}", 
                 ha='center', fontsize=10)
     plt.tight_layout(pad=2.5)
     plt.savefig('./images/camera_number_reconstruction_camera_number_4.svg')
     plt.close()
-    plt.bar(x, reconstruction_3_ratio_list)
+    plt.bar(x, reconstruction_3_ratio_list, alpha=0.7,color="red")
     plt.xticks(x, sequence_name)
     plt.xticks(rotation=90, fontsize=5)
-    plt.figtext(0.5, 0.01, f"Camera number: 3, Average ratio: {np.mean(reconstruction_3_ratio_list):.2f}", 
+    plt.figtext(0.5, 0.01, f"Camera number: 3, number: {sum([camera_3s[index]-camera_4s[index] for index, _item in enumerate(above_5s)])} Average ratio: {np.mean(reconstruction_3_ratio_list):.2f}", 
                 ha='center', fontsize=10)
     plt.tight_layout(pad=2.5)
     plt.savefig('./images/camera_number_reconstruction_camera_number_3.svg')
     plt.close()
-    exit(0)
 
     
     bars = plt.bar(sequence_name,candidate_frame_number,color="grey")
@@ -1758,9 +1810,85 @@ def wingbeat_cycle(if_paper:bool=False) -> None:
     plt.savefig("test.svg")
     return
 
+def stiffness_plot_w_speed() -> None:
+    """
+    Docstring for plot the average the stiffness (mean/std) for each sequence
+    """
+    project_root = "./drivers"
+    subroots = [
+    name for name in os.listdir(project_root)
+    if os.path.isdir(os.path.join(project_root, name))]
+    average_speed = []
+    average_stiffness = []
+    std_stiffness = []
+    for subroot in subroots:
+        sub_dirs = [name for name in os.listdir(os.path.join(project_root,subroot,"result_plot"))
+        if os.path.isdir(os.path.join(project_root, subroot,"result_plot",name))]
+        for sub_dir in sub_dirs:
+            speed_json_path = os.path.join(project_root, subroot, "result_plot", sub_dir, 'flying_speed.json')
+            if(not os.path.isfile(speed_json_path)):
+                continue
+            # stiffness info
+
+            stiffness_json_path = os.path.join(project_root, subroot, "result_plot", sub_dir, 'stiffness.json')
+            if(not os.path.isfile(stiffness_json_path)):
+                continue
+            stiffness_json = read_json_file(stiffness_json_path)
+            average_stiffness.append(stiffness_json['mean'])
+            std_stiffness.append(stiffness_json['std'])
+            speed_json = read_json_file(speed_json_path)
+            average_speed.append(np.mean(speed_json['speed']))
+    
+    
+    average_speed = np.array(average_speed)
+    average_stiffness = np.array(average_stiffness)
+    std_stiffness = np.array(std_stiffness)
+    r_average_stiff, p_value_average_stiff = pearsonr(average_speed, average_stiffness)
+    r_std_stiff, p_value_std_stiff = pearsonr(average_speed, std_stiffness)
+    n = len(average_speed)
+    t_stat = r_average_stiff * np.sqrt((n - 2) / (1 - r_average_stiff**2))
+    df = n - 2
+    print(f"Average Stiffness Correlation coefficient r = {r_average_stiff:.4f}")
+    print(f"t-statistic = {t_stat:.4f}")
+    print(f"degrees of freedom = {df}")
+    print(f"p-value = {p_value_average_stiff:.4e}")
+    print(f"Std Stiffness Correlation coefficient r = {r_std_stiff:.4f}")
+    print(f"t-statistic = {t_stat:.4f}")
+    print(f"degrees of freedom = {df}")
+    print(f"p-value = {p_value_std_stiff:.4e}")
+    
+
+    plt.scatter(average_speed, average_stiffness,alpha=0.7)
+    plt.xlabel('Average flying speed (m/s)')
+    plt.ylabel('average stiffness')
+    plt.xlim([2, 6])
+    plt.ylim([0,0.008])
+    slope, intercept, r_value, p_value, std_err = linregress(average_speed, average_stiffness)
+    x_line = np.linspace(2, 6, 100)
+    y_line = slope * x_line + intercept
+    print(f"average: {slope}")
+    plt.plot(x_line, y_line,color='red',linestyle='--',alpha=0.5)
+    plt.savefig('./images/mean_stiffness_w_speed.svg')
+    plt.close()
+
+    plt.scatter(average_speed, std_stiffness,alpha=0.7)
+    plt.xlabel('Average flying speed (m/s)')
+    plt.ylabel('stiffness std')
+    plt.xlim([2, 6])
+    plt.ylim([0,0.008])
+    slope, intercept, r_value, p_value, std_err = linregress(average_speed, std_stiffness)
+    x_line = np.linspace(2, 6, 100)
+    y_line = slope * x_line + intercept
+    print(f"std: {slope}")
+    plt.plot(x_line, y_line, color='red', linestyle='--',alpha=0.5)
+    plt.savefig('./images/std_stiffness_w_speed.svg')
+    plt.close()
+
+    return None
 
 if __name__=="__main__":
-    _ = project_statistics(if_paper=True)
+    #_ = project_statistics(if_paper=True)
     #_ = wingbeat_cycle(if_paper=True)
     #_ = project_average_iou_loss(if_paper=True)
     
+    _=stiffness_plot_w_speed()

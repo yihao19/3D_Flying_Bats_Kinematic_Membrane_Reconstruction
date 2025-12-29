@@ -49,10 +49,10 @@ def get_target_objs(dl, remotes, n):
     return target_objs
 
 
-def y_forward_z_up(vertices): 
-    x = vertices[:, :,  0]
-    y = -vertices[:, :, 2]
-    z = vertices[:, :,  1]
+def y_forward_z_up(vertices, scale_factor: float=1.0): 
+    x = vertices[:, :,  0] * scale_factor
+    y = -vertices[:, :, 2] * scale_factor
+    z = vertices[:, :,  1] * scale_factor
     vertices = torch.stack([x, y, z], axis=2)
     
     return vertices

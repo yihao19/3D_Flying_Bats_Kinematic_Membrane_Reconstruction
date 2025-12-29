@@ -43,13 +43,11 @@ def enable_gpus(device_type, use_cpus=False):
 enable_gpus("CUDA")
 
 
-def y_forward_z_up(vertices): 
-    print(vertices.shape)
-    x = np.expand_dims(vertices[:,  0], 1)
-    y = np.expand_dims(-vertices[:, 2], 1)
-    z = np.expand_dims(vertices[:,  1], 1)
+def y_forward_z_up(vertices, scale_factor:float=1.0): 
+    x = np.expand_dims(vertices[:,  0] * scale_factor, 1) 
+    y = np.expand_dims(-vertices[:, 2] * scale_factor, 1)
+    z = np.expand_dims(vertices[:,  1] * scale_factor, 1)
     vertices =np.concatenate([x, y, z], axis=1)
-    print(vertices.shape)
     return vertices
 
 
@@ -262,7 +260,7 @@ def kinematic_smoothing(factor:int=1, sigma:float=0.33, filter_width:int=6) -> N
     bpy.ops.object.mode_set(mode='OBJECT') # don't forget this step for normal rendering
     return
 
-def load_kinematics(armature, start_frame:int, end_frame:int, reconstruction_project:str,epoch_index:int = 0, if_membrane_opt:bool=True) -> None:
+def load_kinematics(armature, start_frame:int, end_frame:int, reconstruction_project:str,epoch_index:int = 0, if_membrane_opt:bool=True, scale_factor:float=1.0) -> None:
     """
     function to load all the kinematics from raw reconstruction json
 
@@ -272,7 +270,7 @@ def load_kinematics(armature, start_frame:int, end_frame:int, reconstruction_pro
         DESCRIPTION.
     end_frame : int
         DESCRIPTION.
-    reconstruction_project : str
+    reconstruction_project : name of the reconstruction sequence
         DESCRIPTION.
 
     Raises
@@ -321,7 +319,8 @@ def load_kinematics(armature, start_frame:int, end_frame:int, reconstruction_pro
         bone_rest_rotation = read_json_file('/home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/model_template/template_bone_rest_rotation.json')
         bone_rest_rotation = bone_rest_rotation['bone_rest_rotation']
         
-        template_displacement = Vector(pose_dict['template_displacement'])
+       
+        
         scale = 0.005
         
         pose_array = pose_dict['pose']
@@ -336,7 +335,10 @@ def load_kinematics(armature, start_frame:int, end_frame:int, reconstruction_pro
             pose_dict['pose'].append([0,0,0])
         # Get the active bone. If you want to operator on a specific bone, use it's name instead. arm.pose.bones['Bone']
         #bones = context.selected_objects[0].pose.bones
-        
+        # if the 5_7 the location needs to be rescaled by 0.35 
+       
+        pose_dict['joints'][0] = np.array(pose_dict['joints'][0]) * scale_factor
+
         for bone_index, bone in enumerate(armature.pose.bones):
             bone_name = bone.name
             parts = bone_name.split('.')
@@ -420,7 +422,6 @@ def membrane_cloth_setting(tension_stiffness:float,
     settings.quality = opt_quality # Simulation quality
     settings.mass =mass  # Cloth mass
     settings.air_damping = air_damping# Air resistance
-    print("tension_stiffness: ", tension_stiffness)
     
     settings.tension_stiffness =tension_stiffness # Tension stiffness
     settings.compression_stiffness = 0
@@ -467,7 +468,8 @@ def mesh_render(obj_save_root:str,
                 reconstruction_project:str,
                 start_frame:int,
                 end_frame:int,
-                mesh_name:str='Icosphere.001') -> None:
+                mesh_name:str='Icosphere.001',
+                scale_factor:float=1.0) -> None:
     scene = bpy.context.scene
     for frame_index in range(start_frame, end_frame +1): 
         scene.frame_set(frame_index)
@@ -479,7 +481,7 @@ def mesh_render(obj_save_root:str,
         save_path = os.path.join(obj_save_root, reconstruction_project, "blender_render",f"{frame_index}.obj")
         bpy.ops.wm.obj_export(filepath=save_path)
         original_vertices, original_faces = load_obj(save_path)
-        rectified_vertices = y_forward_z_up(original_vertices)
+        rectified_vertices = y_forward_z_up(original_vertices, scale_factor=scale_factor)
         if(frame_index == end_frame):
             save_path = os.path.join(obj_save_root, reconstruction_project, "membrane_optimized_mesh", f"{frame_index}.obj")
             save_obj(rectified_vertices, original_faces,save_path)
@@ -540,7 +542,11 @@ def membrane_reconstruction_render(config) -> None:
     reconstruction_project = config['reconstruction_project']
     tension_stiffness = config['tension_stiffness']
     if_membrane_opt = config['if_membrane_opt']
-
+    if("5_7" in reconstruction_project):
+        scale_factor = 0.31
+    else:
+        scale_factor = 1.0
+    print(scale_factor)
     #scene setting
     scene_setting(start_frame, end_frame)
     armature = pose_reset()
@@ -549,11 +555,11 @@ def membrane_reconstruction_render(config) -> None:
         # if optimize the membrane
         membrane_cloth_setting(tension_stiffness, start_frame, end_frame)
         #3. load kinematic  of the project
-        load_kinematics(armature, start_frame, end_frame, reconstruction_project, epoch_index = epoch_index, if_membrane_opt=if_membrane_opt)
+        load_kinematics(armature, start_frame, end_frame, reconstruction_project, epoch_index = epoch_index, if_membrane_opt=if_membrane_opt,scale_factor=scale_factor)
         #4. smooth the loaded kinematic
         #kinematic_smoothing()
         #5. render the membrane enabled mesh
-        mesh_render(project_root, reconstruction_project, start_frame, end_frame)
+        mesh_render(project_root, reconstruction_project, start_frame, end_frame, scale_factor=1/scale_factor)
           # quit blender
     else: 
         #3. load the kinematics
@@ -587,12 +593,12 @@ if __name__=="__main__":
     blender_config = {"start_frame":int(start_frame), 
                       "end_frame":int(end_frame), 
                       "project_root":str(project_root),
-                      "reconstruction_project":str(f"Brunei_{PROJECT_YEAR}_"+reconstruction_project),
-                      #"reconstruction_project":str(reconstruction_project),
+                      #"reconstruction_project":str(f"Brunei_{PROJECT_YEAR}_"+reconstruction_project),
+                      "reconstruction_project":str(reconstruction_project),
                       "tension_stiffness":float(tension_stiffness),
                       "epoch_index":int(epoch_index),
                       "if_membrane_opt":True if if_membrane_opt.lower()=='true' else False}
     membrane_reconstruction_render(blender_config)
 
     #./blender /home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/membrane_blender/bat_15_1/bat_15_1.blend -b --python-use-system-env --python /home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/blender_script_template.blend.py -- /home/yihao19/PhDProject_real_data bat_15_1 102 110 0.018193772992058585 0 True
-    #./blender /home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/membrane_blender/2024/bat.blend -b --python-use-system-env --python /home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/blender_script_template.blend.py -- /home/yihao19/PhDProject_real_data Brunei_2024_HIPCER019_FlightTest1_2_4 5692 5700 0.018193772992058585 0 True
+    #./blender /home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/membrane_blender/2024/bat.blend -b --python-use-system-env --python /home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/blender_script_template.blend.py -- /home/yihao19/PhDProject_real_data Brunei_2024_HIPCER021_FlightTest1_5_7 3030 3040 0.018193772992058585 0 True

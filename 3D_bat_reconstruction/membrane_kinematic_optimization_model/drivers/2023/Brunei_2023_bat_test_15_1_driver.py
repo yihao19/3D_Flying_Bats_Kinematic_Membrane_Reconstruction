@@ -61,7 +61,7 @@ if __name__ == "__main__":
     #exit(0)
     #driver.run_kinematic_smoothing()
     #driver.plot_camera_number()
-    #driver.generate_flight_speed()
+    driver.generate_flight_speed()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     #exit(0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)

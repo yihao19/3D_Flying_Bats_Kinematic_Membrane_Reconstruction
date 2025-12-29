@@ -11,4 +11,4 @@
 module load Miniconda3/24.7.1-0
 module load CUDA/12.1.1
 source activate softRas
-python /home/yihao19/PhD_research/3D_bat_reconstruction/SoftRas/models/membrane_kinematic_optimization_model/drivers/2024/HIPCER023_FlightTest4_2_4_driver.py
+python /home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/drivers/2024/HIPCER023_FlightTest4_2_4_driver.py
