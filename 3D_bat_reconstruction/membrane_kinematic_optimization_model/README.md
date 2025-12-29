@@ -333,9 +333,9 @@ Camera group two (2): 52,53,54,55,61,64,65,71,72,73,74,75
 ### Stiffness (mean/std) and flying speed
 <div>
     <figure  style="text-align: center;">
-        <img src="images/mean_stiffness_w_speed.svg" width="600" height="600" alt="stiffness mean and flying speed"/>
+        <img src="images/mean_stiffness_w_speed.svg" width="500" height="500" alt="stiffness mean and flying speed"/>
     </figure>
     <figure  style="text-align: center;">
-        <img src="images/std_stiffness_w_speed.svg" width="600" height="600" alt="stiffness std and flying speed"/>
+        <img src="images/std_stiffness_w_speed.svg" width="500" height="500" alt="stiffness std and flying speed"/>
     </figure>
 </div>
