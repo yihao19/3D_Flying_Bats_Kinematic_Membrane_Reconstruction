@@ -19,7 +19,7 @@ if __name__ == "__main__":
     membrane_simulation_mode = "ANGULAR"
     #[2666,2850 ,3255]
     start_pose = 2700#2849
-    end_pose =3000#
+    end_pose =3200#
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
@@ -53,8 +53,11 @@ if __name__ == "__main__":
     
     #driver.run_raw_kinematic_optimize_pipeline()
     #exit(0)
-    driver.run_kinematic_smoothing()
+    #driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
+    driver.generate_flight_speed()
+    driver.stiffness_visualization()
+    exit(0)    
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     driver.run_original_reconstruction()
     #driver.stiffness_visualization()

@@ -200,7 +200,7 @@ class Optimize_Driver():
             self.reverse = False
         # to deal with different camera calibration
         if("5_7" in self.test_name):
-            self.template_initial_scale = 0.01
+            self.template_initial_scale = 0.0115
         else: 
             self.template_initial_scale = 0.0035
         self.opposite_direction = opposite_direction  # back and force
@@ -549,7 +549,7 @@ class Optimize_Driver():
         result = gp_minimize(self.membrane_optimization_loss_bayes_mode_v2,     # The function to minimize
                              searching_space,                   # The search space
                              n_calls= self.membrane_opt_epoch,              # The number of evaluations
-                             random_state=42,
+                             random_state=None,
                              initial_point_generator='lhs',
                              n_initial_points=int(0.8 * self.membrane_opt_epoch),
                              acq_optimizer="lbfgs",
@@ -1499,7 +1499,8 @@ class Optimize_Driver():
         return None
     
     def run_membrane_kinematic_update_pipeline(self, epoch_index):
-        for pose_index in range(self.start_pose, self.end_pose, 1): 
+        MEMBRANE_BUFFER = 10
+        for pose_index in range(self.start_pose+MEMBRANE_BUFFER, self.end_pose, 1): 
             self.current_pose_index = pose_index
             self.current_epoch = epoch_index
             self.membrane_kinematic_optimize(pose_index, pipeline_epoch=self.current_epoch)
@@ -1658,6 +1659,22 @@ def project_statistics(if_paper:bool=False) -> None:
     plt.xticks(index_location[::5])
     plt.savefig("./paper_images/frame_number_portion.svg")
     plt.close()
+
+    plt.bar(x, reconstruction_above_5_ratio_list, alpha=0.7,color="green")
+    plt.xticks(index_location[::5])
+    plt.savefig("./paper_images/camera_number_reconstruction_camera_number_5.svg")
+    plt.close()
+
+    plt.bar(x, reconstruction_4_ratio_list, alpha=0.7,color="orange")
+    plt.xticks(index_location[::5])
+    plt.savefig("./paper_images/camera_number_reconstruction_camera_number_4.svg")
+    plt.close()
+
+    plt.bar(x, reconstruction_3_ratio_list, alpha=0.7,color="red")
+    plt.xticks(index_location[::5])
+    plt.savefig("./paper_images/camera_number_reconstruction_camera_number_3.svg")
+    plt.close()
+
     return
 
 def project_membrane_stiffness(if_paper:bool=False):
@@ -1825,6 +1842,8 @@ def stiffness_plot_w_speed() -> None:
         sub_dirs = [name for name in os.listdir(os.path.join(project_root,subroot,"result_plot"))
         if os.path.isdir(os.path.join(project_root, subroot,"result_plot",name))]
         for sub_dir in sub_dirs:
+            #if("2_4" in sub_dir):
+            #    continue
             speed_json_path = os.path.join(project_root, subroot, "result_plot", sub_dir, 'flying_speed.json')
             if(not os.path.isfile(speed_json_path)):
                 continue
@@ -1868,10 +1887,13 @@ def stiffness_plot_w_speed() -> None:
     y_line = slope * x_line + intercept
     print(f"average: {slope}")
     plt.plot(x_line, y_line,color='red',linestyle='--',alpha=0.5)
+    plt.title(f"p-value = {p_value_average_stiff:.4e}   r-value: {r_average_stiff:.4f}")
     plt.savefig('./images/mean_stiffness_w_speed.svg')
+    plt.savefig('./paper_images/mean_stiffness_w_speed.svg')
     plt.close()
 
     plt.scatter(average_speed, std_stiffness,alpha=0.7)
+    plt.title(f"p-value = {p_value_std_stiff:.4e}   r-value: {r_std_stiff:.4f}")
     plt.xlabel('Average flying speed (m/s)')
     plt.ylabel('stiffness std')
     plt.xlim([2, 6])
@@ -1882,6 +1904,7 @@ def stiffness_plot_w_speed() -> None:
     print(f"std: {slope}")
     plt.plot(x_line, y_line, color='red', linestyle='--',alpha=0.5)
     plt.savefig('./images/std_stiffness_w_speed.svg')
+    plt.savefig('./paper_images/std_stiffness_w_speed.svg')
     plt.close()
 
     return None
