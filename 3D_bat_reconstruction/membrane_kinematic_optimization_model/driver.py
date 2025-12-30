@@ -773,6 +773,9 @@ class Optimize_Driver():
             iou_loss_original_list.append(iou_loss)
             iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="membrane_opt")
             iou_loss_membrane_opt_list.append(iou_loss)
+        
+        iou_loss_membrane_opt_list = iou_loss_membrane_opt_list[10:-10]
+        iou_loss_original_list = iou_loss_original_list[10:-10]
 
         plt.plot(iou_loss_membrane_opt_list, color='black')
         plt.plot(iou_loss_original_list, color='black', linestyle=':')
@@ -793,10 +796,11 @@ class Optimize_Driver():
                          )
         plt.xlabel("Frame index")
         plt.ylabel("IOU loss")
+        plt.ylim([0.15, 0.5])
         #plt.legend(["original","membrane optimized",])
         if not os.path.exists(f"./result_plot/{self.test_name}/"):
             os.makedirs(f"./result_plot/{self.test_name}/")
-        plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_loss_original_VS_membrane_opt.svg",format="svg")
+        plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_loss_original_VS_membrane_opt_wo_legend.svg",format="svg")
         plt.legend(["cloth-based membrane", "LBS"])
         plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_loss_original_VS_membrane_opt.svg",format="svg")
         plt.close()
@@ -967,7 +971,7 @@ class Optimize_Driver():
                          )
         plt.xlabel("Frame index")
         plt.ylabel("IOU loss")
-        plt.ylim([0.15, 0.3])
+        plt.ylim([0.15, 0.50])
         #plt.legend(["original","membrane optimized",])
         if not os.path.exists(f"./result_plot/{self.test_name}/"):
             os.makedirs(f"./result_plot/{self.test_name}/")
