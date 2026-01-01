@@ -1334,7 +1334,7 @@ class Optimize_Driver():
 
         return None
 
-    def generate_flying_trajectory_gif(self, if_smoothed:bool=False, suffix:str=""):
+    def generate_flying_trajectory_gif(self, if_smoothed:bool=True, suffix:str=""):
         """
         generate the gif that contains the flying trajectory of the point cloud in bev view
         """
@@ -1344,7 +1344,8 @@ class Optimize_Driver():
         elif("5_7" in self.test_name):
             array_rectifier = ArrayRectify("5_7")
         else: 
-            return
+            array_rectifier = ArrayRectify("2023")
+            
         transformation, rectified_camera_location, camera_names = array_rectifier.rectifying()
 
         if not os.path.exists(f"./result_plot/{self.test_name}{suffix}/"):

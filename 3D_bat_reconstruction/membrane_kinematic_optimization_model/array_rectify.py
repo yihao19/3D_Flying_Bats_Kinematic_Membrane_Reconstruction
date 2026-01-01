@@ -30,7 +30,13 @@ class ArrayRectify():
             self.scaler = 1.32
             self.reference_camera_index = 2
         elif(self.name == "2023"):
-            pass
+            self.calibration_file = "../../calibration_mat/2023.mat"
+            self.camera_names = [21,23,24,25,31,32,33,34,35,41,42,43,44]
+            self.ground_camera_index = [1,2,6,7]
+            self.y_forward:list = [1,6]
+            self.x_forward:list = [2,1]
+            self.scaler = 4.8
+            self.reference_camera_index = 2
         self.mat_contents = sio.loadmat(self.calibration_file)      
         self.camera_locs = np.array(self.mat_contents['in']['Ce'][0][0]).T
        
@@ -52,7 +58,7 @@ class ArrayRectify():
             ax.set_zlabel('Z (m)')
             for i in range(len(camera_loc_rectified)):
                 ax.text(x[i], y[i], z[i], f'{self.camera_names[i]}')
-            #ax.view_init(elev=0, azim=90)
+            ax.view_init(elev=0, azim=90)
             plt.savefig(f"calibration_rectified_{self.name}.svg")
             plt.close()
 
@@ -102,13 +108,13 @@ class ArrayRectify():
             )
         homo_tf = np.eye(4)
         homo_tf[:3,:3] = R
-        transformation, rectified_camera_locs = self.camera_loc_rectify(homo_tf, if_plot=False)
+        transformation, rectified_camera_locs = self.camera_loc_rectify(homo_tf, if_plot=True)
 
         return transformation, rectified_camera_locs,self.camera_names 
         #return transformation, rectified_camera_locs,self.camera_names 
     
 if __name__=="__main__":
-    array_rectifier = ArrayRectify("5_7")
+    array_rectifier = ArrayRectify("2023")
     array_rectifier.rectifying()
 
     

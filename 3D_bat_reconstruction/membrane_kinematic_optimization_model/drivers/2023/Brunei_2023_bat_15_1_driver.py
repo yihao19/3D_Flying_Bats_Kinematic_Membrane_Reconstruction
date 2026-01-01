@@ -54,7 +54,8 @@ if __name__ == "__main__":
                              if_use_previous_kinematics,
                              opposite_direction,
                              template_flip=template_flip)
-    
+    driver.generate_flying_trajectory_gif(if_smoothed=True)
+    exit(0)  
     #driver.run_raw_kinematic_optimize_pipeline()
     #exit(0)
     #driver.plot_camera_number()
@@ -77,4 +78,3 @@ if __name__ == "__main__":
     #driver.run_original_kinematic_smooth_rendering()
     #driver.iou_loss_membrane_compare()
     #driver.scale_parameter_plot()
-    #driver.generate_flying_trajectory_gif(if_smoothed=True)
