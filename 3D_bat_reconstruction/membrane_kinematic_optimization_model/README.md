@@ -68,7 +68,7 @@ Camera group two (2): 52,53,54,55,61,64,65,71,72,73,74,75
   </figure>
 
   <figure style="text-align: center;">
-    <img src="drivers/2023/result_plot/Brunei_2023_bat_16/Brunei_2023_bat_16_trajectory.gif"      width="330" height="330" alt="Brunei_2023_bat_16" />
+    <img src="drivers/2023/result_plot/Brunei_2023_bat_16/Brunei_2023_bat_16_smoothed_trajectory.gif"      width="330" height="330" alt="Brunei_2023_bat_16" />
   </figure>
 
   <figure style="text-align: center;">
