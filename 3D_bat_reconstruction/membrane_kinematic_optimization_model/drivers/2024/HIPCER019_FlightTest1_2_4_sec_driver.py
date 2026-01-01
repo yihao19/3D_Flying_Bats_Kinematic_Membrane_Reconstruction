@@ -56,7 +56,8 @@ if __name__ == "__main__":
    
     #driver.plot_camera_number()
     #exit(0)
-    
+    driver.generate_flying_trajectory_gif(if_smoothed=True, suffix="_sec")
+    exit(0)
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     #exit(0)
     driver.generate_flight_speed(suffix="_sec")
@@ -75,4 +76,4 @@ if __name__ == "__main__":
     #driver.run_original_kinematic_smooth_rendering()
     #driver.iou_loss_membrane_compare()
     #driver.scale_parameter_plot()
-    driver.generate_flying_trajectory_gif(if_smoothed=True)
+   

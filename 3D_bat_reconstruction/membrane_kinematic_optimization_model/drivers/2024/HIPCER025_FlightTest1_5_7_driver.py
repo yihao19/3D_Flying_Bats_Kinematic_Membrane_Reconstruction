@@ -58,7 +58,7 @@ if __name__ == "__main__":
     driver.generate_flight_speed()
     driver.stiffness_visualization()
     exit(0)    
-#driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
+    #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     driver.run_original_reconstruction()
     #driver.stiffness_visualization()
     driver.plot_initial_kinematic(kinematic_smoothed=False)

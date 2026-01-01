@@ -51,7 +51,8 @@ if __name__ == "__main__":
                              template_flip=template_flip, 
                              glitched_camera_indexes = glitched_camera_indexes
                              )
-    
+    driver.generate_flying_trajectory_gif(if_smoothed=True)
+    exit(0)
     #driver.run_raw_kinematic_optimize_pipeline()
     #driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)

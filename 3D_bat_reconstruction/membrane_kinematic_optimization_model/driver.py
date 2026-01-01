@@ -50,7 +50,7 @@ from num2words import num2words
 import imageio
 import cv2
 from scipy.stats import linregress, pearsonr
-
+from array_rectify import ArrayRectify
 
 
 PROJECT_ROOT = "/home/yihao19"
@@ -1079,7 +1079,7 @@ class Optimize_Driver():
         fig.savefig(f"./result_plot/{self.test_name}/{self.test_name}_camera_number.svg",format="svg")
         return 
 
-    def plot_initial_kinematic(self, bone_index = [0,5,18], kinematic_smoothed:bool=False, suffix:str=""):
+    def plot_initial_kinematic(self, bone_index = [0,6,19], kinematic_smoothed:bool=False, suffix:str=""):
         """
         Docstring for plot_initial_kinematic
         
@@ -1338,6 +1338,15 @@ class Optimize_Driver():
         """
         generate the gif that contains the flying trajectory of the point cloud in bev view
         """
+        track_indices = {263:[], 252: [], 268: [], 270: [], 283: [], 257: [], 254: [], 260: [], 258: [], 598: [], 105: [], 154:[]}
+        if("2_4" in self.test_name):
+            array_rectifier = ArrayRectify("2_4")
+        elif("5_7" in self.test_name):
+            array_rectifier = ArrayRectify("5_7")
+        else: 
+            return
+        transformation, rectified_camera_location, camera_names = array_rectifier.rectifying()
+
         if not os.path.exists(f"./result_plot/{self.test_name}{suffix}/"):
             os.makedirs(f"./result_plot/{self.test_name}{suffix}/")
         if(if_smoothed == True):
@@ -1346,7 +1355,7 @@ class Optimize_Driver():
         else: 
             prefix = "initial"
             kinematic_file_name = "output.json"
-
+        
         gif_output_path = os.path.join(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_{prefix}_trajectory.gif")
         gif_writter = imageio.get_writer(gif_output_path, loop=0, fps=40)
         # get the first reconstruction pose and function as reference
@@ -1364,6 +1373,7 @@ class Optimize_Driver():
             pose_json_path = os.path.join(self.kinematic_save_path_root, str(pose_index),kinematic_file_name)
             file = open(pose_json_path)
             pose_json = json.load(file)
+            '''
             rotation_euler = pose_json['pose'][0]
             displacement = pose_json['template_displacement']
             rotation_matrix = quat_to_rotmat(rodrigues(rotation_euler))
@@ -1372,7 +1382,7 @@ class Optimize_Driver():
             rect_displacement = (np.array(displacement) - np.array(root_displacement)).tolist()
             pose_json['template_displacement'] = [0,0,0]
             pose_json['pose'][0] = rect_rotation_euler
-
+            '''
             kinematic_model = Kinematic_model(bone_skining_matrix_name=self.model_template,
                                           opposite_direction=self.opposite_direction, 
                                           template_initial_scale=self.template_initial_scale).cuda()
@@ -1394,27 +1404,61 @@ class Optimize_Driver():
             pose = torch.tensor(pose).cuda()
             output_mesh = kinematic_model.render_original(estimated_location, pose)
             vertices = output_mesh.vertices.cpu().numpy()[0]
-            fig = plt.figure()
-            ax = fig.add_subplot(projection='3d') # or use plt.axes(projection='3d')
-
+            fig= plt.figure(figsize=(10, 10))
+            fig.suptitle(f"{self.test_name} summary", fontsize=16)
+            ax1 = fig.add_subplot(2,2,1,projection='3d') # or use plt.axes(projection='3d')
+            ax2 = fig.add_subplot(2,2,2,projection='3d') # or use plt.axes(projection='3d')
+            ax3 = fig.add_subplot(2,2,3)
+            ax4 = fig.add_subplot(2,2,4)
             # 3. Create the 3D plot
-           
-            x = vertices[:, 0]
-            y = vertices[:, 1]
+            # plot the camera location
+            ax1.scatter(rectified_camera_location[0], rectified_camera_location[1],rectified_camera_location[2], c='r', marker='o',s=5) # 'c' for color, 'marker' for style
+            for i in range(len(camera_names)):
+                ax1.text(rectified_camera_location[0][i], rectified_camera_location[1][i], rectified_camera_location[2][i], f'{camera_names[i]}')
+            # applying the rectifying matrix
+            vertices = (transformation @ np.hstack([vertices, np.ones((vertices.shape[0], 1))]).T).T
+            x = vertices[:, 0] 
+            y = vertices[:, 1] 
             z = vertices[:, 2]
-            ax.scatter(x, y, z, c='b', marker='o',s=0.01) # 'c' for color, 'marker' for style
-            ax.set_xlabel('X Label')
-            ax.set_ylabel('Y Label')
-            ax.set_zlabel('Z Label')
-            ax.set_xlim([-0.05, 0.05])
-            ax.set_ylim([-0.05, 0.05])
-            ax.set_zlim([-0.05, 0.05])
-            ax.set_title(f"{self.test_name}: {pose_index}")
-            ax.view_init(elev=80, azim=-60)
+            for key in track_indices.keys():
+                track_indices[key].append(vertices[key])
+            ax1.scatter(x, y, z, c='b', marker='o',s=0.1) # 'c' for color, 'marker' for style
+            ax1.set_xlabel('X (m)')
+            ax1.set_ylabel('Y (m)')
+            ax1.set_zlabel('Z (m)')
+            ax1.set_xlim([-2.5, 0])
+            ax1.set_ylim([-2.5, 0])
+            ax1.set_zlim([0, 2.5])
+            #ax1.set_title(f"{self.test_name}: {pose_index} geomtry")
+            ax1.view_init(elev=0, azim=30)
+            # plotting the trajectory
+            for key in track_indices.keys():
+                track_array = np.array(track_indices[key])
+                ax2.plot(track_array[:,0], track_array[:,1], track_array[:,2], linewidth=1)
+            #ax2.set_title(f"{self.test_name}: {pose_index} trajectory")
+            ax2.set_zlim([0, 2.5])
+            ax2.set_xlabel('X (m)')
+            ax2.set_ylabel('Y (m)')
+            ax2.set_zlabel('Z (m)')
+            # plot the z axis altitude
+            index = range(len(track_indices[154]))
+            ax3.plot(index, np.array(track_indices[154])[:,2], color='black')
+            ax3.set_ylim([0,2.5])
+            ax3.set_xlabel("frame index")
+            ax3.set_ylabel("altitude (m)")
+            # plot the xy axis to show the direction change
+            ax4.plot(np.array(track_indices[154])[:,0], np.array(track_indices[154])[:,1], color='black')
+            ax4.set_xlim([-3,3])
+            ax4.set_ylim([-3,3])
+            ax4.set_xlabel("x location (m)")
+            ax4.set_ylabel("y location (m)")
             fig.savefig(f"{self.test_name}_{pose_index}.png")
+            if(pose_index == self.end_pose -1):
+              plt.savefig(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_{prefix}_final_frame.svg",format="svg")  
             plt.close()
             plot_img = cv2.imread(f"{self.test_name}_{pose_index}.png")
             gif_writter.append_data(plot_img)
+          
             os.remove(f"{self.test_name}_{pose_index}.png")
            
         gif_writter.close()
@@ -1531,6 +1575,7 @@ def project_statistics(if_paper:bool=False) -> None:
     reconstruction_above_5s = []
     reconstruction_4s = []
     reconstruction_3s = []
+    reconstruction_less_3s = []
     for project in tqdm(subdirectories[:], desc="counting reconstructions"):
         if("Brunei" in project): 
             # this is a project subfoler
@@ -1553,6 +1598,7 @@ def project_statistics(if_paper:bool=False) -> None:
             reconstruction_above_5 = 0
             reconstruction_4 = 0
             reconstruction_3 = 0
+            reconstruction_less_3 = 0
             reconstructed_index = [str(p).split('_')[-1].split('.')[0] for p in search_path.iterdir() if p.is_file()]
             for sub_dir in subdirs: 
                 sub_dir_index = str(sub_dir).split('/')[-1]
@@ -1574,14 +1620,14 @@ def project_statistics(if_paper:bool=False) -> None:
                     if(len(camera_number) >= 3):
                         reconstruction_3 +=1
                 else:
-                    continue
+                    reconstruction_less_3 += 1
             
             above_5s.append(above_5)
             camera_4s.append(camera_4)
             camera_3s.append(camera_3)
             reconstruction_above_5s.append(reconstruction_above_5)
             reconstruction_4s.append(reconstruction_4)
-            reconstruction_3s.append(reconstruction_3)
+            reconstruction_less_3s.append(reconstruction_less_3)
     # plot the percentation of camera number
     width = 0.25
     x = np.arange(len(sequence_name))
@@ -1657,6 +1703,7 @@ def project_statistics(if_paper:bool=False) -> None:
 
     #plot individual frame number
     index_location = np.arange(0, total_sequence)
+    
     plt.bar(index_location,camera_3s,alpha=0.7, color='red' )
     plt.bar(index_location,camera_4s,alpha=0.7,color="orange")
     plt.bar(index_location,above_5s, alpha=0.7,color="green")
@@ -1842,12 +1889,13 @@ def stiffness_plot_w_speed() -> None:
     average_speed = []
     average_stiffness = []
     std_stiffness = []
+    names = []
     for subroot in subroots:
         sub_dirs = [name for name in os.listdir(os.path.join(project_root,subroot,"result_plot"))
         if os.path.isdir(os.path.join(project_root, subroot,"result_plot",name))]
         for sub_dir in sub_dirs:
-            #if("2_4" in sub_dir):
-            #    continue
+            if("_5_7" in sub_dir):
+                continue
             speed_json_path = os.path.join(project_root, subroot, "result_plot", sub_dir, 'flying_speed.json')
             if(not os.path.isfile(speed_json_path)):
                 continue
@@ -1861,7 +1909,7 @@ def stiffness_plot_w_speed() -> None:
             std_stiffness.append(stiffness_json['std'])
             speed_json = read_json_file(speed_json_path)
             average_speed.append(np.mean(speed_json['speed']))
-    
+            names.append(sub_dir)
     
     average_speed = np.array(average_speed)
     average_stiffness = np.array(average_stiffness)
@@ -1892,8 +1940,10 @@ def stiffness_plot_w_speed() -> None:
     print(f"average: {slope}")
     plt.plot(x_line, y_line,color='red',linestyle='--',alpha=0.5)
     plt.title(f"p-value = {p_value_average_stiff:.4e}   r-value: {r_average_stiff:.4f}")
-    plt.savefig('./images/mean_stiffness_w_speed.svg')
     plt.savefig('./paper_images/mean_stiffness_w_speed.svg')
+    for index, name in enumerate(names):
+        plt.text(average_speed[index], average_stiffness[index], name, fontsize=3, ha='right')
+    plt.savefig('./images/mean_stiffness_w_speed.svg')
     plt.close()
 
     plt.scatter(average_speed, std_stiffness,alpha=0.7)
@@ -1907,8 +1957,10 @@ def stiffness_plot_w_speed() -> None:
     y_line = slope * x_line + intercept
     print(f"std: {slope}")
     plt.plot(x_line, y_line, color='red', linestyle='--',alpha=0.5)
-    plt.savefig('./images/std_stiffness_w_speed.svg')
     plt.savefig('./paper_images/std_stiffness_w_speed.svg')
+    for index, name in enumerate(names):
+        plt.text(average_speed[index], std_stiffness[index], name, fontsize=3, ha='right')
+    plt.savefig('./images/std_stiffness_w_speed.svg')
     plt.close()
 
     return None

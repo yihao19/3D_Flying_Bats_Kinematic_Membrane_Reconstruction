@@ -57,7 +57,11 @@ if __name__ == "__main__":
     #driver.calibration_validation(pose_index=4400)
     
     #exit(0)
-    driver.run_kinematic_smoothing()
+    #driver.run_kinematic_smoothing()
+    driver.run_membrane_optimize_pipeline(epoch_index = 0)
+    driver.generate_flight_speed(suffix="_sec")
+    driver.stiffness_visualization(suffix="_sec")
+    exit(0)
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     driver.run_original_reconstruction()

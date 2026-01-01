@@ -67,7 +67,7 @@ if __name__ == "__main__":
     #driver.plot_camera_number()
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     #driver.run_original_reconstruction()
-    driver.iou_loss_membrane_compare()
+    #driver.iou_loss_membrane_compare()
     #driver.iou_loss_initial_vs_final()
     #driver.up_down_stroke_stiffness()
     #driver.stiffness_visualization()
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     #driver.iou_loss_compare()
     #driver.stiffness_visualization()
     #driver.plot_initial_kinematic(kinematic_smoothed=False)
-    #driver.plot_initial_kinematic(kinematic_smoothed=True)
+    driver.plot_initial_kinematic(kinematic_smoothed=True)
    
     #driver.iou_loss_original()
     #driver.run_original_kinematic_smooth_rendering()

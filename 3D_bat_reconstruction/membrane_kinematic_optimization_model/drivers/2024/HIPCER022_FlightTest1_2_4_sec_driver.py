@@ -50,6 +50,8 @@ if __name__ == "__main__":
                              opposite_direction,
                              template_flip=template_flip
                              )
+    driver.generate_flying_trajectory_gif(if_smoothed=True, suffix="_sec")
+    exit(0)
     #driver.plot_camera_number()
     #exit(0)
     #driver.run_raw_kinematic_optimize_pipeline()
