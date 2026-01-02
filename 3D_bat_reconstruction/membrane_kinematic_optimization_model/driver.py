@@ -463,7 +463,7 @@ class Optimize_Driver():
             #cloth_obj_path = 'D:/PhDProject_real_data/cloth_simulation/{}/{}.obj'.format(test_name, pose_index)
             cloth_obj_path = os.path.join(self.blender_render_save_path, f"{pose_index}.obj")
             if('_5_7' in self.test_name):
-                scale_factor = 0.315
+                scale_factor = 0.328
             else:
                 scale_factor = 1
             mesh = sr.Mesh.from_obj(cloth_obj_path, load_texture=False, texture_res = 1, texture_type='surface')
@@ -889,8 +889,6 @@ class Optimize_Driver():
             except:
                 #temp_list.append(0)
                 break
-        
-
         plt.plot(temp_list[:], color = 'black')
         plt.xlabel("Frame index")
         plt.ylabel("Tension stiffness")
@@ -1913,6 +1911,13 @@ def stiffness_plot_w_speed() -> None:
             average_speed.append(np.mean(speed_json['speed']))
             names.append(sub_dir)
     
+    name_dict = {}
+    for name in names:
+        name_dict[name] = []
+        name_dict[name]['average_speed'] = average_speed[names.index(name)]
+        name_dict[name]['average_stiffness'] = 
+    with open('./flying_info_tag.json', 'w') as file: 
+        json.dump(name_dict,file, indent=4)
     average_speed = np.array(average_speed)
     average_stiffness = np.array(average_stiffness)
     std_stiffness = np.array(std_stiffness)

@@ -543,7 +543,7 @@ def membrane_reconstruction_render(config) -> None:
     tension_stiffness = config['tension_stiffness']
     if_membrane_opt = config['if_membrane_opt']
     if("5_7" in reconstruction_project):
-        scale_factor = 0.315
+        scale_factor = 0.328
     else:
         scale_factor = 1.0
     print(scale_factor)

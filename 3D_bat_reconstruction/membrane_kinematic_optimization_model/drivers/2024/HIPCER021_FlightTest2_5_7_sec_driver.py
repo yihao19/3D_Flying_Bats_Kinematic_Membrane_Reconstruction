@@ -56,9 +56,8 @@ if __name__ == "__main__":
     #driver.scale_parameter_plot(suffix="_sec")
     #exit(0)
     #driver.run_kinematic_smoothing()
+
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
-    #driver.stiffness_visualization_frame(pose_index=1110)
-    #exit(0)
     #driver.generate_flight_speed(suffix="_sec")
     driver.stiffness_visualization(suffix="_sec")
     exit(0)
