@@ -463,7 +463,7 @@ class Optimize_Driver():
             #cloth_obj_path = 'D:/PhDProject_real_data/cloth_simulation/{}/{}.obj'.format(test_name, pose_index)
             cloth_obj_path = os.path.join(self.blender_render_save_path, f"{pose_index}.obj")
             if('_5_7' in self.test_name):
-                scale_factor = 0.31
+                scale_factor = 0.32
             else:
                 scale_factor = 1
             mesh = sr.Mesh.from_obj(cloth_obj_path, load_texture=False, texture_res = 1, texture_type='surface')
@@ -1030,9 +1030,9 @@ class Optimize_Driver():
         plt.legend(["original","membrane optimized",])
         plt.savefig(f"./result_plot/{self.test_name}_IOU_compare.svg",format="svg")
         '''
-    def scale_parameter_plot(self)-> None:
+    def scale_parameter_plot(self,suffix:str="")-> None:
         scale_parameter_list = []
-        for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc="iou_loss cal..."):
+        for pose_index in tqdm(range(self.start_pose, self.end_pose, 1), desc="plotting scale factor..."):
             json_file = os.path.join(self.kinematic_save_path_root, str(pose_index), "output.json")
             file = open(json_file)
             data = json.load(file)
@@ -1042,9 +1042,9 @@ class Optimize_Driver():
         plt.ylabel("Template scale factor")
         plt.plot(scale_parameter_list, color='black')
         plt.plot([average for _counter in range(len(scale_parameter_list))], color='black', linestyle=":")
-        plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_scale_parameter_wo_legend.svg",format="svg")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_scale_parameter_wo_legend.svg",format="svg")
         plt.legend(["template scale parameter", "average"])
-        plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_scale_parameter_w_legend.svg",format="svg")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_scale_parameter_w_legend.svg",format="svg")
         plt.close()
         return
 
