@@ -51,7 +51,8 @@ if __name__ == "__main__":
                              template_flip=template_flip, 
                              glitched_camera_indexes=glitched_camera_indexes
                              )
-    
+    driver.generate_flying_trajectory_gif(if_smoothed=True)
+    exit(0)
     #driver.run_raw_kinematic_optimize_pipeline()
     #exit(0)
     #driver.calibration_validation(pose_index=3140)
@@ -78,4 +79,3 @@ if __name__ == "__main__":
     #driver.run_original_kinematic_smooth_rendering()
     #driver.iou_loss_membrane_compare()
     #driver.scale_parameter_plot()
-    driver.generate_flying_trajectory_gif(if_smoothed=True)

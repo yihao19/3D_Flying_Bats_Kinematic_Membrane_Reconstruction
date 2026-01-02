@@ -53,7 +53,8 @@ if __name__ == "__main__":
                              glitched_camera_indexes = glitched_camera_indexes
                              )
     
-      
+    driver.generate_flying_trajectory_gif(if_smoothed=True)
+    exit(0) 
     #driver.run_raw_kinematic_optimize_pipeline()
     #driver.calibration_validation(pose_index=1850)
     #exit(0)

@@ -25,7 +25,7 @@ class ArrayRectify():
             self.calibration_file = "../../calibration_mat/5to7.mat"
             self.camera_names = [52,53,54,55,61,64,65,71,72,73,74,75]
             self.ground_camera_index = [1,2, 5, 9, 10]
-            self.y_forward:list = [9,1]
+            self.y_forward:list = [1,9]
             self.x_forward:list = [10,9]
             self.scaler = 1.32
             self.reference_camera_index = 2
@@ -114,7 +114,7 @@ class ArrayRectify():
         #return transformation, rectified_camera_locs,self.camera_names 
     
 if __name__=="__main__":
-    array_rectifier = ArrayRectify("2023")
+    array_rectifier = ArrayRectify("5_7")
     array_rectifier.rectifying()
 
     

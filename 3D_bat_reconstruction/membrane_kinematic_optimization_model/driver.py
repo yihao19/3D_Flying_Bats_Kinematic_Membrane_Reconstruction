@@ -1345,7 +1345,7 @@ class Optimize_Driver():
             array_rectifier = ArrayRectify("5_7")
         else: 
             array_rectifier = ArrayRectify("2023")
-            
+
         transformation, rectified_camera_location, camera_names = array_rectifier.rectifying()
 
         if not os.path.exists(f"./result_plot/{self.test_name}{suffix}/"):
@@ -1895,8 +1895,8 @@ def stiffness_plot_w_speed() -> None:
         sub_dirs = [name for name in os.listdir(os.path.join(project_root,subroot,"result_plot"))
         if os.path.isdir(os.path.join(project_root, subroot,"result_plot",name))]
         for sub_dir in sub_dirs:
-            if("_5_7" in sub_dir):
-                continue
+            #if("_5_7" in sub_dir):
+            #    continue
             speed_json_path = os.path.join(project_root, subroot, "result_plot", sub_dir, 'flying_speed.json')
             if(not os.path.isfile(speed_json_path)):
                 continue
