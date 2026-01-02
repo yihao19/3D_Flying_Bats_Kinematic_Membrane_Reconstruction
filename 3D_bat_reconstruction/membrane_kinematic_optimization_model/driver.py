@@ -1481,6 +1481,7 @@ class Optimize_Driver():
             pose_json = json.load(file)
             rotation_matrix_list.append(np.array(pose_json['pose']))
             displacement_vector_list.append(np.array(pose_json['template_displacement']))
+
         smoothed_rotation_euler_list = kinematic_smoothing(rotation_matrix_list, sigma=sigma)
         smoothed_vector_list = displacement_smoothing(displacement_vector_list, sigma=sigma)
 
