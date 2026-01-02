@@ -200,7 +200,7 @@ class Optimize_Driver():
             self.reverse = False
         # to deal with different camera calibration
         if("5_7" in self.test_name):
-            self.template_initial_scale = 0.0115
+            self.template_initial_scale = 0.01
         else: 
             self.template_initial_scale = 0.0035
         self.opposite_direction = opposite_direction  # back and force
@@ -463,7 +463,7 @@ class Optimize_Driver():
             #cloth_obj_path = 'D:/PhDProject_real_data/cloth_simulation/{}/{}.obj'.format(test_name, pose_index)
             cloth_obj_path = os.path.join(self.blender_render_save_path, f"{pose_index}.obj")
             if('_5_7' in self.test_name):
-                scale_factor = 0.32
+                scale_factor = 0.315
             else:
                 scale_factor = 1
             mesh = sr.Mesh.from_obj(cloth_obj_path, load_texture=False, texture_res = 1, texture_type='surface')
@@ -707,7 +707,7 @@ class Optimize_Driver():
         """
         if(epoch_number == 0):
             for index in range(self.current_pose_index -self.half_window_size-1, self.current_pose_index+1): 
-                source_json_path = os.path.join(self.kinematic_save_path_root, str(index), "output_smoothed.json")
+                source_json_path = os.path.join(self.kinematic_save_path_root, str(index), "output.json")
                 target_json_path = os.path.join(self.kinematic_save_path_root, str(index), f"membrane_output_{epoch_number}.json")
                 source_json = read_json_file(source_json_path)
                 save_json_file(source_json, target_json_path)
@@ -1444,7 +1444,7 @@ class Optimize_Driver():
             # plot the z axis altitude
             index = range(len(track_indices[154]))
             ax3.plot(index, np.array(track_indices[154])[:,2], color='black')
-            ax3.set_ylim([0,2.5])
+            ax3.set_ylim([-0.5,2.5])
             ax3.set_xlabel("frame index")
             ax3.set_ylabel("altitude (m)")
             # plot the xy axis to show the direction change
@@ -1534,7 +1534,7 @@ class Optimize_Driver():
     def run_membrane_optimize_pipeline(self, epoch_index): 
         # initialize the membrane output.json with the original output.json
         MEMBRANE_BUFFER = 10
-        self.run_kinematic_smoothing()
+        #self.run_kinematic_smoothing()
         for pose_index in range(self.start_pose+MEMBRANE_BUFFER, self.end_pose, 1): 
             if(pose_index == self.start_pose+MEMBRANE_BUFFER):
                 self.use_previous_attr=False
