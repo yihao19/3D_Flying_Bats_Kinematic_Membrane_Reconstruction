@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH -J Brunei_2024_HIPCER021_FlightTest2_2_4_driver_reverse   # Name of the job
+#SBATCH -J Brunei_2024_HIPCER021_FlightTest2_2_4_driver_kinematic_refine   # Name of the job
 #SBATCH --account=bat_flight_kinematics   # Account allocation
 #SBATCH --partition=v100_normal_q   # Partition of the cluster
 #SBATCH --nodes=1   # Number of compute nodes
 #SBATCH --ntasks-per-node=1   # Number of processes
 #SBATCH --cpus-per-task=1   # Number of CPU cores per process
-#SBATCH --time=6-00:00:00   # Runtime limit of 10 minutes
+#SBATCH --time=1-00:00:00   # Runtime limit of 10 minutes
 #SBATCH --gres=gpu:1   # Request one GPU (only valid on GPU partitions)
 
 
@@ -14,4 +14,4 @@ module load CUDA/12.1.1
 
 source activate softRas
 
-python HIPCER021_FlightTest2_2_4_driver.py
+python /home/yihao19/3D_Flying_Bats_Kinematic_Membrane_Reconstruction/3D_bat_reconstruction/membrane_kinematic_optimization_model/drivers/2024/HIPCER021_FlightTest2_2_4_driver.py

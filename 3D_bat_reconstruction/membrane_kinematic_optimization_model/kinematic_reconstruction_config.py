@@ -1,0 +1,3 @@
+kinematic_opt_epoch = 100
+if_use_previous_kinematics =True
+model_template_name = "new_bat_params_version2_backward_membrane_24.pkl"

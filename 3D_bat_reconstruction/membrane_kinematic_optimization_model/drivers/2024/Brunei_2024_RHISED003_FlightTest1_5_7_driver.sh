@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J Brunei_2024_RHISED003_FlightTest1_5_7_driver_reverse   # Name of the job
+#SBATCH -J Brunei_2024_RHISED003_FlightTest1_5_7_driver_membrane_opt+kinematic_refine   # Name of the job
 #SBATCH --account=bat_flight_kinematics   # Account allocation
 #SBATCH --partition=v100_normal_q   # Partition of the cluster
 #SBATCH --nodes=1   # Number of compute nodes

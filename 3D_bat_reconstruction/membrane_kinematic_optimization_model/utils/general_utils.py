@@ -211,3 +211,35 @@ def list_subfolders(path) -> list:
         if os.path.isdir(full_path):
             subfolders.append(entry)
     return subfolders
+
+def count_continuous_sublists(indices):
+    if not indices:
+        return 0
+
+    count = 1
+    for i in range(1, len(indices)):
+        if indices[i] != indices[i - 1] + 1:
+            count += 1
+    return count
+
+def std_without_outliers(data):
+    q1 = np.percentile(data, 25)
+    q3 = np.percentile(data, 75)
+    iqr = q3 - q1
+
+    lower = q1 - 1.5 * iqr
+    upper = q3 + 1.5 * iqr
+
+    filtered = data[(data >= lower) & (data <= upper)]
+    return np.std(filtered)  # sample standard deviation
+
+def mean_without_outliers(data):
+    q1 = np.percentile(data, 25)
+    q3 = np.percentile(data, 75)
+    iqr = q3 - q1
+
+    lower = q1 - 1.5 * iqr
+    upper = q3 + 1.5 * iqr
+
+    filtered = data[(data >= lower) & (data <= upper)]
+    return np.mean(filtered)  # sample standard deviation

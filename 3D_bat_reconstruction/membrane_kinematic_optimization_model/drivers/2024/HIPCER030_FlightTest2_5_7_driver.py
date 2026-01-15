@@ -18,14 +18,14 @@ if __name__ == "__main__":
     test_name = "Brunei_2024_HIPCER030_FlightTest2_5_7"
     membrane_simulation_mode = "ANGULAR"
     #[5100, 5370, 5684]
-    start_pose =5369#6579  # 1730
-    end_pose = 5100#5684
+    start_pose =5300
+    end_pose = 5680
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
     kinematic_opt_epoch = 50
     membrane_opt_epoch =100
-    membrane_kinematic_opt_epoch = 10
+    membrane_kinematic_opt_epoch = 50
     whole_opt_epoch =1
     if_use_previous_attr = False
     if_use_previous_kinematics =True
@@ -52,12 +52,20 @@ if __name__ == "__main__":
                              template_flip=template_flip, 
                              glitched_camera_indexes=glitched_camera_indexes
                              )
-    
-    driver.run_raw_kinematic_optimize_pipeline()
-    #driver.calibration_validation(pose_index=5370)
+    driver.iou_loss_initial_vs_final_obj()
     exit(0)
-    driver.run_kinematic_smoothing()
+    #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
+    driver.run_original_reconstruction()
+    driver.iou_loss_initial_vs_final_obj()
+    exit(0)
+    #driver.run_raw_kinematic_optimize_pipeline()
+    #driver.calibration_validation(pose_index=5370)
+    #exit(0)
+    #driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
+    driver.generate_flight_speed()
+    driver.stiffness_visualization()
+    exit(0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     driver.run_original_reconstruction()
     #driver.stiffness_visualization()

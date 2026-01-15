@@ -18,14 +18,14 @@ if __name__ == "__main__":
     test_name = "Brunei_2024_HIPCER019_FlightTest1_2_4"
     membrane_simulation_mode = "ANGULAR"
     #[5690. 6190]
-    start_pose = 5690
+    start_pose = 5700
     end_pose =6190
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
-    membrane_optimized_frame = 1# frame number that will be optimized
+    membrane_optimized_frame = 3# frame number that will be optimized
     kinematic_opt_epoch = 50
     membrane_opt_epoch =100
-    membrane_kinematic_opt_epoch = 10
+    membrane_kinematic_opt_epoch = 50
     whole_opt_epoch =1
     if_use_previous_attr = False
     if_use_previous_kinematics =True
@@ -50,20 +50,33 @@ if __name__ == "__main__":
                              opposite_direction,
                              template_flip=template_flip
                              )
-    
+    driver.iou_loss_initial_vs_final_obj()
+    exit(0)
     #driver.run_raw_kinematic_optimize_pipeline()
     #exit(0)
-    driver.run_kinematic_smoothing()
-    exit(0)
+   
+    #driver.plot_camera_number()
+    #exit(0)
+    
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
+    #driver.generate_flight_speed()
+    #driver.stiffness_visualization()
+    #driver.run_original_reconstruction()
+    #driver.iou_loss_membrane_compare()
+    #exit(0)
+    #driver.run_kinematic_smoothing()
+    
+
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     driver.run_original_reconstruction()
+    driver.iou_loss_initial_vs_final_obj()
+    
     #driver.stiffness_visualization()
-    driver.plot_initial_kinematic(kinematic_smoothed=False)
-    driver.plot_initial_kinematic(kinematic_smoothed=True)
+    #driver.plot_initial_kinematic(kinematic_smoothed=False)
+    #driver.plot_initial_kinematic(kinematic_smoothed=True)
     #driver.iou_loss_compare()
-    driver.iou_loss_original()
+    #driver.iou_loss_original()
     #driver.run_original_kinematic_smooth_rendering()
     #driver.iou_loss_membrane_compare()
     #driver.scale_parameter_plot()
-    driver.generate_flying_trajectory_gif(if_smoothed=True)
+    #driver.generate_flying_trajectory_gif(if_smoothed=True)

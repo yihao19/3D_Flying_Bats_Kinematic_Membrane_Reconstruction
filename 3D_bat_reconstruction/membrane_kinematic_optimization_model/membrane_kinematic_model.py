@@ -293,14 +293,14 @@ class Membrane_kinematic_model(nn.Module):
             
         
         #self.pose_tensor[0][2] = math.pi / 2 * torch.tanh(self.joint_0[0][2]) +math.pi
-        self.pose_tensor[1][0] = self.original_pose_np[1][0] + math.pi / 9 * torch.tanh(self.joint_1[0][0])
-        self.pose_tensor[1][1] = self.original_pose_np[1][1] + math.pi / 9 * torch.tanh(self.joint_1[0][1])
-        self.pose_tensor[1][2] = self.original_pose_np[1][2] + math.pi / 9 * torch.tanh(self.joint_1[0][2])
+        self.pose_tensor[1][0] = self.original_pose_np[1][0] + math.pi / 6 * torch.tanh(self.joint_1[0][0])
+        self.pose_tensor[1][1] = self.original_pose_np[1][1] + math.pi / 6 * torch.tanh(self.joint_1[0][1])
+        self.pose_tensor[1][2] = self.original_pose_np[1][2] + math.pi / 6 * torch.tanh(self.joint_1[0][2])
         
         
-        self.pose_tensor[2][0] = self.original_pose_np[2][0] + math.pi / 9 * torch.tanh(self.joint_2[0][0])
-        self.pose_tensor[2][1] = self.original_pose_np[2][1] + math.pi / 9 * torch.tanh(self.joint_2[0][1])
-        self.pose_tensor[2][2] = self.original_pose_np[2][2] + math.pi / 9 * torch.tanh(self.joint_2[0][2])
+        self.pose_tensor[2][0] = self.original_pose_np[2][0] + math.pi / 6 * torch.tanh(self.joint_2[0][0])
+        self.pose_tensor[2][1] = self.original_pose_np[2][1] + math.pi / 6 * torch.tanh(self.joint_2[0][1])
+        self.pose_tensor[2][2] = self.original_pose_np[2][2] + math.pi / 6 * torch.tanh(self.joint_2[0][2])
         #self.pose_tensor[3][:] = math.pi / 18 * torch.tanh(self.joint_3)
         
         #self.pose_tensor[1][0] = self.original_pose_np[1][0] + math.pi / 9 * torch.tanh(self.joint_1[0][0])
@@ -314,43 +314,43 @@ class Membrane_kinematic_model(nn.Module):
         #self.pose_tensor[2][2] = self.original_pose_np[2][2] + math.pi / 9 * torch.tanh(self.joint_2[0][2])
         #for the shoulder using the symmetric deformation
 
-        self.pose_tensor[5][0] = self.original_pose_np[5][0] +math.pi / 9 * torch.tanh(self.joint_5[0][0])
-        self.pose_tensor[5][1] = self.original_pose_np[5][1] +math.pi / 9 * torch.tanh(self.joint_5[0][1])
-        self.pose_tensor[5][2] = self.original_pose_np[5][2] +math.pi / 9 * torch.tanh(self.joint_5[0][2])
+        self.pose_tensor[5][0] = self.original_pose_np[5][0] +math.pi / 6 * torch.tanh(self.joint_5[0][0])
+        self.pose_tensor[5][1] = self.original_pose_np[5][1] +math.pi / 6 * torch.tanh(self.joint_5[0][1])
+        self.pose_tensor[5][2] = self.original_pose_np[5][2] +math.pi / 6 * torch.tanh(self.joint_5[0][2])
         
         
-        self.pose_tensor[18][0] = self.original_pose_np[18][0] + math.pi / 9 * torch.tanh(self.joint_18[0][0])
-        self.pose_tensor[18][1] = self.original_pose_np[18][1] + math.pi / 9 * torch.tanh(self.joint_18[0][1])
-        self.pose_tensor[18][2] = self.original_pose_np[18][2] + math.pi / 9 * torch.tanh(self.joint_18[0][2])
+        self.pose_tensor[18][0] = self.original_pose_np[18][0] + math.pi / 6 * torch.tanh(self.joint_18[0][0])
+        self.pose_tensor[18][1] = self.original_pose_np[18][1] + math.pi / 6 * torch.tanh(self.joint_18[0][1])
+        self.pose_tensor[18][2] = self.original_pose_np[18][2] + math.pi / 6 * torch.tanh(self.joint_18[0][2])
         
         #self.pose_tensor[4][0] = ( math.pi / 3 * torch.tanh(self.joint_4[0][0]))
         #self.pose_tensor[4][1] = (  math.pi / 3 * torch.tanh(self.joint_4[0][1]))
-        self.pose_tensor[4][2] =  self.original_pose_np[4][2] + math.pi / 9 * torch.tanh(self.joint_4[0][2])
+        self.pose_tensor[4][2] =  self.original_pose_np[4][2] + math.pi / 6 * torch.tanh(self.joint_4[0][2])
         
         
         
         #self.pose_tensor[17][0] = (  math.pi / 3 * torch.tanh(self.joint_4[0][0]))
         #self.pose_tensor[17][1] = (  -math.pi / 3 * torch.tanh(self.joint_4[0][1]))
-        self.pose_tensor[17][2] =  self.original_pose_np[17][2] - math.pi / 9 * torch.tanh(self.joint_4[0][2])
+        self.pose_tensor[17][2] =  self.original_pose_np[17][2] - math.pi / 6 * torch.tanh(self.joint_4[0][2])
         
 
-        self.pose_tensor[6][0]  =   self.original_pose_np[6][0] + math.pi / 9 * torch.tanh(self.joint_6[0][0])
-        self.pose_tensor[6][1]  =   self.original_pose_np[6][1] + math.pi / 9 * torch.tanh(self.joint_6[0][1])
-        self.pose_tensor[6][2]  =   self.original_pose_np[6][2] + math.pi / 9 * torch.tanh(self.joint_6[0][2])
+        self.pose_tensor[6][0]  =   self.original_pose_np[6][0] + math.pi / 6 * torch.tanh(self.joint_6[0][0])
+        self.pose_tensor[6][1]  =   self.original_pose_np[6][1] + math.pi / 6 * torch.tanh(self.joint_6[0][1])
+        self.pose_tensor[6][2]  =   self.original_pose_np[6][2] + math.pi / 6 * torch.tanh(self.joint_6[0][2])
         
-        self.pose_tensor[19][0] =   self.original_pose_np[19][0] + math.pi / 9 * torch.tanh(self.joint_19[0][0])
-        self.pose_tensor[19][1] =   self.original_pose_np[19][1] + math.pi / 9 * torch.tanh(self.joint_19[0][1])
-        self.pose_tensor[19][2] =   self.original_pose_np[19][2] + math.pi / 9 * torch.tanh(self.joint_19[0][2])
+        self.pose_tensor[19][0] =   self.original_pose_np[19][0] + math.pi / 6 * torch.tanh(self.joint_19[0][0])
+        self.pose_tensor[19][1] =   self.original_pose_np[19][1] + math.pi / 6 * torch.tanh(self.joint_19[0][1])
+        self.pose_tensor[19][2] =   self.original_pose_np[19][2] + math.pi / 6  * torch.tanh(self.joint_19[0][2])
         
         
         
-        self.pose_tensor[7][0] = self.original_pose_np[7][0] + math.pi / 9 * torch.tanh(self.joint_7[0][0])
-        self.pose_tensor[7][1] = self.original_pose_np[7][1] + math.pi / 9 * torch.tanh(self.joint_7[0][1])
-        self.pose_tensor[7][2] = self.original_pose_np[7][2] + math.pi / 9 * torch.tanh(self.joint_7[0][2])
+        self.pose_tensor[7][0] = self.original_pose_np[7][0] + math.pi / 6 * torch.tanh(self.joint_7[0][0])
+        self.pose_tensor[7][1] = self.original_pose_np[7][1] + math.pi / 6 * torch.tanh(self.joint_7[0][1])
+        self.pose_tensor[7][2] = self.original_pose_np[7][2] + math.pi / 6 * torch.tanh(self.joint_7[0][2])
         
-        self.pose_tensor[20][0] = self.original_pose_np[20][0] +  math.pi / 9 * torch.tanh(self.joint_20[0][0])
-        self.pose_tensor[20][1] = self.original_pose_np[20][1] +  math.pi / 9 * torch.tanh(self.joint_20[0][1])
-        self.pose_tensor[20][2] = self.original_pose_np[20][2] +  math.pi / 9 * torch.tanh(self.joint_20[0][2])
+        self.pose_tensor[20][0] = self.original_pose_np[20][0] +  math.pi / 6 * torch.tanh(self.joint_20[0][0])
+        self.pose_tensor[20][1] = self.original_pose_np[20][1] +  math.pi / 6 * torch.tanh(self.joint_20[0][1])
+        self.pose_tensor[20][2] = self.original_pose_np[20][2] +  math.pi / 6 * torch.tanh(self.joint_20[0][2])
  
         # For the third, forth, fifth bone, based on the template design, only make it able to rotate around the y axis
         # for opening and closing the wing
@@ -358,50 +358,50 @@ class Membrane_kinematic_model(nn.Module):
         
         
         #self.pose_tensor[8][:] = math.pi / 6 * torch.tanh(self.joint_8)
-        self.pose_tensor[8][1] =  self.original_pose_np[8][1] + math.pi / 9 * torch.tanh(self.joint_8[0][1])
+        self.pose_tensor[8][1] =  self.original_pose_np[8][1] + math.pi / 6 * torch.tanh(self.joint_8[0][1])
         #self.pose_tensor[8][:] = math.pi / 6 * torch.tanh(self.joint_8)
         #self.pose_tensor[9][:] = math.pi / 18 * torch.tanh(self.joint_9)
         #self.pose_tensor[10][:] = math.pi / 18 * torch.tanh(self.joint_10)
         
         #self.pose_tensor[11][:] = math.pi /  6 * torch.tanh(self.joint_11)
-        self.pose_tensor[11][1] =  self.original_pose_np[11][1] + 0.5 * math.pi /  9 * torch.tanh(self.joint_8[0][1])
+        self.pose_tensor[11][1] =  self.original_pose_np[11][1] + 0.5 * math.pi /  6 * torch.tanh(self.joint_8[0][1])
         #self.pose_tensor[11][:] = math.pi /  6 * torch.tanh(self.joint_11)
         #self.pose_tensor[12][:] = math.pi / 18 * torch.tanh(self.joint_12)
         #self.pose_tensor[13][:] = math.pi / 18 * torch.tanh(self.joint_13)
         
         
         #self.pose_tensor[14][:] = math.pi /  6 * torch.tanh(self.joint_14)
-        self.pose_tensor[14][1] =  self.original_pose_np[14][1] +  0.3 * math.pi /  9 * torch.tanh(self.joint_8[0][1])
+        self.pose_tensor[14][1] =  self.original_pose_np[14][1] +  0.3 * math.pi /  6 * torch.tanh(self.joint_8[0][1])
         #self.pose_tensor[14][:] = math.pi /  6 * torch.tanh(self.joint_14)
         #self.pose_tensor[15][:] = math.pi / 18 * torch.tanh(self.joint_15)
         #self.pose_tensor[16][:] = math.pi / 18 * torch.tanh(self.joint_16)
         
         #self.pose_tensor[21][:] = math.pi /  6 * torch.tanh(self.joint_21)
-        self.pose_tensor[21][1] =  self.original_pose_np[21][1] + math.pi /  9 * torch.tanh(self.joint_21[0][1])
+        self.pose_tensor[21][1] =  self.original_pose_np[21][1] + math.pi /  6 * torch.tanh(self.joint_21[0][1])
         #self.pose_tensor[21][:] = math.pi /  6 * torch.tanh(self.joint_21)
         #self.pose_tensor[22][:] = math.pi / 18 * torch.tanh(self.joint_22)
         #self.pose_tensor[23][:] = math.pi / 18 * torch.tanh(self.joint_23)
         
         #self.pose_tensor[24][:] = math.pi /  6 * torch.tanh(self.joint_24)
-        self.pose_tensor[24][1] =  self.original_pose_np[24][1] + 0.5 * math.pi /  9 * torch.tanh(self.joint_21[0][1])
+        self.pose_tensor[24][1] =  self.original_pose_np[24][1] + 0.5 * math.pi /  6 * torch.tanh(self.joint_21[0][1])
         #self.pose_tensor[24][:] = math.pi /  6 * torch.tanh(self.joint_24)
         #self.pose_tensor[25][:] = math.pi / 18 * torch.tanh(self.joint_25)
         #self.pose_tensor[26][:] = math.pi / 18 * torch.tanh(self.joint_26)
         
         #self.pose_tensor[27][:] = math.pi /  6 * torch.tanh(self.joint_27)
-        self.pose_tensor[27][1] =  self.original_pose_np[27][1] + 0.3 * math.pi /  9 * torch.tanh(self.joint_21[0][1])
+        self.pose_tensor[27][1] =  self.original_pose_np[27][1] + 0.3 * math.pi /  6 * torch.tanh(self.joint_21[0][1])
         #self.pose_tensor[27][:] = math.pi /  6 * torch.tanh(self.joint_27)
         #self.pose_tensor[28][:] = math.pi / 18 * torch.tanh(self.joint_28)
         #self.pose_tensor[29][:] = math.pi / 18 * torch.tanh(self.joint_29)
         
-        self.pose_tensor[30][0] =  self.original_pose_np[30][0] + math.pi /  9 * torch.tanh(self.joint_30[0][0])
-        self.pose_tensor[30][1] =  self.original_pose_np[30][1] + math.pi /  9 * torch.tanh(self.joint_30[0][1])
-        self.pose_tensor[30][2] =  self.original_pose_np[30][2] + math.pi /  9 * torch.tanh(self.joint_30[0][2])
+        self.pose_tensor[30][0] =  self.original_pose_np[30][0] + math.pi /  6 * torch.tanh(self.joint_30[0][0])
+        self.pose_tensor[30][1] =  self.original_pose_np[30][1] + math.pi /  6 * torch.tanh(self.joint_30[0][1])
+        self.pose_tensor[30][2] =  self.original_pose_np[30][2] + math.pi /  6 * torch.tanh(self.joint_30[0][2])
         #self.pose_tensor[31][:] = math.pi / 18 * torch.tanh(self.joint_31)
         
-        self.pose_tensor[32][0] =  self.original_pose_np[32][0] + math.pi /  9 * torch.tanh(self.joint_32[0][0])
-        self.pose_tensor[32][1] =  self.original_pose_np[32][1] + math.pi /  9 * torch.tanh(self.joint_32[0][1])
-        self.pose_tensor[32][2] =  self.original_pose_np[32][2] + math.pi /  9 * torch.tanh(self.joint_32[0][2])
+        self.pose_tensor[32][0] =  self.original_pose_np[32][0] + math.pi /  6 * torch.tanh(self.joint_32[0][0])
+        self.pose_tensor[32][1] =  self.original_pose_np[32][1] + math.pi /  6 * torch.tanh(self.joint_32[0][1])
+        self.pose_tensor[32][2] =  self.original_pose_np[32][2] + math.pi /  6 * torch.tanh(self.joint_32[0][2])
         #self.pose_tensor[33][:] = math.pi / 18 * torch.tanh(self.joint_33)
        
             

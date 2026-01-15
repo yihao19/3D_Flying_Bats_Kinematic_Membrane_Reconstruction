@@ -17,21 +17,21 @@ if __name__ == "__main__":
     project_name = "PhDProject_real_data"
     test_name = "Brunei_2024_HIPCER022_FlightTest1_5_7"
     membrane_simulation_mode = "ANGULAR"
-    #[2778,2900, 3155]
-    start_pose =2900
-    end_pose =2901
+    #[2273,2900, 2640]
+    start_pose =2273
+    end_pose =2640
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
     kinematic_opt_epoch = 399
     membrane_opt_epoch =100
-    membrane_kinematic_opt_epoch = 10
+    membrane_kinematic_opt_epoch = 50
     whole_opt_epoch =1
     if_use_previous_attr = False
     if_use_previous_kinematics =False
     opposite_direction = True # bat flying direction
     template_flip = True
-    glitched_camera_indexes = ["5", "11","12"]#["5","6","11", "12"]
+    glitched_camera_indexes = ["5","12"]#["5","6","11", "12"]
     model_template_name = "new_bat_params_version2_backward_membrane_24.pkl"
     driver = Optimize_Driver(project_root_path, 
                              project_name, 
@@ -52,11 +52,20 @@ if __name__ == "__main__":
                              template_flip=template_flip,
                              glitched_camera_indexes = glitched_camera_indexes
                              )
-    
+    driver.iou_loss_initial_vs_final_obj()
+    exit(0)
+    #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
+    driver.run_original_reconstruction()
+    driver.iou_loss_initial_vs_final_obj()
+    #driver.generate_flying_trajectory_gif(if_smoothed=True)
+    exit(0)
     #driver.run_raw_kinematic_optimize_pipeline()
-    #exit(0)
-    driver.run_kinematic_smoothing()
+
+    #driver.run_kinematic_smoothing()
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
+    driver.generate_flight_speed()
+    driver.stiffness_visualization()
+    exit(0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     driver.run_original_reconstruction()
     #driver.stiffness_visualization()

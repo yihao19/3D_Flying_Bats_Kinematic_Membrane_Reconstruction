@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH -J Brunei_2024_HIPCER025_FlightTest2_5_7_driver_reverse  # Name of the job
+#SBATCH -J Brunei_2024_HIPCER025_FlightTest2_5_7_driver_kinematic_refine  # Name of the job
 #SBATCH --account=bat_flight_kinematics   # Account allocation
 #SBATCH --partition=v100_normal_q   # Partition of the cluster
 #SBATCH --nodes=1   # Number of compute nodes
 #SBATCH --ntasks-per-node=1   # Number of processes
 #SBATCH --cpus-per-task=1   # Number of CPU cores per process
-#SBATCH --time=6-00:00:00   # Runtime limit of 10 minutes
+#SBATCH --time=1-00:00:00   # Runtime limit of 10 minutes
 #SBATCH --gres=gpu:1   # Request one GPU (only valid on GPU partitions)
 
 module load Miniconda3/24.7.1-0

@@ -18,14 +18,14 @@ if __name__ == "__main__":
     test_name = "Brunei_2024_RHISED002_FlightTest3_2_4"
     membrane_simulation_mode = "ANGULAR"
     #[4864, 5120, 5436]
-    start_pose = 5120
-    end_pose = 5344#5436
+    start_pose = 4870
+    end_pose = 5350
     current_pose_index = start_pose
     half_window_size = 8  # animation rendering window size
     membrane_optimized_frame = 1# frame number that will be optimized
     kinematic_opt_epoch = 50
     membrane_opt_epoch =100
-    membrane_kinematic_opt_epoch = 10
+    membrane_kinematic_opt_epoch = 50
     whole_opt_epoch =1
     if_use_previous_attr = False
     if_use_previous_kinematics =True
@@ -50,11 +50,12 @@ if __name__ == "__main__":
                              opposite_direction,
                              template_flip=template_flip
                              )
-    
-    #driver.run_raw_kinematic_optimize_pipeline()
-    #exit(0)
-    driver.run_kinematic_smoothing()
-    #driver.run_membrane_optimize_pipeline(epoch_index = 0)
+    driver.iou_loss_initial_vs_final_obj()
+    exit(0)
+    driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
+    driver.run_original_reconstruction()
+    driver.iou_loss_initial_vs_final_obj()
+    exit(0)
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
     driver.run_original_reconstruction()
     #driver.stiffness_visualization()
