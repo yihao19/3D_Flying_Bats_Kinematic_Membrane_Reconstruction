@@ -25,7 +25,7 @@ if __name__ == "__main__":
     membrane_optimized_frame = 3# frame number that will be optimized
     kinematic_opt_epoch = 50
     membrane_opt_epoch =100
-    membrane_kinematic_opt_epoch = 10
+    membrane_kinematic_opt_epoch = 50
     whole_opt_epoch =1
     if_use_previous_attr = False
     if_use_previous_kinematics =True
@@ -50,7 +50,8 @@ if __name__ == "__main__":
                              opposite_direction,
                              template_flip=template_flip
                              )
-    
+    driver.iou_loss_initial_vs_final_obj()
+    exit(0)
     #driver.run_raw_kinematic_optimize_pipeline()
     #exit(0)
    
@@ -67,7 +68,9 @@ if __name__ == "__main__":
     
 
     #driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
-    #driver.run_original_reconstruction()
+    driver.run_original_reconstruction()
+    driver.iou_loss_initial_vs_final_obj()
+    
     #driver.stiffness_visualization()
     #driver.plot_initial_kinematic(kinematic_smoothed=False)
     #driver.plot_initial_kinematic(kinematic_smoothed=True)
@@ -76,4 +79,4 @@ if __name__ == "__main__":
     #driver.run_original_kinematic_smooth_rendering()
     #driver.iou_loss_membrane_compare()
     #driver.scale_parameter_plot()
-    driver.generate_flying_trajectory_gif(if_smoothed=True)
+    #driver.generate_flying_trajectory_gif(if_smoothed=True)

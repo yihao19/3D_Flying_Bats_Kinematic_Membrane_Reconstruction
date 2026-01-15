@@ -26,7 +26,7 @@ if __name__ == "__main__":
     membrane_optimized_frame = 1# frame number that will be optimized
     kinematic_opt_epoch = 50
     membrane_opt_epoch =100
-    membrane_kinematic_opt_epoch = 10
+    membrane_kinematic_opt_epoch = 50
     whole_opt_epoch =1
     if_use_previous_attr = False
     if_use_previous_kinematics =True
@@ -53,7 +53,11 @@ if __name__ == "__main__":
                              template_flip=template_flip, 
                              glitched_camera_indexes=glitched_camera_indexes
                              )
-    driver.generate_flying_trajectory_gif(if_smoothed=True)
+    driver.iou_loss_initial_vs_final_obj()
+    exit(0)
+    driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
+    driver.run_original_reconstruction()
+    driver.iou_loss_initial_vs_final_obj()
     exit(0)
     #driver.run_raw_kinematic_optimize_pipeline()
     #driver.calibration_validation(pose_index=700)

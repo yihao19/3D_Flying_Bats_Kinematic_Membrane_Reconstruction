@@ -5,6 +5,7 @@ Created on Fri May  9 22:52:28 2025
 @author: yihao
 """
 import os
+import math
 from pathlib import Path
 from image_data_loader import image_dataloader
 from membrane_kinematic_model import Membrane_kinematic_model
@@ -51,7 +52,10 @@ import imageio
 import cv2
 from scipy.stats import linregress, pearsonr
 from array_rectify import ArrayRectify
-
+from collections import Counter
+from matplotlib import cm
+from matplotlib.colors import Normalize
+import matplotlib.ticker as ticker
 
 PROJECT_ROOT = "/home/yihao19"
 class TqdmCallBack:
@@ -200,7 +204,7 @@ class Optimize_Driver():
             self.reverse = False
         # to deal with different camera calibration
         if("5_7" in self.test_name):
-            self.template_initial_scale = 0.01
+            self.template_initial_scale = 0.0115
         else: 
             self.template_initial_scale = 0.0035
         self.opposite_direction = opposite_direction  # back and force
@@ -363,7 +367,8 @@ class Optimize_Driver():
             self.silhouette_image_path_root, 
             pose_index, 
             False, 
-            reverse = False
+            reverse = False,
+            glitched_camera_indexes=self.glitched_camera_indexes
             )
         for training_sample in train_dataloader:
             images_gt = training_sample['mask'].cuda()
@@ -397,6 +402,11 @@ class Optimize_Driver():
         images_pred = renderer.render_mesh(mesh)
         with torch.no_grad():
             iou_loss = neg_iou_loss(images_pred[:, -1], images_gt[:, 0])
+        # save the iou loss to json
+        output_json = {"IOU": iou_loss.item()}
+        output_json_file_path = os.path.join(self.camera_list_path_root, str(pose_index), f"{reconstruction_type}_iou_loss.json")
+        with open(output_json_file_path, 'w') as f:
+            json.dump(output_json, f)
         return iou_loss.item()
         
     def membrane_optimization_loss_bayes_mode_v2(self, membrane_physical_attribues): 
@@ -447,7 +457,8 @@ class Optimize_Driver():
                 self.silhouette_image_path_root, 
                 pose_index, 
                 self.use_previous, 
-                reverse=False
+                reverse=False,
+                glitched_camera_indexes=self.glitched_camera_indexes
                 )
             for training_sample in train_dataloader:
                 images_gt = training_sample['mask'].cuda()
@@ -483,9 +494,7 @@ class Optimize_Driver():
             with torch.no_grad():
                 iou_loss = neg_iou_loss(images_pred[:, -1], images_gt[:, 0])      
                 total_iou_loss_list.append(iou_loss.item())
-                total_iou_loss += iou_loss.item()
-            #print(f"IOU loss: {iou_loss.item()}") 
-            
+                total_iou_loss += iou_loss.item() 
 
         average_iou_loss = sum(total_iou_loss_list) / self.membrane_optimized_frame
         max_loss = max(total_iou_loss_list)
@@ -543,8 +552,8 @@ class Optimize_Driver():
         
         # check if the previous pkl file exist, if not optimize from scratch
        
-        gp = GaussianProcessRegressor(kernel=Matern(length_scale=10), 
-                              alpha=1e-6, normalize_y=True, random_state=0)
+        gp = GaussianProcessRegressor(kernel=Matern(length_scale=1), 
+                              alpha=1e-6, normalize_y=True, random_state=None)
         tqdm_callback = TqdmCallBack(total_iterations=self.membrane_opt_epoch, description=f"{self.test_name}_membrane optimizing pose: {self.current_pose_index}, if_use_prev: {self.use_previous_attr}")
         result = gp_minimize(self.membrane_optimization_loss_bayes_mode_v2,     # The function to minimize
                              searching_space,                   # The search space
@@ -553,7 +562,7 @@ class Optimize_Driver():
                              initial_point_generator='lhs',
                              n_initial_points=int(0.8 * self.membrane_opt_epoch),
                              acq_optimizer="lbfgs",
-                             kappa = 0.19,
+                             kappa = 1,#0.19,
                              acq_func = "LCB",
                              noise=1e-6,
                              base_estimator = gp,
@@ -577,7 +586,8 @@ class Optimize_Driver():
             self.camera_list_path_root, 
             self.silhouette_image_path_root, 
             pose_index, 
-            self.use_previous
+            self.use_previous,
+            glitched_camera_indexes=self.glitched_camera_indexes
             )
         epoch = tqdm(list(range(0,self.membrane_kinematic_opt_epoch)))
         for i in epoch:
@@ -707,7 +717,7 @@ class Optimize_Driver():
         """
         if(epoch_number == 0):
             for index in range(self.current_pose_index -self.half_window_size-1, self.current_pose_index+1): 
-                source_json_path = os.path.join(self.kinematic_save_path_root, str(index), "output.json")
+                source_json_path = os.path.join(self.kinematic_save_path_root, str(index), "output_smoothed.json")
                 target_json_path = os.path.join(self.kinematic_save_path_root, str(index), f"membrane_output_{epoch_number}.json")
                 source_json = read_json_file(source_json_path)
                 save_json_file(source_json, target_json_path)
@@ -935,21 +945,18 @@ class Optimize_Driver():
         plt.savefig(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_IOU_original_w_legend.svg",format="svg")
         plt.close()
         return None
-    def iou_loss_initial_vs_final(self):
-        """
-        Docstring for iou_loss_initial_vs_final
-        
-        :param self: Description
-        :return: Description
-        :rtype: Any
-        """
+    
+    def iou_loss_initial_vs_final_json(self):
         original_iou_loss_list = []
         final_optimized_loss_list = []
-        for pose_index in tqdm(range(self.start_pose+10, self.end_pose-10, 1), desc="iou_loss cal..."):
-            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="kinematic_smoothed")
-            original_iou_loss_list.append(iou_loss)
-            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="kinematic_membrane_opt")
-            final_optimized_loss_list.append(iou_loss)
+        buffer = 10
+        for pose_index in tqdm(range(self.start_pose+buffer, self.end_pose, 1), desc="iou_loss cal..."):
+            initial_json_path = os.path.join(self.kinematic_save_path_root, str(pose_index), "output_smoothed.json")
+            final_json_path = os.path.join(self.kinematic_save_path_root, str(pose_index), f"membrane_output_0.json")
+            initial_json = read_json_file(initial_json_path)
+            final_json = read_json_file(final_json_path)
+            original_iou_loss_list.append(initial_json['IOU'])
+            final_optimized_loss_list.append(final_json['IOU'])
         #original_iou_loss_list= original_iou_loss_list[20:20]
         #final_optimized_loss_list = final_optimized_loss_list[20:-20]
         plt.plot(original_iou_loss_list, color='black',linestyle = ':')
@@ -976,6 +983,51 @@ class Optimize_Driver():
         plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_initial_vs_final_wo_legend.svg",format="svg")
         plt.legend(["initial kinematic + LBS","updated kinematic + cloth-based membrane"])
         plt.savefig(f"./result_plot/{self.test_name}/{self.test_name}_IOU_initial_vs_final_w_legend.svg",format="svg")
+        plt.close()
+        return
+    
+    def iou_loss_initial_vs_final_obj(self, suffix:str=""):
+        """
+        Docstring for iou_loss_initial_vs_final
+        
+        :param self: Description
+        :return: Description
+        :rtype: Any
+        """
+        original_iou_loss_list = []
+        final_optimized_loss_list = []
+        for pose_index in tqdm(range(self.start_pose+10, self.end_pose-10, 1), desc="iou_loss cal..."):
+            iou_loss = self.iou_loss_cal(pose_index, reconstruction_type="original")
+            original_iou_loss_list.append(iou_loss)
+            final_json_path = os.path.join(self.kinematic_save_path_root, str(pose_index), f"membrane_output_0.json")
+            final_json = read_json_file(final_json_path)
+            final_optimized_loss_list.append(final_json['IOU'])
+        #original_iou_loss_list= original_iou_loss_list[20:20]
+        #final_optimized_loss_list = final_optimized_loss_list[20:-20]
+        plt.plot(original_iou_loss_list, color='black',linestyle = ':')
+        plt.plot(final_optimized_loss_list,color = 'black')
+        x = np.array([index for index in range(len(original_iou_loss_list))])
+        original_iou_loss_list = np.array(original_iou_loss_list)
+        final_optimized_loss_list = np.array(final_optimized_loss_list)
+        plt.fill_between(x, original_iou_loss_list,final_optimized_loss_list, 
+                 where=(original_iou_loss_list >= final_optimized_loss_list),
+                 facecolor='green',
+                 alpha=0.2)
+
+        plt.fill_between(x, np.array(original_iou_loss_list), np.array(final_optimized_loss_list), 
+                         where=(original_iou_loss_list < final_optimized_loss_list),
+                         facecolor='red',
+                         alpha=0.2
+                         )
+        plt.xlabel("Frame index")
+        plt.ylabel("IOU loss")
+        plt.ylim([0.15, 0.50])
+        #plt.legend(["original","membrane optimized",])
+        if not os.path.exists(f"./result_plot/{self.test_name}{suffix}/"):
+            os.makedirs(f"./result_plot/{self.test_name}{suffix}/")
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_IOU_initial_vs_final_wo_legend.svg",format="svg")
+        plt.legend(["initial kinematic + LBS","updated kinematic + cloth-based membrane"])
+        plt.savefig(f"./result_plot/{self.test_name}{suffix}/{self.test_name}_IOU_initial_vs_final_w_legend.svg",format="svg")
         plt.close()
 
     def iou_loss_compare_membrane_only(self):
@@ -1532,7 +1584,7 @@ class Optimize_Driver():
     def run_membrane_optimize_pipeline(self, epoch_index): 
         # initialize the membrane output.json with the original output.json
         MEMBRANE_BUFFER = 10
-        #self.run_kinematic_smoothing()
+        self.run_kinematic_smoothing()
         for pose_index in range(self.start_pose+MEMBRANE_BUFFER, self.end_pose, 1): 
             if(pose_index == self.start_pose+MEMBRANE_BUFFER):
                 self.use_previous_attr=False
@@ -1773,51 +1825,118 @@ def project_average_iou_loss(if_paper:bool=False):
     subdirectories = [
     name for name in os.listdir(project_root)
     if os.path.isdir(os.path.join(project_root, name))]
-    sequence_iou_average = []
-    sequence_iou_std = []
+    original_sequence_iou_average = []
+    orignal_sequence_iou_std = []
+    opt_sequence_iou_average = []   
+    opt_sequence_iou_std = []
     sequence_name = []
+    total_project_name =[]
     for project in tqdm(subdirectories[:], desc="counting reconstructions"):
-        if("Brunei" in project): 
+        if( "2023" in project or "Brunei_2024_" in project): 
             # this is a project subfoler
             # count the total reconstructions
-            search_path = Path(os.path.join(f"{project_root}", f"{project}", "reconstruction"))
+            total_project_name.append(project[12:])
+            search_path = Path(os.path.join(f"{project_root}", f"{project}", "membrane_kinematic_optimized_mesh_final"))
             if search_path.exists():
                 file_names = [p for p in search_path.iterdir() if p.is_file()]
-                total_iou_loss = []
+                original_total_iou_loss = []
+                opt_total_iou_loss = []
                 if(len(file_names) == 0): 
                     continue
                 for file_name in file_names: 
-                    index = str(file_name).split('.')[0].split('_')[-1]
-                    json_path = os.path.join(f"{project_root}", f"{project}", "rearrange_pose", index, "output.json")
-                    json_data = read_json_file(json_path)
-                    try:
-                        iou_loss = float(json_data["IOU"])
+                    index = str(file_name).split('/')[-1].split('.')[0]
+                    try: 
+                        index = int(index)
                     except:
                         continue
-                    total_iou_loss.append(iou_loss)
-                if(len(total_iou_loss) == 0):
+                    original_json_path = os.path.join(f"{project_root}", f"{project}", "rearrange_pose", str(index), "original_iou_loss.json")
+                    membrane_kinematic_opt_path = os.path.join(f"{project_root}", f"{project}", "rearrange_pose", str(index), "membrane_output_0.json")
+                   
+                    try:
+                        original_json_data = read_json_file(original_json_path)
+                        membrane_kinematic_opt_json_data = read_json_file(membrane_kinematic_opt_path)
+                        if(math.isnan(float(membrane_kinematic_opt_json_data["IOU"]))):
+                            continue
+                        if(math.isnan(float(original_json_data["IOU"]))):
+                            continue
+                        membrane_kinematic_opt_iou_loss = float(membrane_kinematic_opt_json_data["IOU"])
+                        original_iou_loss = float(original_json_data["IOU"])
+                    except:
+                        continue
+                    original_total_iou_loss.append(original_iou_loss)
+                    opt_total_iou_loss.append(membrane_kinematic_opt_iou_loss)
+                if(len(original_total_iou_loss) == 0):
+                    continue
+                if(len(opt_total_iou_loss) == 0):
                     continue
                 sequence_name.append(project[12:])
-                sequence_iou_average.append(np.mean(total_iou_loss))
-                sequence_iou_std.append(np.std(total_iou_loss))
+                original_sequence_iou_average.append(np.mean(original_total_iou_loss))
+                orignal_sequence_iou_std.append(np.std(original_total_iou_loss))
+                opt_sequence_iou_average.append(np.mean(opt_total_iou_loss))
+                opt_sequence_iou_std.append(np.std(opt_total_iou_loss))
             else: 
                 continue
     # plot bar with std
-    if not if_paper:
-        plt.bar(sequence_name, sequence_iou_average, yerr=sequence_iou_std)
-        plt.figtext(0.5, 0.01, "Initial Kinematic Average/Std IOU loss", 
-                    ha='center', fontsize=12)
-        plt.ylabel("IOU loss")
-        plt.xticks(rotation=90, fontsize=5)
-        plt.tight_layout(pad=2.0)
-        plt.savefig("./images/sequence_mean_std.svg")
-        plt.close()
-    else: 
-        index = np.arange(0, len(sequence_name))
-        plt.bar(index, sequence_iou_average, yerr=sequence_iou_std, color='grey',edgecolor='black')
-        plt.xticks(index[::5])
-        plt.savefig("./paper_images/sequence_mean_std.svg")
-        plt.close()
+    print(f"Total sequence analyzed: {len(sequence_name)} out of {len(total_project_name)}")
+    print(f"Excluded sequences: {set(total_project_name) - set(sequence_name)}")
+    
+    plt.bar(sequence_name, original_sequence_iou_average, yerr=orignal_sequence_iou_std)
+    plt.figtext(0.5, 0.01, "Initial Kinematic Average/Std IOU loss", 
+                ha='center', fontsize=12)
+    plt.ylabel("IOU loss")
+    plt.ylim([0, 0.6])
+    plt.xticks(rotation=90, fontsize=5)
+    plt.tight_layout(pad=2.0)
+    plt.savefig("./images/original_sequence_mean_std.svg")
+    plt.close()
+    plt.bar(sequence_name, opt_sequence_iou_average, yerr=opt_sequence_iou_std)
+    plt.figtext(0.5, 0.01, "Initial Kinematic Average/Std IOU loss", 
+                ha='center', fontsize=12)
+    plt.ylabel("IOU loss")
+    plt.ylim([0, 0.6])
+    plt.xticks(rotation=90, fontsize=5)
+    plt.tight_layout(pad=2.0)
+    plt.savefig("./images/opt_sequence_mean_std.svg")
+    plt.close()
+    improvement = [original_sequence_iou_average[i] - opt_sequence_iou_average[i] for i in range(len(opt_sequence_iou_average))]
+    improvement.sort()
+    colors = ['green' if element > 0 else 'red' for element in improvement]
+    plt.bar(sequence_name, improvement, color=colors, alpha=0.7)
+    plt.ylim([-0.03, 0.12])
+    plt.xticks(rotation=90, fontsize=5)
+    plt.tight_layout(pad=2.0)
+    plt.savefig("./images/average_iou_loss_improvement.svg")
+    name_improvement = {sequence_name[i]: improvement[i] for i in range(len(sequence_name))}
+    with open("./images/average_iou_loss_improvement.json", 'w') as file: 
+        name_improvement = dict(sorted(name_improvement.items(), key=lambda item: item[1]))
+        json.dump(name_improvement, file, indent=4)
+    plt.close()
+    # for the paper figure only
+    improvement = [original_sequence_iou_average[i] - opt_sequence_iou_average[i] for i in range(len(opt_sequence_iou_average))]
+    #improvement.sort()
+    zipped_list = list(zip(improvement, opt_sequence_iou_average, opt_sequence_iou_std, original_sequence_iou_average, orignal_sequence_iou_std, sequence_name))
+    zipped_list = sorted(zipped_list)
+    improvement, opt_sequence_iou_average, opt_sequence_iou_std, original_sequence_iou_average, orignal_sequence_iou_std, sequence_name = zip(*zipped_list)
+    index = np.arange(0, len(sequence_name))
+    # getting the improvement or loss in average
+    
+    plt.bar(index, original_sequence_iou_average, yerr=orignal_sequence_iou_std, color='grey')
+    plt.xticks(index[::5])
+    plt.ylim([0, 0.6])
+    plt.bar(index, opt_sequence_iou_average, color='black')
+    plt.xticks(index[::5])
+    plt.savefig("./paper_images/original_VS_opt_sequence_mean_std.svg")
+    plt.close()
+    colors = ['green' if element > 0 else 'red' for element in improvement]
+    plt.bar(index, improvement, color=colors, alpha=0.7)
+    plt.xticks(index[::5])
+    plt.ylim([-0.03, 0.12])
+    plt.savefig("./paper_images/average_iou_loss_improvement.svg")
+    name_improvement = {sequence_name[i]: improvement[i] for i in range(len(sequence_name))}
+    with open("./paper_images/average_iou_loss_improvement.json", 'w') as file:
+        
+        json.dump(name_improvement, file, indent=4)
+    plt.close()
     return
 
 
@@ -1890,34 +2009,30 @@ def stiffness_plot_w_speed() -> None:
     average_stiffness = []
     std_stiffness = []
     names = []
+    description = read_json_file("./description.json")
     for subroot in subroots:
         sub_dirs = [name for name in os.listdir(os.path.join(project_root,subroot,"result_plot"))
         if os.path.isdir(os.path.join(project_root, subroot,"result_plot",name))]
         for sub_dir in sub_dirs:
             #if("_5_7" in sub_dir):
             #    continue
+            
             speed_json_path = os.path.join(project_root, subroot, "result_plot", sub_dir, 'flying_speed.json')
             if(not os.path.isfile(speed_json_path)):
                 continue
             # stiffness info
-
+            
             stiffness_json_path = os.path.join(project_root, subroot, "result_plot", sub_dir, 'stiffness.json')
             if(not os.path.isfile(stiffness_json_path)):
                 continue
+            
             stiffness_json = read_json_file(stiffness_json_path)
             average_stiffness.append(stiffness_json['mean'])
             std_stiffness.append(stiffness_json['std'])
             speed_json = read_json_file(speed_json_path)
             average_speed.append(np.mean(speed_json['speed']))
             names.append(sub_dir)
-    
-    name_dict = {}
-    for name in names:
-        name_dict[name] = []
-        name_dict[name]['average_speed'] = average_speed[names.index(name)]
-        name_dict[name]['average_stiffness'] = 
-    with open('./flying_info_tag.json', 'w') as file: 
-        json.dump(name_dict,file, indent=4)
+
     average_speed = np.array(average_speed)
     average_stiffness = np.array(average_stiffness)
     std_stiffness = np.array(std_stiffness)
@@ -1972,9 +2087,48 @@ def stiffness_plot_w_speed() -> None:
 
     return None
 
+def manuverability_statistics():
+    """
+    Docstring for manuverability_analysis
+    """
+    description = read_json_file("./description.json")
+    x_label = ["ascending-descending","ascending", "leveled", "descending", "descending-ascending"]
+    y_label = ["straight", "turn","s_curve","u-turn"]
+    x_map = {key:counter for counter, key in enumerate(x_label)}
+    y_map = {key:counter for counter, key in enumerate(y_label)}
+    altitude = []
+    direction = []
+
+    for key in description.keys():
+        altitude.append(description[key][0])
+        direction.append(description[key][1]) 
+    counts = Counter(zip(altitude, direction))
+    xs = np.array([x_map[k[0]] for k in counts])
+    ys = np.array([y_map[k[1]] for k in counts])
+    zs = np.array(list(counts.values()))
+    norm = Normalize(zs.min(), zs.max())
+    colors = cm.viridis(norm(zs))
+    fig = plt.figure()
+    ax = fig.add_subplot()
+
+    ax.scatter(ys,xs,zs, alpha=0)
+    for yi, xi, num in zip(ys, xs, zs):
+        plt.text(yi, xi, str(num), fontsize=12, ha='center', va='center')
+
+    ax.set_xticks([0,1,2,3])
+    ax.set_xticklabels(y_label)
+    ax.set_yticks([0,1,2,3,4])
+    ax.set_yticklabels( x_label)
+    #ax.zaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+    plt.tight_layout()  # Automatically adjusts subplot params
+    # or when creating figure:
+    plt.savefig("./images/manuverability_statistics.svg")
+    plt.close()
+    return None
 if __name__=="__main__":
     #_ = project_statistics(if_paper=True)
     #_ = wingbeat_cycle(if_paper=True)
-    #_ = project_average_iou_loss(if_paper=True)
+    #_ = project_average_iou_loss(if_paper=False)
     
     _=stiffness_plot_w_speed()
+    #_ = manuverability_statistics()

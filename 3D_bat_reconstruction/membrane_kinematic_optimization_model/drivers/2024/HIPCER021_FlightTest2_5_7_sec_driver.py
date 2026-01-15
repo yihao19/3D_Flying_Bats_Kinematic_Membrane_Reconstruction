@@ -51,7 +51,11 @@ if __name__ == "__main__":
                              template_flip=template_flip, 
                              glitched_camera_indexes = glitched_camera_indexes
                              )
-
+    driver.iou_loss_initial_vs_final_obj()
+    exit(0)
+    driver.run_membrane_kinematic_update_pipeline(epoch_index=0)
+    driver.run_original_reconstruction()
+    driver.iou_loss_initial_vs_final_obj(suffix="_sec")
     #driver.generate_flying_trajectory_gif(if_smoothed=True,suffix="_sec")
     #driver.scale_parameter_plot(suffix="_sec")
     #exit(0)
@@ -60,7 +64,6 @@ if __name__ == "__main__":
     #driver.run_membrane_optimize_pipeline(epoch_index = 0)
     #driver.generate_flight_speed(suffix="_sec")
     driver.stiffness_visualization(suffix="_sec")
-    exit(0)
     #driver.calibration_validation(pose_index=3450)
     exit(0)
     driver.run_kinematic_smoothing()
